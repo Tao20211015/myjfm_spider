@@ -42,3 +42,34 @@ void split_to_kv(String& line, String& key, String& value) {
 #undef MAX_BUF_LEN
 }
 
+String get_file_full_path(String& path) {
+  if (!path.length()) {
+    return CHARS2STR("");
+  }
+
+  if (path.length() == 1) {
+    if (path[0] == '.') {
+      return CHARS2STR("");
+    } else if (path[0] == '~') {
+      return CHARS2STR(getenv("HOME"));
+    } else if (path[0] == '/') {
+      return CHARS2STR("/");
+    } else {
+#define MAX_BUF_LEN 1024
+      char buffer[MAX_BUF_LEN];
+      getcwd(buffer, MAX_BUF_lEN);
+      return CHARS2STR(buffer);
+    }
+  }
+
+  if (buffer[0] == '.' && buffer[1] == '/') {
+    full_config_file_name = cur_path + &(buffer[1]);
+  } else if (buffer[0] == '~' && buffer[1] == '/') {
+    full_config_file_name = CHARS2STR(getenv("HOME")) + &(buffer[1]);
+  } else if (buffer[0] == '/') {
+    full_config_file_name = buffer;
+  } else {
+    full_config_file_name = cur_path + "/" + buffer;
+  }
+}
+

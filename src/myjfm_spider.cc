@@ -15,7 +15,7 @@ void usage(char *argv0) {
   Cerr << "Usage: " << argv0 << " [-f configure_file_name]" << Endl;
 }
 
-void load_config(String config_file_name) {
+void load_config(String cur_path, String config_file_name) {
   int res = access(config_file_name.c_str(), F_OK);
   if (res != 0) {
     Cerr << "Warning: The configure file '" 
@@ -24,7 +24,7 @@ void load_config(String config_file_name) {
     config_file_name = "";
   }
   // init the object
-  glob.init(config_file_name);
+  glob.init(cur_path, config_file_name);
 }
 
 void parse_args(int argc, char *argv[]) {
@@ -36,7 +36,7 @@ void parse_args(int argc, char *argv[]) {
   String cur_path(buffer);
   if (argc == 1) {
     full_config_file_name = cur_path + "/myjfmspider.conf";
-    load_config(full_config_file_name);
+    load_config(cur_path, full_config_file_name);
   } else if (argc == 3 && !strcmp(argv[1], "-f")) {
     strcpy(buffer, argv[2]);
     if (buffer[0] == '.' && buffer[1] == '/') {
@@ -48,7 +48,7 @@ void parse_args(int argc, char *argv[]) {
     } else {
       full_config_file_name = cur_path + "/" + buffer;
     }
-    load_config(full_config_file_name);
+    load_config(cur_path, full_config_file_name);
   } else if (argc == 2 && 
       (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
     usage(argv[0]);

@@ -2,4 +2,12 @@
 # the config file for the myjfm spider
 #######################################
 
+# the path that the web pages fetched to be saved
 SAVEPATH /home/myjfm/work/myjfm_spider/output
+
+# the maximum depth that one website to be crawled
+DEPTH 5
+
+# the interval between two crawls (seconds)
+INTERVAL 5
+

@@ -16,9 +16,12 @@ class Global {
 public:
   Global();
   ~Global();
-  void init(String& config_file_name);
+  void init(String& v_cur_path, String& config_file_name);
   void parse_config();
 private:
+  // current work path
+  String cur_path;
+
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
   volatile bool has_init;

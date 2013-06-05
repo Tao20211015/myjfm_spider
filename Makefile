@@ -5,6 +5,7 @@ export OUTPUT_PATH=./output
 all :
 	mkdir -p $(OUTPUT_PATH)
 	cp myjfmspider.conf.sample $(OUTPUT_PATH)/myjfmspider.conf
+	cp websites.txt.sample $(OUTPUT_PATH)/websites.conf
 	@echo
 	@echo "make src..."
 	@$(MAKE) -C src

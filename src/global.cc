@@ -6,17 +6,22 @@
 
 Global::Global() {
   has_init = false;
+  config_file = "";
+  cur_path = "";
 }
 
 Global::~Global() {
 }
 
-void Global::init(String& config_file_name) {
+void Global::init(String& v_cur_path, String& config_file_name) {
   if (has_init) {
     return;
   }
 
+  // It should be initialized here and JUST ONCE!!!
   has_init = true;
+
+  cur_path = v_cur_path;
   config_file = config_file_name;
   parse_config();
 }
@@ -28,7 +33,7 @@ void Global::parse_config() {
   } else {
     FILE* config_file_p = fopen(config_file.c_str(), "r");
     if (config_file_p == NULL) {
-      Cerr << "Warning: The configure file in your home directory can't be read." 
+      Cerr << "Warning: Configure file in your home directory can't be read." 
         << Endl 
         << "         Will use the default configure options instead." 
         << Endl;

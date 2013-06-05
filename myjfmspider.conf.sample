@@ -1,0 +1,5 @@
+#######################################
+# the config file for the myjfm spider
+#######################################
+
+SAVEPATH /home/myjfm/work/myjfm_spider/output

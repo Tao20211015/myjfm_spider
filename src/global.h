@@ -18,6 +18,9 @@ public:
   ~Global();
   void init(String& v_cur_path, String& config_file_name);
   void parse_config();
+  void set_save_path(String path);
+  String& get_save_path();
+  void set_depth(String& dep);
 private:
   // current work path
   String cur_path;
@@ -29,6 +32,7 @@ private:
 
   // the path saved all the web pages and all the indexes
   String save_path;
+  int depth;
 };
 
 #endif

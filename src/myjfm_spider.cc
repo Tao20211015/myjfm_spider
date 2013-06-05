@@ -1,4 +1,5 @@
 #include "global.h"
+#include "utility.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -28,27 +29,16 @@ void load_config(String cur_path, String config_file_name) {
 }
 
 void parse_args(int argc, char *argv[]) {
-  String full_config_file_name;
 #define MAX_BUF_LEN 1024
   char buffer[MAX_BUF_LEN];
   getcwd(buffer, MAX_BUF_LEN);
 #undef MAX_BUF_LEN
   String cur_path(buffer);
   if (argc == 1) {
-    full_config_file_name = cur_path + "/myjfmspider.conf";
+    String full_config_file_name = cur_path + "/myjfmspider.conf";
     load_config(cur_path, full_config_file_name);
   } else if (argc == 3 && !strcmp(argv[1], "-f")) {
-    strcpy(buffer, argv[2]);
-    if (buffer[0] == '.' && buffer[1] == '/') {
-      full_config_file_name = cur_path + &(buffer[1]);
-    } else if (buffer[0] == '~' && buffer[1] == '/') {
-      full_config_file_name = CHARS2STR(getenv("HOME")) + &(buffer[1]);
-    } else if (buffer[0] == '/') {
-      full_config_file_name = buffer;
-    } else {
-      full_config_file_name = cur_path + "/" + buffer;
-    }
-    load_config(cur_path, full_config_file_name);
+    load_config(cur_path, get_file_full_path(CHARS2STR(argv[2])));
   } else if (argc == 2 && 
       (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
     usage(argv[0]);

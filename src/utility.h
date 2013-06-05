@@ -8,6 +8,7 @@
 
 char* trim(char* str);
 void split_to_kv(String& line, String& key, String& value);
+String get_file_full_path(String path);
 
 #endif
 

@@ -8,6 +8,7 @@ Global::Global() {
   has_init = false;
   config_file = "";
   cur_path = "";
+  depth = 5;
 }
 
 Global::~Global() {
@@ -23,6 +24,7 @@ void Global::init(String& v_cur_path, String& config_file_name) {
 
   cur_path = v_cur_path;
   config_file = config_file_name;
+  depth = 5;
   parse_config();
 }
 
@@ -73,5 +75,10 @@ void Global::set_save_path(String path) {
 String& Global::get_save_path() {
   ASSERT(has_init);
   return save_path;
+}
+
+void Global::set_depth(String& dep) {
+  ASSERT(has_init);
+  depth = atoi(dep.c_str());
 }
 

@@ -23,16 +23,16 @@ public:
   void set_depth(String& dep);
 private:
   // current work path
-  String cur_path;
+  String _cur_path;
 
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
-  volatile bool has_init;
-  String config_file;
+  volatile bool _has_init;
+  String _config_file;
 
   // the path saved all the web pages and all the indexes
-  String save_path;
-  int depth;
+  String _save_path;
+  int _depth;
 };
 
 #endif

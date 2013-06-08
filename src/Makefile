@@ -2,9 +2,9 @@
 CC			= g++
 CFLAGS	= -Wall -c
 LD			= g++
-LDFLAGS	= 
+LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o global.o utility.o
+OBJS		= myjfm_spider.o global.o utility.o smart.o mutex.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -44,6 +44,12 @@ utility.o : utility.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 utility_ut.o : utility_ut.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+smart.o : smart.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+mutex.o : mutex.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)

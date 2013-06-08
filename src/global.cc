@@ -5,41 +5,41 @@
 #include <stdlib.h>
 
 Global::Global() {
-  has_init = false;
-  config_file = "";
-  cur_path = "";
-  depth = 5;
+  _has_init = false;
+  _config_file = "";
+  _cur_path = "";
+  _depth = 5;
 }
 
 Global::~Global() {
 }
 
 void Global::init(String& v_cur_path, String& config_file_name) {
-  if (has_init) {
+  if (_has_init) {
     return;
   }
 
   // It should be initialized here and JUST ONCE!!!
-  has_init = true;
+  _has_init = true;
 
-  cur_path = v_cur_path;
-  config_file = config_file_name;
-  depth = 5;
+  _cur_path = v_cur_path;
+  _config_file = config_file_name;
+  _depth = 5;
   parse_config();
 }
 
 void Global::parse_config() {
-  ASSERT(has_init);
+  ASSERT(_has_init);
 
-  if (config_file == "") {
+  if (_config_file == "") {
   } else {
-    FILE* config_file_p = fopen(config_file.c_str(), "r");
+    FILE* config_file_p = fopen(_config_file.c_str(), "r");
     if (config_file_p == NULL) {
       Cerr << "Warning: Configure file in your home directory can't be read." 
         << Endl 
         << "         Will use the default configure options instead." 
         << Endl;
-      config_file = "";
+      _config_file = "";
     }
 
 #define MAX_BUF_LEN 1024
@@ -68,17 +68,17 @@ void Global::parse_config() {
 }
 
 void Global::set_save_path(String path) {
-  ASSERT(has_init);
-  save_path = path;
+  ASSERT(_has_init);
+  _save_path = path;
 }
 
 String& Global::get_save_path() {
-  ASSERT(has_init);
-  return save_path;
+  ASSERT(_has_init);
+  return _save_path;
 }
 
 void Global::set_depth(String& dep) {
-  ASSERT(has_init);
-  depth = atoi(dep.c_str());
+  ASSERT(_has_init);
+  _depth = atoi(dep.c_str());
 }
 

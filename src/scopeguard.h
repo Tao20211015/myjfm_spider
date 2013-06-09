@@ -3,7 +3,7 @@
 
 #include <stdlib.h>
 
-// use this template to implement the smart mutex lock and unlock
+// use this template class to implement the smart mutex lock and unlock
 template <class Lock>
 class ScopeGuard {
 public:

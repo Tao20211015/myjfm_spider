@@ -1,4 +1,5 @@
 #include "global.h"
+#include <stdlib.h>
 #include <string.h>
 
 // eliminate all the blank chars from the head and tail of the string

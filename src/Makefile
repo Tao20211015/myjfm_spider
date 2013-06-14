@@ -4,7 +4,7 @@ CFLAGS	= -Wall -c
 LD			= g++
 LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o global.o utility.o smart.o
+OBJS		= myjfm_spider.o global.o utility.o shared.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -46,7 +46,7 @@ utility.o : utility.cc
 utility_ut.o : utility_ut.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-smart.o : smart.cc
+shared.o : shared.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)

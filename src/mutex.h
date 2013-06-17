@@ -1,8 +1,11 @@
 #ifndef _MUTEX_H_
 #define _MUTEX_H_
 
+#include "config.h"
 #include <pthread.h>
 #include <stdlib.h>
+
+_START_MYJFM_NAMESPACE_
 
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
   if (_has_init && func(&_mutex) != 0) { \
@@ -50,6 +53,8 @@ int Mutex::try_lock() {
 void Mutex::unlock() {
   RUN_FUNC_IF_HAS_INIT(pthread_mutex_lock);
 }
+
+_END_MYJFM_NAMESPACE_
 
 #endif
 

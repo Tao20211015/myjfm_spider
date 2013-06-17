@@ -1,8 +1,11 @@
+#include "config.h"
 #include "utility.h"
 #include "global.h"
 
 #include <stdio.h>
 #include <stdlib.h>
+
+_START_MYJFM_NAMESPACE_
 
 Global::Global() {
   _has_init = false;
@@ -81,4 +84,6 @@ void Global::set_depth(String& dep) {
   ASSERT(_has_init);
   _depth = atoi(dep.c_str());
 }
+
+_END_MYJFM_NAMESPACE_
 

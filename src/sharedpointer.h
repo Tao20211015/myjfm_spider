@@ -1,6 +1,10 @@
 #ifndef _SHAREDPOINTER_H_
 #define _SHAREDPOINTER_H_
 
+#include "config.h"
+
+_START_MYJFM_NAMESPACE_
+
 // every class inherited from this class must 
 // have the inc_ref and dec_ref function
 template <class T>
@@ -65,6 +69,8 @@ private:
   T* _p;
 #undef INC_REF
 };
+
+_END_MYJFM_NAMESPACE_
 
 #endif
 

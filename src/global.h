@@ -1,6 +1,7 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
+#include "config.h"
 #include <iostream>
 #include <string>
 
@@ -11,6 +12,8 @@
 
 #define String std::string
 #define CHARS2STR(a) String(a)
+
+_START_MYJFM_NAMESPACE_
 
 class Global {
 public:
@@ -34,6 +37,8 @@ private:
   String _save_path;
   int _depth;
 };
+
+_END_MYJFM_NAMESPACE_
 
 #endif
 

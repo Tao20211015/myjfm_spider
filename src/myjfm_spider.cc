@@ -1,3 +1,4 @@
+#include "config.h"
 #include "global.h"
 #include "utility.h"
 
@@ -10,7 +11,9 @@
 // e.x. the configure options
 // before access this object, you must invoke the
 // init(config_file) member function to init the object
+_START_MYJFM_NAMESPACE_
 Global glob;
+_END_MYJFM_NAMESPACE_
 
 void usage(char *argv0) {
   Cerr << "Usage: " << argv0 << " [-f configure_file_name]" << Endl;
@@ -25,7 +28,7 @@ void load_config(String cur_path, String config_file_name) {
     config_file_name = "";
   }
   // init the object
-  glob.init(cur_path, config_file_name);
+  _MYJFM_NAMESPACE_::glob.init(cur_path, config_file_name);
 }
 
 void parse_args(int argc, char *argv[]) {

@@ -5,7 +5,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-// every class inherited from this class must 
+// every class uses this template class must 
 // have the inc_ref and dec_ref function
 template <class T>
 class Sharedpointer {
@@ -36,9 +36,8 @@ public:
           delete _p;
         }
       }
-      if ((_p = r._p) != NULL) {
-        _p->inc_ref();
-      }
+      _p = r._p;
+      INC_REF;
     }
   }
 

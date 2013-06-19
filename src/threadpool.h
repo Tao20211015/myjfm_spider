@@ -25,7 +25,7 @@ public:
 
   void join();
 
-  void stop();
+  void stop(){};
 
   void add_task(Sharedpointer<Task> task);
 
@@ -37,7 +37,7 @@ private:
   std::vector< Sharedpointer<Thread> > _threads;
   Squeue< Sharedpointer<Task> > _tasks;
 
-  void add_worker();
+  void add_worker(){};
 };
 
 _END_MYJFM_NAMESPACE_

@@ -3,14 +3,14 @@
 
 #include "config.h"
 #include "task.h"
-#include "threadpool.h"
 
 _START_MYJFM_NAMESPACE_
 
+class Threadpool;
+
 class Threadtask : public Task {
 public:
-  Threadtask() {}
-  //Threadtask(Threadpool* threadpool = NULL);
+  Threadtask(Threadpool* threadpool = NULL);
   virtual int operator()(void* arg = NULL);
 
 private:

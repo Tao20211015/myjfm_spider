@@ -18,13 +18,15 @@ public:
 
   ~Squeue() {}
 
-  void put(T& t) {
+  // can not use reference
+  // because the caller may pass stack variable to this callee
+  void push(T t) {
     Scopeguard<Mutex> lock(&_mutex);
     _queue.push(t);
     _cond.signal();
   }
 
-  void get(T& t) {
+  void pop(T& t) {
     Scopeguard<Mutex> lock(&_mutex);
     while (_queue.empty()) {
       _cond.wait();

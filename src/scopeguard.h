@@ -8,15 +8,15 @@ _START_MYJFM_NAMESPACE_
 
 // use this template class to implement the smart mutex lock and unlock
 template <class Lock>
-class ScopeGuard {
+class Scopeguard {
 public:
-  ScopeGuard(Lock* lock) : _lock(lock) {
+  Scopeguard(Lock* lock) : _lock(lock) {
     if (_lock != NULL) {
       _lock->lock();
     }
   }
 
-  ~ScopeGuard() {
+  ~Scopeguard() {
     if (_lock != NULL) {
       _lock->unlock();
     }

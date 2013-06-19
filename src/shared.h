@@ -12,11 +12,13 @@ public:
   virtual ~Shared() {};
   void add_ref();
   unsigned int dec_ref(bool* flag = NULL);
+protected:
+  Shared();
 private:
   unsigned int _count;
   Mutex _mutex;
   // only can be inherited
-  Shared();
+  Shared(const Shared&);
   Shared& operator=(const Shared&);
 };
 

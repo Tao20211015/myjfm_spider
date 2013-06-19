@@ -11,7 +11,7 @@ template <class T>
 class Sharedpointer {
 #define INC_REF do { \
   if (_p) { \
-    _p->inc_ref(); \
+    _p->add_ref(); \
   } \
 } while (0)
 public:
@@ -32,13 +32,14 @@ public:
     if (_p != r._p) {
       if (_p) {
         bool flag = true;
-        if (_p.dec_ref(&flag) == 0 && flag) {
+        if (_p->dec_ref(&flag) == 0 && flag) {
           delete _p;
         }
       }
       _p = r._p;
       INC_REF;
     }
+    return *this;
   }
 
   ~Sharedpointer() {
@@ -51,6 +52,10 @@ public:
         _p = NULL;
       }
     }
+  }
+
+  int is_null() const {
+    return _p ? 0 : 1;
   }
 
   T* getp() const {

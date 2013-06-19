@@ -41,7 +41,7 @@ public:
 
   inline void wait() {
     if (_state == INITIALIZED && 
-        pthread_cond_wait(&_cond, _mutex->_mutex)) {
+        pthread_cond_wait(&_cond, &(_mutex->_mutex))) {
       abort();
     }
   }

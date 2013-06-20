@@ -1,5 +1,6 @@
 #include "config.h"
 #include "task.h"
+#include "thread.h"
 #include "threadpool.h"
 #include "threadtask.h"
 #include "sharedpointer.h"
@@ -12,13 +13,34 @@ Threadpool::~Threadpool() {
   stop();
 }
 
-void Threadpool::run() {
+int Threadpool::run() {
+  int retry = 0;
   if (_state == CONSTRUCTED) {
     int i;
     for (i = 0; i < _n; ++i) {
-      add_worker();
+      if (add_worker()) {
+        if (retry >= MAX_RETRY) {
+          return 1;
+        } else {
+          retry++;
+          i--;
+        }
+      }
     }
+    return 0;
   }
+  return 1;
+}
+
+void Threadpool::stop() {
+  int i;
+  for (i = 0; i < _threads.size(); ++i) {
+    _threads[i]->stop();
+  }
+}
+
+size_t Threadpool::size() {
+  return _n;
 }
 
 void Threadpool::add_task(Sharedpointer<Task> task) {
@@ -27,8 +49,17 @@ void Threadpool::add_task(Sharedpointer<Task> task) {
   }
 }
 
-void Threadpool::get_one_task(Sharedpointer<Task>& task) {
+void Threadpool::get_task(Sharedpointer<Task>& task) {
   _tasks.pop(task);
+}
+
+int Threadpool::add_worker() {
+  Sharedpointer<Threadtask> threadtask;
+  Sharedpointer<Thread> thread = Threadfactory::create_thread(threadtask);
+  if (thread.is_null()) {
+    return 1;
+  }
+  return 0;
 }
 
 _END_MYJFM_NAMESPACE_

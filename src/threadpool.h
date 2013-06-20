@@ -12,6 +12,8 @@
 _START_MYJFM_NAMESPACE_
 
 class Threadpool : public Shared {
+#define MAX_RETRY 10
+
   enum _enum_state {
     UNCONSTRUCTED, 
     CONSTRUCTED = 0x1111
@@ -21,15 +23,15 @@ public:
   Threadpool(int n);
   ~Threadpool();
 
-  void run();
+  int run();
 
-  void join();
+  void stop();
 
-  void stop(){};
+  size_t size();
 
   void add_task(Sharedpointer<Task> task);
 
-  void get_one_task(Sharedpointer<Task>& task);
+  void get_task(Sharedpointer<Task>& task);
 
 private:
   int _n;
@@ -37,7 +39,8 @@ private:
   std::vector< Sharedpointer<Thread> > _threads;
   Squeue< Sharedpointer<Task> > _tasks;
 
-  void add_worker(){};
+  // return: 0, success; 1, error
+  int add_worker();
 };
 
 _END_MYJFM_NAMESPACE_

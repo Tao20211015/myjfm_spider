@@ -120,5 +120,16 @@ void* Thread::thread_core_shell(void* arg) {
   return NULL;
 }
 
+Sharedpointer<Thread> Threadfactory::create_thread(Sharedpointer<Task> task) {
+  Sharedpointer<Thread> thread;
+  if (!task.is_null()) {
+    Sharedpointer<Thread> t(new Thread(task));
+    if (!(t->start())) {
+      thread = t;
+    }
+  }
+  return thread;
+}
+
 _END_MYJFM_NAMESPACE_
 

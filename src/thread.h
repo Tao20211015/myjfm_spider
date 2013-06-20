@@ -61,6 +61,16 @@ private:
   Semaphore _semaphore;
 };
 
+// use this factory to generate threads
+class Threadfactory {
+public:
+  static Sharedpointer<Thread> create_thread(Sharedpointer<Task> task);
+
+private:
+  Threadfactory(const Threadfactory&);
+  Threadfactory& operator=(const Threadfactory&);
+};
+
 _END_MYJFM_NAMESPACE_
 
 #endif

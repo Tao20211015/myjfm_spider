@@ -15,7 +15,7 @@ int Threadtask::operator()(void* arg) {
     for(;;) {
       Sharedpointer<Task> task;
       // if there is no task, it will block
-      _threadpool->get_one_task(task);
+      _threadpool->get_task(task);
       if (!task.is_null()) {
         (*task)();
       }

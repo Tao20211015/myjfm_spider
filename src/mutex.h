@@ -41,7 +41,7 @@ public:
   }
 
   inline void unlock() {
-    RUN_FUNC_IF_HAS_INIT(pthread_mutex_lock);
+    RUN_FUNC_IF_HAS_INIT(pthread_mutex_unlock);
   }
 
 private:

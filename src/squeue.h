@@ -32,6 +32,7 @@ public:
       _cond.wait();
     }
     t = _queue.front();
+    _queue.pop();
   }
 
   int size() {

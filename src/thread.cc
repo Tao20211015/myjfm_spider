@@ -73,24 +73,41 @@ int Thread::join() {
   if (pthread_self() != _tid) {
     int tres = pthread_join(_tid, NULL);
     if (!tres) {
-      _state = JOINED;
+      _state = STOP;
     }
     res = tres;
   }
   return res;
 }
 
-int Thread::stop() {
+int Thread::stop_nonblocking() {
   switch (_state) {
     case INIT:
     case STOP:
       return 1;
     case RUNNING:
-    case JOINED:
       if (pthread_cancel(_tid)) {
         return 1;
       }
       _state = STOP;
+      return 0;
+    default:
+      return 1;
+  }
+}
+
+int Thread::stop_blocking() {
+  switch (_state) {
+    case INIT:
+    case STOP:
+      return 1;
+    case RUNNING:
+      if (pthread_cancel(_tid)) {
+        return 1;
+      }
+      if (join()) {
+        return 1;
+      }
       return 0;
     default:
       return 1;

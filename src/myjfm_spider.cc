@@ -1,6 +1,9 @@
 #include "config.h"
 #include "global.h"
 #include "utility.h"
+#include "sharedpointer.h"
+#include "task.h"
+#include "threadpool.h"
 
 #include <stdlib.h>
 #include <unistd.h>
@@ -11,9 +14,7 @@
 // e.x. the configure options
 // before access this object, you must invoke the
 // init(config_file) member function to init the object
-_START_MYJFM_NAMESPACE_
-Global glob;
-_END_MYJFM_NAMESPACE_
+_MYJFM_NAMESPACE_::Global glob;
 
 void usage(char *argv0) {
   Cerr << "Usage: " << argv0 << " [-f configure_file_name]" << Endl;
@@ -28,7 +29,7 @@ void load_config(String cur_path, String config_file_name) {
     config_file_name = "";
   }
   // init the object
-  _MYJFM_NAMESPACE_::glob.init(cur_path, config_file_name);
+  glob.init(cur_path, config_file_name);
 }
 
 void parse_args(int argc, char *argv[]) {
@@ -52,8 +53,26 @@ void parse_args(int argc, char *argv[]) {
   }
 }
 
+class Mytask : public _MYJFM_NAMESPACE_::Task {
+public:
+  Mytask(String a) : _s(a) {}
+  int operator()(void* arg = NULL) {
+    Cout << _s << Endl;
+    return 0;
+  }
+private:
+  String _s;
+};
+
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
+  
+  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Threadpool> threadpool(new _MYJFM_NAMESPACE_::Threadpool(2));
+  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Task> task1(new Mytask("hehe"));
+  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Task> task2(new Mytask("haha"));
+  threadpool->init();
+  threadpool->add_task(task1);
+  threadpool->add_task(task2);
   return 0;
 }
 

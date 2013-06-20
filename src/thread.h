@@ -17,7 +17,6 @@ class Thread : public Shared {
   enum _enum_state {
     INIT, 
     RUNNING, 
-    JOINED, 
     STOP
   };
 
@@ -34,7 +33,14 @@ public:
   int start();
 
   // stop the execution
-  int stop();
+  // invoke the pthread_cancel() and return immediately
+  // do not wait the thread finishing
+  int stop_nonblocking();
+
+  // stop the execution
+  // invoke the pthread_cancel() and then invoke the
+  // pthread_join(), so will block until this thread finished
+  int stop_blocking();
 
   // wait this thread until exiting
   int join();

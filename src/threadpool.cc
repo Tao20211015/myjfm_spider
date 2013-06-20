@@ -13,7 +13,7 @@ Threadpool::~Threadpool() {
   stop();
 }
 
-int Threadpool::run() {
+int Threadpool::init() {
   int retry = 0;
   if (_state == CONSTRUCTED) {
     int i;
@@ -35,7 +35,7 @@ int Threadpool::run() {
 void Threadpool::stop() {
   int i;
   for (i = 0; i < _threads.size(); ++i) {
-    _threads[i]->stop();
+    _threads[i]->stop_blocking();
   }
 }
 
@@ -54,11 +54,12 @@ void Threadpool::get_task(Sharedpointer<Task>& task) {
 }
 
 int Threadpool::add_worker() {
-  Sharedpointer<Threadtask> threadtask;
+  Sharedpointer<Threadtask> threadtask(new Threadtask(this));
   Sharedpointer<Thread> thread = Threadfactory::create_thread(threadtask);
   if (thread.is_null()) {
     return 1;
   }
+  _threads.push_back(thread);
   return 0;
 }
 

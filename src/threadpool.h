@@ -23,7 +23,7 @@ public:
   Threadpool(int n);
   ~Threadpool();
 
-  int run();
+  int init();
 
   void stop();
 

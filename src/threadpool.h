@@ -2,12 +2,12 @@
 #define _THREADPOOL_H_
 
 #include "config.h"
+#include "global.h"
 #include "shared.h"
 #include "task.h"
 #include "thread.h"
 #include "squeue.h"
 #include "threadtask.h"
-#include <vector>
 
 _START_MYJFM_NAMESPACE_
 
@@ -36,7 +36,7 @@ public:
 private:
   int _n;
   int _state;
-  std::vector< Sharedpointer<Thread> > _threads;
+  Vector< Sharedpointer<Thread> > _threads;
   Squeue< Sharedpointer<Task> > _tasks;
 
   // return: 0, success; 1, error

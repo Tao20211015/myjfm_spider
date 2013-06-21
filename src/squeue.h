@@ -2,10 +2,10 @@
 #define _SQUEUE_H_
 
 #include "config.h"
+#include "global.h"
 #include "scopeguard.h"
 #include "mutex.h"
 #include "conditional.h"
-#include <queue>
 
 _START_MYJFM_NAMESPACE_
 
@@ -44,7 +44,7 @@ private:
   // disallow copy constructor
   Squeue(const Squeue&);
   Squeue& operator=(const Squeue&);
-  std::queue<T> _queue;
+  Queue<T> _queue;
   Mutex _mutex;
   Conditional _cond;
 };

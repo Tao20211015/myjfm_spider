@@ -1,11 +1,13 @@
 #include "config.h"
-#include "utility.h"
 #include "global.h"
+#include "utility.h"
 
 #include <stdio.h>
 #include <stdlib.h>
 
 _START_MYJFM_NAMESPACE_
+
+class Utility;
 
 Global::Global() {
   _has_init = false;
@@ -37,6 +39,7 @@ void Global::parse_config() {
   if (_config_file == "") {
   } else {
     FILE* config_file_p = fopen(_config_file.c_str(), "r");
+
     if (config_file_p == NULL) {
       Cerr << "Warning: Configure file in your home directory can't be read." 
         << Endl 
@@ -48,20 +51,26 @@ void Global::parse_config() {
 #define MAX_BUF_LEN 1024
     char buffer[MAX_BUF_LEN];
     while (fgets(buffer, MAX_BUF_LEN - 1, config_file_p)) {
-      char* line = trim(buffer);
-      if (!line || *line == '#') {
-        continue;
-      }
-      String sline = line, key, value;
-      split_to_kv(sline, key, value);
-      if (!key.length() || !value.length()) {
+      Utility::trim(buffer);
+      if (buffer[0] == '\0' || buffer[0] == '#') {
         continue;
       }
 
-      if (key == "SAVEPATH") {
-        set_save_path(value);
-      } else if (key == "DEPTH") {
-        set_depth(value);
+      String line = buffer;
+      String separator = " ";
+      Vector<String> key_and_value;
+      Utility::split(line, separator, key_and_value);
+
+      if (key_and_value.size() != 2 || 
+          key_and_value[0].length() <= 0 || 
+          key_and_value[1].length() <= 0) {
+        continue;
+      }
+
+      if (key_and_value[0] == "SAVEPATH") {
+        set_save_path(key_and_value[1]);
+      } else if (key_and_value[0] == "DEPTH") {
+        set_depth(key_and_value[1]);
       } else {
         continue;
       }

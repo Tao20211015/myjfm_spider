@@ -49,8 +49,14 @@ int main() {
 
 
   String string3 = "This is the third task";
-  Thread thread(print_func, (void*)&string3);
-  thread.start();
+  Thread thread3(print_func, (void*)&string3);
+  thread3.start();
+
+  String string4 = "This is the fourth task";
+  Printtask_p task4(new Printtask(string4));
+  Thread thread4(task4);
+  thread4.start();
+
   return 0;
 }
 

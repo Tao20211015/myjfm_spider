@@ -4,7 +4,7 @@ CFLAGS	= -Wall -c -g
 LD			= g++
 LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o global.o utility.o shared.o \
+OBJS		= myjfm_spider.o utility.o hash.o global.o shared.o \
 					thread.o threadpool.o threadtask.o
 BIN			= myjfm_spider
 
@@ -50,6 +50,9 @@ myjfm_spider.o : myjfm_spider.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 global.o : global.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+hash.o : hash.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 utility.o : utility.cc

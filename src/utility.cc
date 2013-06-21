@@ -1,52 +1,156 @@
+#include "config.h"
 #include "global.h"
+#include "utility.h"
 #include <stdlib.h>
 #include <string.h>
 
-// eliminate all the blank chars from the head and tail of the string
-// NOTE: the parameter and return value are both char * strings
-char *trim(char *str) {
-  if (!str || !(*str)) {
-    return NULL;
+_START_MYJFM_NAMESPACE_
+
+void Utility::ltrim(char* str) {
+  if (!str) {
+    return;
   }
-  char *head = str;
-  while (*head == ' ' || *head == '\t') {
-    head++;
+
+  char* p = str;
+  while (::isspace(*p)) {
+    p++;
   }
-  if (*head == '\0') {
-    return NULL;
+
+  if (p == str) {
+    return;
   }
-  char *tail = head;
-  while (*tail) {
-    tail++;
-  }
-  tail--;
-  while (*tail == ' ' || *head == '\t') {
-    tail--;
-  }
-  *(++tail) = '\0';
-  return head;
+
+  while ((*str++ = *p++));
 }
 
-// split the string into key and value
-// you should always input the correct string, which means,
-// the first parameter 'line' should always contains one and 
-// only one space char(' ')
-void split_to_kv(String& line, String& key, String& value) {
-#define MAX_BUF_LEN 1024
-  char buffer[MAX_BUF_LEN];
-  strcpy(buffer, line.c_str());
-  char* pivot = buffer;
-  while (*pivot && *pivot != ' ') {
-    pivot++;
+String Utility::ltrim(const String& str) {
+  const char* p = str.c_str();
+  while (::isspace(*p)) {
+    p++;
   }
-  if (!*pivot) {
-    key = "";
-    value = "";
+  return CHARS2STR(p);
+}
+
+void Utility::rtrim(char* str) {
+  if (!str) {
+    return;
   }
-  *pivot = '\0';
-  key = buffer;
-  value = pivot + 1;
-#undef MAX_BUF_LEN
+
+  char* p = str + strlen(str) - 1;
+
+  while (p >= str && ::isspace(*p)) {
+    *p = '\0';
+    p--;
+  }
+}
+
+String Utility::rtrim(const String& str) {
+  if (str.length() <= 0) {
+    return CHARS2STR("");
+  }
+  const char* head = str.c_str();
+
+  const char* tail = head + strlen(head) - 1;
+  while (tail >= head && ::isspace(*tail)) {
+    tail--;
+  }
+
+  String res(head, tail - head + 1);
+  return res;
+}
+
+void Utility::trim(char* str) {
+  Utility::ltrim(str);
+  Utility::rtrim(str);
+}
+
+String Utility::trim(const String& str) {
+  return Utility::rtrim(Utility::ltrim(str));
+}
+
+void Utility::toupper(char* str) {
+  if (!str) {
+    return;
+  }
+
+  while (*str) {
+    *str = ::toupper(*str);
+    str++;
+  }
+}
+
+String Utility::toupper(const String& str) {
+  String res = str;
+  int i;
+  for (i = 0; i < res.length(); ++i) {
+    res[i] = ::toupper(res[i]);
+  }
+  return res;
+}
+
+void Utility::toupper_inplace(String& str) {
+  int i;
+  for (i = 0; i < str.length(); ++i) {
+    str[i] = ::toupper(str[i]);
+  }
+}
+
+void Utility::tolower(char* str) {
+  if (!str) {
+    return;
+  }
+
+  while (*str) {
+    *str = ::tolower(*str);
+    str++;
+  }
+}
+
+String Utility::tolower(const String& str) {
+  String res = str;
+  int i;
+  for (i = 0; i < res.length(); ++i) {
+    res[i] = ::tolower(res[i]);
+  }
+  return res;
+}
+
+void Utility::tolower_inplace(String& str) {
+  int i;
+  for (i = 0; i < str.length(); ++i) {
+    str[i] = ::tolower(str[i]);
+  }
+}
+
+void Utility::split(const String& str, 
+    const String& separator, 
+    Vector<String>& container) {
+
+  container.clear();
+
+  if (separator.length() <= 0) {
+    container.push_back(str);
+    return;
+  }
+
+  String_size_t pre = 0;
+  String_size_t cur;
+
+  while (1) {
+    cur = str.find_first_of(separator, pre);
+    if (cur == String_tail) {
+      cur = str.length();
+      if (cur != pre) {
+        container.push_back(String(str.c_str() + pre, cur - pre));
+      }
+      break;
+    } else {
+      if (cur != pre) {
+        container.push_back(String(str.c_str() + pre, cur - pre));
+      }
+    }
+    pre = cur + 1;
+  }
 }
 
 // get the full path
@@ -54,7 +158,7 @@ void split_to_kv(String& line, String& key, String& value) {
 // for example './../.././' etc.
 // please do not give the invalid path name, otherwise, 
 // the result will be confused
-String get_file_full_path(String path) {
+String Utility::get_file_full_path(String path) {
 #define MAX_BUF_LEN 512
   char buffer[MAX_BUF_LEN];
   int i, j;
@@ -127,4 +231,6 @@ String get_file_full_path(String path) {
   return CHARS2STR(buffer) + "/" + path;
 #undef MAX_BUF_LEN
 }
+
+_END_MYJFM_NAMESPACE_
 

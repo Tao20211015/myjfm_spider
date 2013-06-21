@@ -1,10 +1,6 @@
 #include "config.h"
 #include "global.h"
 #include "utility.h"
-#include "sharedpointer.h"
-#include "task.h"
-#include "threadpool.h"
-
 #include <stdlib.h>
 #include <unistd.h>
 #include <string.h>
@@ -42,7 +38,8 @@ void parse_args(int argc, char *argv[]) {
     String full_config_file_name = cur_path + "/myjfmspider.conf";
     load_config(cur_path, full_config_file_name);
   } else if (argc == 3 && !strcmp(argv[1], "-f")) {
-    load_config(cur_path, get_file_full_path(CHARS2STR(argv[2])));
+    load_config(cur_path, 
+        _MYJFM_NAMESPACE_::Utility::get_file_full_path(CHARS2STR(argv[2])));
   } else if (argc == 2 && 
       (!strcmp(argv[1], "-h") || !strcmp(argv[1], "--help"))) {
     usage(argv[0]);
@@ -53,26 +50,8 @@ void parse_args(int argc, char *argv[]) {
   }
 }
 
-class Mytask : public _MYJFM_NAMESPACE_::Task {
-public:
-  Mytask(String a) : _s(a) {}
-  int operator()(void* arg = NULL) {
-    Cout << _s << Endl;
-    return 0;
-  }
-private:
-  String _s;
-};
-
 int main(int argc, char *argv[]) {
   parse_args(argc, argv);
-  
-  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Threadpool> threadpool(new _MYJFM_NAMESPACE_::Threadpool(2));
-  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Task> task1(new Mytask("hehe"));
-  _MYJFM_NAMESPACE_::Sharedpointer<_MYJFM_NAMESPACE_::Task> task2(new Mytask("haha"));
-  threadpool->init();
-  threadpool->add_task(task1);
-  threadpool->add_task(task2);
   return 0;
 }
 

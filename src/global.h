@@ -4,6 +4,8 @@
 #include "config.h"
 #include <iostream>
 #include <string>
+#include <vector>
+#include <queue>
 
 #define Cerr std::cerr
 #define Cout std::cout
@@ -12,6 +14,11 @@
 
 #define String std::string
 #define CHARS2STR(a) String(a)
+#define String_size_t String::size_type
+#define String_tail String::npos
+
+#define Vector std::vector
+#define Queue std::queue
 
 _START_MYJFM_NAMESPACE_
 

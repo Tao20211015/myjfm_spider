@@ -8,9 +8,10 @@ typedef _MYJFM_NAMESPACE_::Hash<String, Stringhashfunction> Stringhash;
 
 int main() {
   Stringhash htable(10);
-  assert(htable.is_exist(CHARS2STR("hashtable")) == 0);
-  assert(htable.insert(CHARS2STR("hashtable")) == 0);
-  assert(htable.is_exist(CHARS2STR("hashtable")) == 1);
+  String str("hashtable");
+  assert(htable.is_exist(str) == 0);
+  assert(htable.insert(str) == 0);
+  assert(htable.is_exist(str) == 1);
   return 0;
 }
 

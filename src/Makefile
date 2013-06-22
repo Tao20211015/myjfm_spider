@@ -4,7 +4,7 @@ CFLAGS	= -Wall -c -g
 LD			= g++
 LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o utility.o hash.o global.o shared.o \
+OBJS		= myjfm_spider.o utility.o global.o shared.o \
 					thread.o threadpool.o threadtask.o
 BIN			= myjfm_spider
 
@@ -14,7 +14,7 @@ UTILITY_UT_BIN	= utility_ut
 THREAD_TEST_OBJS	= thread_test.o thread.o threadpool.o threadtask.o shared.o
 THREAD_TEST_BIN	= thread_test
 
-HASH_TEST_OBJS	= hash_test.o hash.o
+HASH_TEST_OBJS	= hash_test.o
 HASH_TEST_BIN	= hash_test
 
 export OUTPUT_PATH=../output
@@ -59,9 +59,6 @@ myjfm_spider.o : myjfm_spider.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 global.o : global.cc
-	$(CC) $(CFLAGS) -o $@ $<
-
-hash.o : hash.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 hash_test.o : hash_test.cc

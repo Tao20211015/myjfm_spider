@@ -103,6 +103,11 @@ Hash<T, Hashfunc>::~Hash() {
 }
 
 template <class T, class Hashfunc>
+hash_size_type Hash<T, Hashfunc>::size() {
+  return _buckets_size;
+}
+
+template <class T, class Hashfunc>
 int Hash<T, Hashfunc>::insert(T& value) {
   hash_size_type key = get_key(value);
   if (_buckets[key] == NULL) {

@@ -14,11 +14,15 @@ UTILITY_UT_BIN	= utility_ut
 THREAD_TEST_OBJS	= thread_test.o thread.o threadpool.o threadtask.o shared.o
 THREAD_TEST_BIN	= thread_test
 
+HASH_TEST_OBJS	= hash_test.o hash.o
+HASH_TEST_BIN	= hash_test
+
 export OUTPUT_PATH=../output
 
 .PHONY : everything clean realclean all
 
-everything : $(BIN) $(UTILITY_UT_BIN) $(THREAD_TEST_BIN) others
+everything : $(BIN) $(UTILITY_UT_BIN) $(THREAD_TEST_BIN) \
+	$(HASH_TEST_BIN) others
 
 all : clean everything
 
@@ -26,12 +30,14 @@ clean :
 	rm -rf $(OBJS)
 	rm -rf $(UTILITY_UT_OBJS)
 	rm -rf $(THREAD_TEST_OBJS)
+	rm -rf $(HASH_TEST_OBJS)
 
 realclean : 
 	rm -rf $(OBJS) $(BIN)
 	rm -rf $(OUTPUT_PATH)/$(BIN)
 	rm -rf $(UTILITY_UT_OBJS) $(UTILITY_UT_BIN)
 	rm -rf $(THREAD_TEST_OBJS) $(THREAD_TEST_BIN)
+	rm -rf $(HASH_TEST_OBJS) $(HASH_TEST_BIN)
 
 $(BIN) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $(BIN) $(OBJS)
@@ -43,6 +49,9 @@ $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)
 $(THREAD_TEST_BIN) : $(THREAD_TEST_OBJS)
 	$(LD) $(LDFLAGS) -o $(THREAD_TEST_BIN) $(THREAD_TEST_OBJS)
 
+$(HASH_TEST_BIN) : $(HASH_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(HASH_TEST_BIN) $(HASH_TEST_OBJS)
+
 others : 
 	#cp plot.sh $(OUTPUT_PATH)
 
@@ -53,6 +62,9 @@ global.o : global.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 hash.o : hash.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+hash_test.o : hash_test.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 utility.o : utility.cc

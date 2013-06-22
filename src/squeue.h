@@ -10,7 +10,7 @@
 _START_MYJFM_NAMESPACE_
 
 template <class T>
-class Squeue : public Shared{
+class Squeue : public Shared {
 public:
   Squeue() {
     _cond.init(&_mutex);

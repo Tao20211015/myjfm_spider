@@ -20,3 +20,13 @@ else
   exit 1
 fi
 
+./thread_test
+if [ $? -eq 0 ]; then
+  echo
+  echo 'SUCCESS! All thread tests passed!'
+else
+  echo
+  echo 'FAILED! Some thread test Cases are failed!'
+  exit 1
+fi
+

@@ -177,8 +177,11 @@ public:
     _buckets.resize(_buckets_size, (Hashnode*)0);
   }
 
+  // protected by read-write lock in case of destructing at the same time
   ~Hash() {
     int i;
+    _rwlock.wrlock();
+
     for (i = 0; i < _buckets_size; ++i) {
       Hashnode* p = _buckets[i];
       while (p) {
@@ -188,19 +191,54 @@ public:
       }
       _buckets[i] = NULL;
     }
+
     _buckets.clear();
     _buckets_size = 0;
+
+    _rwlock.unlock();
   }
 
+  // for efficiency, we support two ways to read and write: one is access 
+  // directly and the other is protected by rwlock in case of multi-thread
+
   hash_size_type size() {
+    return _buckets_size;
+  }
+
+  hash_size_type size_safe() {
     _rwlock.rdlock();
+
     hash_size_type res = _buckets_size;
+
     _rwlock.unlock();
     return res;
   }
 
   int insert(T& value) {
+    hash_size_type key = get_key(value);
+    if (_buckets[key] == NULL) {
+      _buckets[key] = new Hashnode(value);
+      return 0;
+    }
+
+    Hashnode* nodep = _buckets[key];
+    while (nodep) {
+      if (*(nodep->_value) == value) {
+        return 1;
+      }
+      nodep = nodep->_next;
+    }
+
+    nodep = new Hashnode(value);
+    nodep->_next = _buckets[key]->_next;
+    _buckets[key] = nodep;
+
+    return 0;
+  }
+
+  int insert_safe(T& value) {
     _rwlock.wrlock();
+
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
       _buckets[key] = new Hashnode(value);
@@ -209,7 +247,6 @@ public:
     }
 
     Hashnode* nodep = _buckets[key];
-
     while (nodep) {
       if (*(nodep->_value) == value) {
         _rwlock.unlock();
@@ -221,12 +258,31 @@ public:
     nodep = new Hashnode(value);
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
+
     _rwlock.unlock();
     return 0;
   }
 
   int is_exist(T& value) {
+    hash_size_type key = get_key(value);
+    if (_buckets[key] == NULL) {
+      return 0;
+    }
+
+    Hashnode* nodep = _buckets[key];
+    while (nodep) {
+      if (*(nodep->_value) == value) {
+        return 1;
+      }
+      nodep = nodep->_next;
+    }
+
+    return 0;
+  }
+
+  int is_exist_safe(T& value) {
     _rwlock.rdlock();
+
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
       _rwlock.unlock();

@@ -56,7 +56,7 @@ public:
     return h;
   }
 
-  ~Stringhashfunction() {}
+  virtual ~Stringhashfunction() {}
 };
 
 class Charhashfunction : Hashfunction<char> {

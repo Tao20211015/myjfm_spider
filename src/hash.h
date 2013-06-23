@@ -4,6 +4,7 @@
 #include "config.h"
 #include "global.h"
 #include "shared.h"
+#include "rwlock.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -192,13 +193,18 @@ public:
   }
 
   hash_size_type size() {
-    return _buckets_size;
+    _rwlock.rdlock();
+    hash_size_type res = _buckets_size;
+    _rwlock.unlock();
+    return res;
   }
 
   int insert(T& value) {
+    _rwlock.wrlock();
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
       _buckets[key] = new Hashnode(value);
+      _rwlock.unlock();
       return 0;
     }
 
@@ -206,6 +212,7 @@ public:
 
     while (nodep) {
       if (*(nodep->_value) == value) {
+        _rwlock.unlock();
         return 1;
       }
       nodep = nodep->_next;
@@ -214,12 +221,15 @@ public:
     nodep = new Hashnode(value);
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
+    _rwlock.unlock();
     return 0;
   }
 
   int is_exist(T& value) {
+    _rwlock.rdlock();
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
+      _rwlock.unlock();
       return 0;
     }
 
@@ -227,11 +237,13 @@ public:
 
     while (nodep) {
       if (*(nodep->_value) == value) {
+        _rwlock.unlock();
         return 1;
       }
       nodep = nodep->_next;
     }
 
+    _rwlock.unlock();
     return 0;
   }
 
@@ -252,6 +264,7 @@ private:
 
   Buckets _buckets;
   hash_size_type _buckets_size;
+  RWlock _rwlock;
 };
 
 _END_MYJFM_NAMESPACE_

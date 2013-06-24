@@ -175,14 +175,13 @@ public:
     }
 
     _buckets.resize(_buckets_size, (Hashnode*)0);
+    _rwlocks = new RWlock[_buckets_size];
   }
 
-  // protected by read-write lock in case of destructing at the same time
   ~Hash() {
     int i;
-    _rwlock.wrlock();
-
     for (i = 0; i < _buckets_size; ++i) {
+      _rwlocks[i].wrlock();
       Hashnode* p = _buckets[i];
       while (p) {
         Hashnode* q = p;
@@ -190,28 +189,16 @@ public:
         delete q;
       }
       _buckets[i] = NULL;
+      _rwlocks[i].unlock();
     }
 
     _buckets.clear();
     _buckets_size = 0;
-
-    _rwlock.unlock();
+    delete []_rwlocks;
   }
-
-  // for efficiency, we support two ways to read and write: one is access 
-  // directly and the other is protected by rwlock in case of multi-thread
 
   hash_size_type size() {
     return _buckets_size;
-  }
-
-  hash_size_type size_safe() {
-    _rwlock.rdlock();
-
-    hash_size_type res = _buckets_size;
-
-    _rwlock.unlock();
-    return res;
   }
 
   int insert(T& value) {
@@ -237,21 +224,23 @@ public:
   }
 
   int insert_safe(T& value) {
-    _rwlock.wrlock();
-
     hash_size_type key = get_key(value);
+
+    _rwlocks[key].wrlock();
+
     if (_buckets[key] == NULL) {
       _buckets[key] = new Hashnode(value);
-      _rwlock.unlock();
+      _rwlocks[key].unlock();
       return 0;
     }
 
     Hashnode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
-        _rwlock.unlock();
+        _rwlocks[key].unlock();
         return 1;
       }
+
       nodep = nodep->_next;
     }
 
@@ -259,12 +248,13 @@ public:
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
 
-    _rwlock.unlock();
+    _rwlocks[key].unlock();
     return 0;
   }
 
   int is_exist(T& value) {
     hash_size_type key = get_key(value);
+
     if (_buckets[key] == NULL) {
       return 0;
     }
@@ -274,6 +264,7 @@ public:
       if (*(nodep->_value) == value) {
         return 1;
       }
+
       nodep = nodep->_next;
     }
 
@@ -281,11 +272,11 @@ public:
   }
 
   int is_exist_safe(T& value) {
-    _rwlock.rdlock();
-
     hash_size_type key = get_key(value);
+    _rwlocks[key].rdlock();
+
     if (_buckets[key] == NULL) {
-      _rwlock.unlock();
+      _rwlocks[key].unlock();
       return 0;
     }
 
@@ -293,13 +284,13 @@ public:
 
     while (nodep) {
       if (*(nodep->_value) == value) {
-        _rwlock.unlock();
+        _rwlocks[key].unlock();
         return 1;
       }
       nodep = nodep->_next;
     }
 
-    _rwlock.unlock();
+    _rwlocks[key].unlock();
     return 0;
   }
 
@@ -319,8 +310,9 @@ private:
   }
 
   Buckets _buckets;
+  RWlock* _rwlocks;
+
   hash_size_type _buckets_size;
-  RWlock _rwlock;
 };
 
 _END_MYJFM_NAMESPACE_

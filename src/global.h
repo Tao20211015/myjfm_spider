@@ -19,6 +19,7 @@
 
 #define Vector std::vector
 #define Queue std::queue
+#define Map std::map
 
 _START_MYJFM_NAMESPACE_
 
@@ -28,10 +29,15 @@ public:
   ~Global();
   void init(String& v_cur_path, String& config_file_name);
   void parse_config();
-  void set_save_path(String path);
+private:
+  void load_default_file_types();
+  void set_seed_urls(Vector<String>& seed_urls);
+  void set_file_types(Vector<String>& file_types);
+  void set_save_path(String& path);
   String& get_save_path();
   void set_depth(String& dep);
-private:
+  void set_thread_num(String& thread_num);
+
   // current work path
   String _cur_path;
 
@@ -43,6 +49,9 @@ private:
   // the path saved all the web pages and all the indexes
   String _save_path;
   int _depth;
+  int _thread_num;
+  Vector<String> _file_types;
+  Vector<String> _seed_urls;
 };
 
 _END_MYJFM_NAMESPACE_

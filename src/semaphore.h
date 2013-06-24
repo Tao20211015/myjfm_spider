@@ -32,11 +32,11 @@ public:
   }
 
   inline void wait() {
-    RUN_FUNC_IF_HAS_INIT(sem_destroy);
+    RUN_FUNC_IF_HAS_INIT(sem_wait);
   }
 
   inline void post() {
-    RUN_FUNC_IF_HAS_INIT(sem_destroy);
+    RUN_FUNC_IF_HAS_INIT(sem_post);
   }
 
 private:

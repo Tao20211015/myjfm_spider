@@ -6,6 +6,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <fstream>
 
 #define Cerr std::cerr
 #define Cout std::cout
@@ -16,6 +17,9 @@
 #define CHARS2STR(a) String(a)
 #define String_size_t String::size_type
 #define String_tail String::npos
+
+#define Ifstream std::ifstream
+#define Stream_size std::streamsize
 
 #define Vector std::vector
 #define Queue std::queue

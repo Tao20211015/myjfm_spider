@@ -76,7 +76,7 @@ void Global::parse_config() {
       }
 
       String line = buffer;
-      String separator = " ";
+      String separator = " \t";
       Vector<String> key_and_value;
       Utility::split(line, separator, key_and_value);
 
@@ -92,7 +92,7 @@ void Global::parse_config() {
         set_thread_num(key_and_value[1]);
       } else if (key_and_value[0] == "FILETYPES") {
         set_file_types(key_and_value);
-      } else if (key_and_value[0] == "") {
+      } else if (key_and_value[0] == "SEEDURLS") {
         set_seed_urls(key_and_value);
       } else {
         continue;

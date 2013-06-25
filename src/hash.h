@@ -156,7 +156,7 @@ class _hash_list_node {
 // and
 // the functor class Hashfunc should has overloaded the operator()
 template <class T, class Hashfunc>
-class Hash {
+class Hash : public Shared {
   typedef _hash_list_node<T> Hashnode;
   typedef Vector<Hashnode*> Buckets;
 

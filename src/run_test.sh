@@ -20,6 +20,26 @@ else
   exit 1
 fi
 
+./md5_test
+if [ $? -eq 0 ]; then
+  echo
+  echo 'SUCCESS! All md5 function tests passed!'
+else
+  echo
+  echo 'FAILED! Some md5 function test Cases are failed!'
+  exit 1
+fi
+
+./url_test
+if [ $? -eq 0 ]; then
+  echo
+  echo 'SUCCESS! All url function tests passed!'
+else
+  echo
+  echo 'FAILED! Some url function test Cases are failed!'
+  exit 1
+fi
+
 ./thread_test
 if [ $? -eq 0 ]; then
   echo

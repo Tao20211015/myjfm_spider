@@ -1,11 +1,11 @@
 #ifndef _MD5_H_
 #define _MD5_H_
 
-#include "config.h"
-#include "global.h"
 #include <string.h>
 #include <string>
 #include <fstream>
+
+#include "config.h"
 
 _START_MYJFM_NAMESPACE_
 

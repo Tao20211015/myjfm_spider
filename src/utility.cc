@@ -1,8 +1,8 @@
-#include "config.h"
-#include "global.h"
-#include "utility.h"
 #include <stdlib.h>
 #include <string.h>
+
+#include "config.h"
+#include "utility.h"
 
 _START_MYJFM_NAMESPACE_
 

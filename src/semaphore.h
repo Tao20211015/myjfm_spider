@@ -1,9 +1,10 @@
 #ifndef _SEMAPHORE_H_
 #define _SEMAPHORE_H_
 
-#include "config.h"
 #include <semaphore.h>
 #include <stdlib.h>
+
+#include "config.h"
 
 _START_MYJFM_NAMESPACE_
 

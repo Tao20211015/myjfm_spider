@@ -1,9 +1,9 @@
+#include <assert.h>
+
 #include "config.h"
-#include "global.h"
 #include "site.h"
 #include "md5.h"
 #include "url.h"
-#include <assert.h>
 
 int main() {
   String seedurl = "http://www.baidu.com";

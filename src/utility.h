@@ -1,9 +1,9 @@
 #ifndef _UTILITY_H_
 #define _UTILITY_H_
 
-#include "config.h"
-#include "global.h"
 #include <assert.h>
+
+#include "config.h"
 
 #define ASSERT(exp) assert(exp)
 

@@ -2,28 +2,10 @@
 #define _GLOBAL_H_
 
 #include "config.h"
-#include <iostream>
-#include <string>
-#include <vector>
-#include <queue>
-#include <fstream>
+#include "url.h"
+#include "squeue.h"
+#include "sharedpointer.h"
 
-#define Cerr std::cerr
-#define Cout std::cout
-#define Cin std::cin
-#define Endl std::endl
-
-#define String std::string
-#define CHARS2STR(a) String(a)
-#define String_size_t String::size_type
-#define String_tail String::npos
-
-#define Ifstream std::ifstream
-#define Stream_size std::streamsize
-
-#define Vector std::vector
-#define Queue std::queue
-#define Map std::map
 
 _START_MYJFM_NAMESPACE_
 
@@ -33,6 +15,7 @@ public:
   ~Global();
   void init(String& v_cur_path, String& config_file_name);
   void parse_config();
+
 private:
   void load_default_file_types();
   void set_seed_urls(Vector<String>& seed_urls);
@@ -56,6 +39,11 @@ private:
   int _thread_num;
   Vector<String> _file_types;
   Vector<String> _seed_urls;
+
+  // thread safe queue. This queue is used by all threads.
+  // All child threads will produce urls, and, 
+  // only the master thread consume the urls.
+  Sharedpointer<Squeue<Url> > _urls_queue;
 };
 
 _END_MYJFM_NAMESPACE_

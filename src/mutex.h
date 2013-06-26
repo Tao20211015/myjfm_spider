@@ -1,9 +1,10 @@
 #ifndef _MUTEX_H_
 #define _MUTEX_H_
 
-#include "config.h"
 #include <pthread.h>
 #include <stdlib.h>
+
+#include "config.h"
 
 _START_MYJFM_NAMESPACE_
 

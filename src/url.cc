@@ -1,5 +1,4 @@
 #include "config.h"
-#include "global.h"
 #include "url.h"
 #include "site.h"
 

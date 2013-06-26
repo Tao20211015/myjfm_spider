@@ -1,5 +1,4 @@
 #include "config.h"
-#include "global.h"
 #include "task.h"
 #include "thread.h"
 #include "threadpool.h"

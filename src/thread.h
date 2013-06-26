@@ -1,12 +1,13 @@
 #ifndef _THREAD_H_
 #define _THREAD_H_
 
+#include <pthread.h>
+
 #include "config.h"
 #include "shared.h"
 #include "task.h"
 #include "semaphore.h"
 #include "sharedpointer.h"
-#include <pthread.h>
 
 _START_MYJFM_NAMESPACE_
 

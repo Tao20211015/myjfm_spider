@@ -1,5 +1,4 @@
 #include "config.h"
-#include <pthread.h>
 #include "thread.h"
 
 _START_MYJFM_NAMESPACE_

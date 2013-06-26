@@ -1,8 +1,8 @@
+#include <assert.h>
+
 #include "config.h"
-#include "global.h"
 #include "hash.h"
 #include "sharedpointer.h"
-#include <assert.h>
 
 typedef _MYJFM_NAMESPACE_::Stringhashfunction Stringhashfunction;
 typedef _MYJFM_NAMESPACE_::Hash<String, Stringhashfunction> Stringhash;

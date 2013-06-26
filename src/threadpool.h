@@ -2,7 +2,6 @@
 #define _THREADPOOL_H_
 
 #include "config.h"
-#include "global.h"
 #include "shared.h"
 #include "task.h"
 #include "thread.h"

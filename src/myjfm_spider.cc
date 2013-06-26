@@ -1,16 +1,17 @@
+#include <unistd.h>
+#include <stdlib.h>
+#include <string.h>
+
 #include "config.h"
 #include "global.h"
 #include "utility.h"
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
 
 // the global variable
 // contains many information of the server
 // e.x. the configure options
 // before access this object, you must invoke the
 // init(config_file) member function to init the object
-_MYJFM_NAMESPACE_::Global glob;
+_MYJFM_NAMESPACE_::Global *glob = NULL;
 
 void usage(char *argv0) {
   Cerr << "[Usage] " << argv0 << " [-f configure_file_name]" << Endl;
@@ -27,7 +28,7 @@ static void load_config(String cur_path, String config_file_name) {
   }
 
   // init the object
-  glob.init(cur_path, config_file_name);
+  glob->init(cur_path, config_file_name);
 }
 
 void parse_args(int argc, char *argv[]) {
@@ -54,6 +55,7 @@ void parse_args(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+  glob = new _MYJFM_NAMESPACE_::Global();
   parse_args(argc, argv);
   return 0;
 }

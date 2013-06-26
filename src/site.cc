@@ -1,6 +1,7 @@
-#include "site.h"
 #include <stdlib.h>
 #include <time.h>
+
+#include "site.h"
 
 _START_MYJFM_NAMESPACE_
 

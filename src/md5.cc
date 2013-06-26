@@ -1,7 +1,7 @@
-#include "config.h"
-#include "global.h"
-#include "md5.h"
 #include <string.h>
+
+#include "config.h"
+#include "md5.h"
 
 _START_MYJFM_NAMESPACE_
 

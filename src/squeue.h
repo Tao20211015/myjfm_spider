@@ -2,9 +2,9 @@
 #define _SQUEUE_H_
 
 #include "config.h"
-#include "global.h"
-#include "scopeguard.h"
 #include "mutex.h"
+#include "shared.h"
+#include "scopeguard.h"
 #include "conditional.h"
 
 _START_MYJFM_NAMESPACE_

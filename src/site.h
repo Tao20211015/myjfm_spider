@@ -2,7 +2,6 @@
 #define _SITE_H_
 
 #include "config.h"
-#include "global.h"
 
 _START_MYJFM_NAMESPACE_
 

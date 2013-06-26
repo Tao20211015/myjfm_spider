@@ -1,8 +1,9 @@
 #ifndef _SCOPEGUARD_H_
 #define _SCOPEGUARD_H_
 
-#include "config.h"
 #include <stdlib.h>
+
+#include "config.h"
 
 _START_MYJFM_NAMESPACE_
 

@@ -2,7 +2,6 @@
 #define _URL_H_
 
 #include "config.h"
-#include "global.h"
 #include "site.h"
 #include "md5.h"
 

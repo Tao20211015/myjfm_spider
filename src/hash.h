@@ -2,7 +2,6 @@
 #define _HASH_H_
 
 #include "config.h"
-#include "global.h"
 #include "shared.h"
 #include "rwlock.h"
 

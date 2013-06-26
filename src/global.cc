@@ -1,13 +1,11 @@
+#include <stdio.h>
+#include <stdlib.h>
+
 #include "config.h"
 #include "global.h"
 #include "utility.h"
 
-#include <stdio.h>
-#include <stdlib.h>
-
 _START_MYJFM_NAMESPACE_
-
-class Utility;
 
 Global::Global() : 
   _has_init(false), 
@@ -44,6 +42,15 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   load_default_file_types();
 
   parse_config();
+
+  // initialize the url queue
+  _urls_queue = Sharedpointer<Squeue<Url> >(new Squeue<Url>());
+
+  int i;
+  for (i = 0; i < _seed_urls.size(); ++i) {
+    Url url(_seed_urls[i]);
+    _urls_queue->push(url);
+  }
 }
 
 void Global::load_default_file_types() {

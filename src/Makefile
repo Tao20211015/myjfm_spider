@@ -5,7 +5,7 @@ LD			= g++
 LDFLAGS	= -lpthread
 
 OBJS		= myjfm_spider.o utility.o global.o shared.o thread.o threadpool.o \
-					threadtask.o site.o url.o md5.o
+					threadtask.o site.o url.o md5.o downloadtask.o scheduletask.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -114,5 +114,11 @@ md5.o : md5.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 md5_test.o : md5_test.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+downloadtask.o : downloadtask.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+scheduletask.o : scheduletask.cc
 	$(CC) $(CFLAGS) -o $@ $<
 

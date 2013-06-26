@@ -12,9 +12,12 @@ Global::Global() :
   _config_file(""), 
   _cur_path(""), 
   _depth(5), 
-  _thread_num(5) {
+  _downloader_num(5), 
+  _scheduler_num(1)
+{
   _file_types.clear();
   _seed_urls.clear();
+  _downloader_queues.clear();
 }
 
 Global::~Global() {
@@ -35,7 +38,8 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   _cur_path = v_cur_path;
   _config_file = config_file_name;
   _depth = 5;
-  _thread_num = 5;
+  _downloader_num = 5;
+  _scheduler_num = 1;
 
   _seed_urls.clear();
 
@@ -46,10 +50,15 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   // initialize the url queue
   _urls_queue = Sharedpointer<Squeue<Url> >(new Squeue<Url>());
 
-  int i;
+  int i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
     Url url(_seed_urls[i]);
     _urls_queue->push(url);
+  }
+
+  // initialize all the downloader queues
+  for (i = 0; i < _downloader_num; ++i) {
+    _downloader_queues.push_back(Sharedpointer<Squeue<Url> >(new Squeue<Url>()));
   }
 }
 
@@ -77,6 +86,7 @@ void Global::parse_config() {
 #define MAX_BUF_LEN 1024
     char buffer[MAX_BUF_LEN];
     while (fgets(buffer, MAX_BUF_LEN - 1, config_file_p)) {
+#undef MAX_BUF_LEN
       Utility::trim(buffer);
       if (buffer[0] == '\0' || buffer[0] == '#') {
         continue;
@@ -95,8 +105,10 @@ void Global::parse_config() {
         set_save_path(key_and_value[1]);
       } else if (key_and_value[0] == "DEPTH") {
         set_depth(key_and_value[1]);
-      } else if (key_and_value[0] == "THREADS") {
-        set_thread_num(key_and_value[1]);
+      } else if (key_and_value[0] == "DOWNLOADERS") {
+        set_downloader_num(key_and_value[1]);
+      } else if (key_and_value[0] == "SCHEDULERS") {
+        set_scheduler_num(key_and_value[1]);
       } else if (key_and_value[0] == "FILETYPES") {
         set_file_types(key_and_value);
       } else if (key_and_value[0] == "SEEDURLS") {
@@ -107,9 +119,11 @@ void Global::parse_config() {
     }
 
     if (_seed_urls.empty()) {
+      fclose(config_file_p);
       exit(1);
     }
-#undef MAX_BUF_LEN
+
+    fclose(config_file_p);
   }
 }
 
@@ -129,9 +143,24 @@ void Global::set_file_types(Vector<String>& file_types) {
   }
 }
 
-void Global::set_thread_num(String& thread_num) {
+void Global::set_downloader_num(String& downloader_num) {
   ASSERT(_has_init);
-  _thread_num = atoi(thread_num.c_str());
+  _downloader_num = atoi(downloader_num.c_str());
+}
+
+int Global::get_downloader_num() {
+  ASSERT(_has_init);
+  return _downloader_num;
+}
+
+void Global::set_scheduler_num(String& scheduler_num) {
+  ASSERT(_has_init);
+  _scheduler_num = atoi(scheduler_num.c_str());
+}
+
+int Global::get_scheduler_num() {
+  ASSERT(_has_init);
+  return _scheduler_num;
 }
 
 void Global::set_save_path(String& path) {
@@ -139,14 +168,25 @@ void Global::set_save_path(String& path) {
   _save_path = path;
 }
 
-String& Global::get_save_path() {
+void Global::get_save_path(String& save_path) {
   ASSERT(_has_init);
-  return _save_path;
+  save_path = _save_path;
 }
 
 void Global::set_depth(String& dep) {
   ASSERT(_has_init);
   _depth = atoi(dep.c_str());
+}
+
+Sharedpointer<Squeue<Url> > Global::get_downloader_queue(int id) {
+  ASSERT(_has_init);
+  int downloader_num = get_downloader_num();
+  if (id >= downloader_num || id < 0) {
+    Sharedpointer<Squeue<Url> > res(NULL);
+    return res;
+  }
+
+  return _downloader_queues[id];
 }
 
 _END_MYJFM_NAMESPACE_

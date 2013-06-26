@@ -5,6 +5,10 @@
 #include "config.h"
 #include "global.h"
 #include "utility.h"
+#include "downloadtask.h"
+#include "scheduletask.h"
+#include "threadpool.h"
+#include "sharedpointer.h"
 
 // the global variable
 // contains many information of the server
@@ -12,6 +16,13 @@
 // before access this object, you must invoke the
 // init(config_file) member function to init the object
 _MYJFM_NAMESPACE_::Global *glob = NULL;
+
+typedef _MYJFM_NAMESPACE_::Threadpool Threadpool;
+typedef _MYJFM_NAMESPACE_::Sharedpointer<Threadpool> Threadpoolptr;
+typedef _MYJFM_NAMESPACE_::Downloadtask Downloadtask;
+typedef _MYJFM_NAMESPACE_::Sharedpointer<Downloadtask> Downloadtaskptr;
+typedef _MYJFM_NAMESPACE_::Scheduletask Scheduletask;
+typedef _MYJFM_NAMESPACE_::Sharedpointer<Scheduletask> Scheduletaskptr;
 
 void usage(char *argv0) {
   Cerr << "[Usage] " << argv0 << " [-f configure_file_name]" << Endl;
@@ -55,8 +66,34 @@ void parse_args(int argc, char *argv[]) {
 }
 
 int main(int argc, char *argv[]) {
+  int i = 0;
   glob = new _MYJFM_NAMESPACE_::Global();
+
   parse_args(argc, argv);
+
+  int downloader_num = glob->get_downloader_num();
+  int scheduler_num = glob->get_scheduler_num();
+
+  Threadpoolptr downloader_threadpool(new Threadpool(downloader_num));
+  downloader_threadpool->init();
+
+  Threadpoolptr scheduler_threadpool(new Threadpool(scheduler_num));
+  scheduler_threadpool->init();
+
+  for (i = 0; i < downloader_num; ++i) {
+    Downloadtaskptr task(new Downloadtask(i));
+    downloader_threadpool->add_task(task);
+  }
+
+  for (i = 0; i < scheduler_num; ++i) {
+    Scheduletaskptr task(new Scheduletask(i));
+    scheduler_threadpool->add_task(task);
+  }
+
+  sleep(1000);
+
+  delete glob;
+
   return 0;
 }
 

@@ -8,11 +8,15 @@ SAVEPATH /home/myjfm/work/myjfm_spider/output
 # the interval between two crawls (seconds)
 INTERVAL 5
 
-# the number of threads
-THREADS 5
+# the number of downloaders
+DOWNLOADERS 5
+
+# the number of schedulers
+SCHEDULERS 1
 
 # the number of threads
 FILETYPES .html .htm .jpg .jpeg
 
 # the start urls
 SEEDURLS www.cnblogs.com www.cppblog.com
+

@@ -3,14 +3,14 @@ So I want it to be a modularized software.
 Its architecture is illustrated in the doc/architecture.png
 It mainly includes four modules, as follows:
 
-1. Downloader: Each downloader is a thread. Its work contains:
+1. '''Downloader''': Each downloader is a thread. Its work contains:
     1) get URLs from its own queue and,
     2) assemble the HTTP requests and sending them to the corresponding sites,
     3) wait until the sites returning back the requested web pages,
     4) put the web pages into the Global Page Queue,
     5) go to the first step.
 
-2. Extractor: Each extractor is also a thread. 
+2. '''Extractor''': Each extractor is also a thread. 
   This module's responsibilities are as follows:
     1) get web pages from the Global Page Queue and,
     2) save these web pages on disk and then,
@@ -18,7 +18,7 @@ It mainly includes four modules, as follows:
     4) put all the extracted URLs into the Global URL Snychronous Queue,
     5) go to the first step.
 
-3. Scheduler: This is the core module of the spider. Its work contains:
+3. '''Scheduler''': This is the core module of the spider. Its work contains:
     1) get the URLs from the Global URL Snychronous Queue,
     2) check all the URLs one by one in this way: 
       if the URL has been downloaded.
@@ -32,6 +32,6 @@ It mainly includes four modules, as follows:
       queue(also according to the same algorithm as the previous step),
     6) go to the first step.
 
-4. Main: This module is the main thread of the process. When the program starts
+4. '''Main''': This module is the main thread of the process. When the program starts
   running, it configure the Downloaders, the Extractors and the Scheduler. 
   Also, it can deal with the commands from the end user.

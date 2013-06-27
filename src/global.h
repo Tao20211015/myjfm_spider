@@ -17,6 +17,7 @@ public:
   void parse_config();
   void get_save_path(String&);
   int get_downloader_num();
+  int get_extractor_num();
   int get_scheduler_num();
   Sharedpointer<Squeue<Url> > get_downloader_queue(int);
 
@@ -27,6 +28,7 @@ private:
   void set_save_path(String& path);
   void set_depth(String& dep);
   void set_downloader_num(String& downloader_num);
+  void set_extractor_num(String& extractor_num);
   void set_scheduler_num(String& scheduler_num);
 
   // current work path
@@ -44,6 +46,7 @@ private:
   int _depth;
 
   int _downloader_num;
+  int _extractor_num;
   int _scheduler_num;
 
   // the types of file which downloader can download

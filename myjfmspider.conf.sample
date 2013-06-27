@@ -11,6 +11,9 @@ INTERVAL 5
 # the number of downloaders
 DOWNLOADERS 5
 
+# the number of extractors
+EXTRACTORS 5
+
 # the number of schedulers
 SCHEDULERS 1
 

@@ -13,6 +13,7 @@ Global::Global() :
   _cur_path(""), 
   _depth(5), 
   _downloader_num(5), 
+  _extractor_num(5), 
   _scheduler_num(1)
 {
   _file_types.clear();
@@ -39,6 +40,7 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   _config_file = config_file_name;
   _depth = 5;
   _downloader_num = 5;
+  _extractor_num = 5;
   _scheduler_num = 1;
 
   _seed_urls.clear();
@@ -107,6 +109,8 @@ void Global::parse_config() {
         set_depth(key_and_value[1]);
       } else if (key_and_value[0] == "DOWNLOADERS") {
         set_downloader_num(key_and_value[1]);
+      } else if (key_and_value[0] == "EXTRACTORS") {
+        set_extractor_num(key_and_value[1]);
       } else if (key_and_value[0] == "SCHEDULERS") {
         set_scheduler_num(key_and_value[1]);
       } else if (key_and_value[0] == "FILETYPES") {
@@ -151,6 +155,16 @@ void Global::set_downloader_num(String& downloader_num) {
 int Global::get_downloader_num() {
   ASSERT(_has_init);
   return _downloader_num;
+}
+
+void Global::set_extractor_num(String& extractor_num) {
+  ASSERT(_has_init);
+  _extractor_num = atoi(extractor_num.c_str());
+}
+
+int Global::get_extractor_num() {
+  ASSERT(_has_init);
+  return _extractor_num;
 }
 
 void Global::set_scheduler_num(String& scheduler_num) {

@@ -6,6 +6,7 @@
 #include "global.h"
 #include "utility.h"
 #include "downloadtask.h"
+#include "extracttask.h"
 #include "scheduletask.h"
 #include "threadpool.h"
 #include "sharedpointer.h"
@@ -21,6 +22,8 @@ typedef _MYJFM_NAMESPACE_::Threadpool Threadpool;
 typedef _MYJFM_NAMESPACE_::Sharedpointer<Threadpool> Threadpoolptr;
 typedef _MYJFM_NAMESPACE_::Downloadtask Downloadtask;
 typedef _MYJFM_NAMESPACE_::Sharedpointer<Downloadtask> Downloadtaskptr;
+typedef _MYJFM_NAMESPACE_::Extracttask Extracttask;
+typedef _MYJFM_NAMESPACE_::Sharedpointer<Extracttask> Extracttaskptr;
 typedef _MYJFM_NAMESPACE_::Scheduletask Scheduletask;
 typedef _MYJFM_NAMESPACE_::Sharedpointer<Scheduletask> Scheduletaskptr;
 
@@ -72,10 +75,14 @@ int main(int argc, char *argv[]) {
   parse_args(argc, argv);
 
   int downloader_num = glob->get_downloader_num();
+  int extractor_num = glob->get_extractor_num();
   int scheduler_num = glob->get_scheduler_num();
 
   Threadpoolptr downloader_threadpool(new Threadpool(downloader_num));
   downloader_threadpool->init();
+
+  Threadpoolptr extractor_threadpool(new Threadpool(extractor_num));
+  extractor_threadpool->init();
 
   Threadpoolptr scheduler_threadpool(new Threadpool(scheduler_num));
   scheduler_threadpool->init();
@@ -83,6 +90,11 @@ int main(int argc, char *argv[]) {
   for (i = 0; i < downloader_num; ++i) {
     Downloadtaskptr task(new Downloadtask(i));
     downloader_threadpool->add_task(task);
+  }
+
+  for (i = 0; i < extractor_num; ++i) {
+    Extracttaskptr task(new Extracttask(i));
+    extractor_threadpool->add_task(task);
   }
 
   for (i = 0; i < scheduler_num; ++i) {

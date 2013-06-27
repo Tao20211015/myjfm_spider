@@ -50,17 +50,22 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   parse_config();
 
   // initialize the url queue
-  _urls_queue = Sharedpointer<Squeue<Url> >(new Squeue<Url>());
+  _urls_queue = 
+    Sharedpointer<Squeue<Sharedpointer<Url> > >
+    (new Squeue<Sharedpointer<Url> >());
 
   int i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
-    Url url(_seed_urls[i]);
-    _urls_queue->push(url);
+    Sharedpointer<Url> url_p(new Url(_seed_urls[i]));
+    //Url url(_seed_urls[i]);
+    _urls_queue->push(url_p);
   }
 
   // initialize all the downloader queues
   for (i = 0; i < _downloader_num; ++i) {
-    _downloader_queues.push_back(Sharedpointer<Squeue<Url> >(new Squeue<Url>()));
+    _downloader_queues.push_back(
+        Sharedpointer<Squeue<Sharedpointer<Url> > >
+        (new Squeue<Sharedpointer<Url> >()));
   }
 }
 
@@ -192,11 +197,12 @@ void Global::set_depth(String& dep) {
   _depth = atoi(dep.c_str());
 }
 
-Sharedpointer<Squeue<Url> > Global::get_downloader_queue(int id) {
+Sharedpointer<Squeue<Sharedpointer<Url> > >
+Global::get_downloader_queue(int id) {
   ASSERT(_has_init);
   int downloader_num = get_downloader_num();
   if (id >= downloader_num || id < 0) {
-    Sharedpointer<Squeue<Url> > res(NULL);
+    Sharedpointer<Squeue<Sharedpointer<Url> > > res(NULL);
     return res;
   }
 

@@ -2,6 +2,7 @@
 #define _URL_H_
 
 #include "config.h"
+#include "shared.h"
 #include "site.h"
 #include "md5.h"
 
@@ -13,7 +14,7 @@ enum Protocol {
   FTP = 0x2
 };
 
-class Url {
+class Url : public Shared {
 public:
   Url(const String& url = "");
   ~Url() {}

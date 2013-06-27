@@ -22,7 +22,7 @@ HASH_TEST_BIN	= hash_test
 MD5_TEST_OBJS	= md5_test.o md5.o
 MD5_TEST_BIN	= md5_test
 
-URL_TEST_OBJS	= url_test.o url.o site.o md5.o
+URL_TEST_OBJS	= url_test.o url.o shared.o site.o md5.o
 URL_TEST_BIN	= url_test
 
 export OUTPUT_PATH=../output

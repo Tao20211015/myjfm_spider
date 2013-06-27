@@ -28,9 +28,10 @@ int Downloadtask::operator()(void* arg) {
 #endif
 
 int Downloadtask::operator()(void* arg) {
-  Sharedpointer<Squeue<Url> > queue = glob->get_downloader_queue(_id);
-  Url url;
-  queue->pop(url);
+  Sharedpointer<Squeue<Sharedpointer<Url> > > queue = 
+    glob->get_downloader_queue(_id);
+  Sharedpointer<Url> url_p;
+  queue->pop(url_p);
   return 0;
 }
 

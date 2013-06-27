@@ -19,7 +19,7 @@ public:
   int get_downloader_num();
   int get_extractor_num();
   int get_scheduler_num();
-  Sharedpointer<Squeue<Url> > get_downloader_queue(int);
+  Sharedpointer<Squeue<Sharedpointer<Url> > > get_downloader_queue(int);
 
 private:
   void load_default_file_types();
@@ -58,11 +58,11 @@ private:
   // url queue. This queue is used by all threads.
   // All download threads will produce urls, and, 
   // the scheduler threads consume the urls.
-  Sharedpointer<Squeue<Url> > _urls_queue;
+  Sharedpointer<Squeue<Sharedpointer<Url> > > _urls_queue;
 
   // downloader queue. Each download thread has one queue.
   // The queue is shared between this downloader and all scheduler threads.
-  Vector<Sharedpointer<Squeue<Url> > > _downloader_queues;
+  Vector<Sharedpointer<Squeue<Sharedpointer<Url> > > > _downloader_queues;
 };
 
 _END_MYJFM_NAMESPACE_

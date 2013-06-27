@@ -129,6 +129,7 @@ int Url::get_md5(MD5& md5) {
   md5caculator.digest(_md5);
   md5 = _md5;
   has_get_md5 = 1;
+  return 0;
 }
 
 _END_MYJFM_NAMESPACE_

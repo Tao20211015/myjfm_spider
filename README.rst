@@ -1,7 +1,9 @@
 Our myjfm_spider is a light weight configurable spider. So I want it to be a modularized software. Its architecture is illustrated in the doc/architecture.png
+
 It mainly includes four modules, as follows:
 
 1. **Downloader**: Each downloader is a thread. Its work contains:
+
         * get URLs from its own queue and,
 
         * assemble the HTTP requests and send them to the corresponding sites,

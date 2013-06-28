@@ -1,13 +1,13 @@
 #include "config.h"
 #include "url.h"
 #include "site.h"
-
+#include "sharedpointer.h"
 
 _START_MYJFM_NAMESPACE_
 
 Url::Url(const String& url) : 
-  _protocol(DUMMY), 
-  _site(Site()), 
+  _protocol(PRO_DUMMY), 
+  _site(Sharedpointer<Site>(NULL)), 
   _file(""), 
   _args(""), 
   has_get_md5(0) {
@@ -34,10 +34,10 @@ Url::Url(const String& url) :
     _file = "";
     _args = "";
     site = url.substr(protocol_pos + 3);
-    _site = Site(site);
+    _site = Sharedpointer<Site>(new Site(site));
   } else {
     site = url.substr(protocol_pos + 3, site_pos - protocol_pos - 3);
-    _site = Site(site);
+    _site = Sharedpointer<Site>(new Site(site));
     String_size_t file_pos = url.find("?", site_pos);
     if (file_pos == String_tail) {
       _file = url.substr(site_pos);
@@ -51,8 +51,10 @@ Url::Url(const String& url) :
   return;
 }
 
-Protocol Url::get_protocol() {
-  return _protocol;
+RES_CODE Url::get_protocol(Protocol& protocol) {
+  protocol = _protocol;
+
+  return S_OK;
 }
 
 /*
@@ -62,19 +64,23 @@ void Url::set_protocol(Protocol protocol) {
 }
 */
 
-void Url::get_site(Site& site) {
+RES_CODE Url::get_site(Sharedpointer<Site>& site) {
   site = _site;
+
+  return S_OK;
 }
 
 /*
-void Url::set_site(Site& site) {
+void Url::set_site(Sharedpointer<Site>& site) {
   _site = site;
   has_get_md5 = 0;
 }
 */
 
-void Url::get_file(String& file) {
+RES_CODE Url::get_file(String& file) {
   file = _file;
+
+  return S_OK;
 }
 
 /*
@@ -84,8 +90,10 @@ void Url::set_file(String& file) {
 }
 */
 
-void Url::get_args(String& args) {
+RES_CODE Url::get_args(String& args) {
   args = _args;
+
+  return S_OK;
 }
 
 /*
@@ -95,19 +103,19 @@ void Url::set_args(String& args) {
 }
 */
 
-int Url::get_md5(MD5& md5) {
+RES_CODE Url::get_md5(MD5& md5) {
   if (has_get_md5) {
     md5 = _md5;
-    return 0;
+    return S_OK;
   }
 
-  if (_protocol == DUMMY) {
+  if (_protocol == PRO_DUMMY) {
     md5 = MD5();
-    return -1;
+    return S_INVALID_URL;
   }
 
   String site_name;
-  _site.get_site_name(site_name);
+  _site->get_site_name(site_name);
 
   String file;
   get_file(file);
@@ -129,7 +137,8 @@ int Url::get_md5(MD5& md5) {
   md5caculator.digest(_md5);
   md5 = _md5;
   has_get_md5 = 1;
-  return 0;
+
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

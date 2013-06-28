@@ -12,9 +12,9 @@ int main() {
   Sharedpointerhash htablep(new Stringhash(10));
   //Stringhash htable(10);
   String str("hashtable");
-  assert(htablep->is_exist(str) == 0);
-  assert(htablep->insert(str) == 0);
-  assert(htablep->is_exist(str) == 1);
+  assert(htablep->is_exist(str) == S_NOT_EXIST);
+  assert(htablep->insert(str) == S_OK);
+  assert(htablep->is_exist(str) == S_EXIST);
   return 0;
 }
 

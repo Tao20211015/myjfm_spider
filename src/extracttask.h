@@ -10,7 +10,8 @@ class Extracttask : public Task {
 public:
   Extracttask(int id);
   ~Extracttask();
-  virtual int operator()(void* arg = NULL);
+  virtual RES_CODE operator()(void* arg = NULL);
+
 private:
   int _id;
 };

@@ -10,7 +10,13 @@ _START_MYJFM_NAMESPACE_
 
 class Mutex {
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
-  if (_has_init && func(&_mutex) != 0) { \
+  if (!_has_init) { \
+    Cerr << "[FATAL] mutex has not been initialized" << Endl; \
+    abort(); \
+  } \
+  \
+  if (func(&_mutex) != 0) { \
+    Cerr << "[FATAL] " << #func << "() failed" << Endl; \
     abort(); \
   } \
 } while (0)
@@ -27,22 +33,29 @@ public:
     RUN_FUNC_IF_HAS_INIT(pthread_mutex_destroy);
   }
 
-  inline void lock() {
+  inline RES_CODE lock() {
     RUN_FUNC_IF_HAS_INIT(pthread_mutex_lock);
+
+    return S_OK;
   }
 
-  // success if return 0
-  // fail otherwise
-  inline int try_lock() {
+  inline RES_CODE try_lock() {
     if (!_has_init) {
-      return 1;
+      Cerr << "[FATAL] mutex has not been initialized" << Endl;
+      abort();
     }
 
-    return pthread_mutex_trylock(&_mutex);
+    if (pthread_mutex_trylock(&_mutex) == 0) {
+      return S_OK;
+    } else {
+      return S_FAIL;
+    }
   }
 
-  inline void unlock() {
+  inline RES_CODE unlock() {
     RUN_FUNC_IF_HAS_INIT(pthread_mutex_unlock);
+
+    return S_OK;
   }
 
 private:

@@ -11,7 +11,7 @@ class Threadpool;
 class Threadtask : public Task {
 public:
   Threadtask(Threadpool* threadpool = NULL);
-  virtual int operator()(void* arg = NULL);
+  virtual RES_CODE operator()(void* arg = NULL);
 
 private:
   Threadpool* _threadpool;

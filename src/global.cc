@@ -7,6 +7,14 @@
 
 _START_MYJFM_NAMESPACE_
 
+#define CHECK_HAS_INIT() \
+  do { \
+    if (!_has_init) { \
+      Cerr << "[FATAL] glob has not been initialized" << Endl; \
+      abort(); \
+    } \
+  } while (0)
+
 Global::Global() : 
   _has_init(false), 
   _config_file(""), 
@@ -14,23 +22,23 @@ Global::Global() :
   _depth(5), 
   _downloader_num(5), 
   _extractor_num(5), 
-  _scheduler_num(1)
-{
+  _scheduler_num(1) {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
 }
 
-Global::~Global() {
-}
+Global::~Global() {}
 
-void Global::init(String& v_cur_path, String& config_file_name) {
+RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   if (_has_init) {
-    return;
+    Cerr << "[ERROR] init() failed. the glob has been initialized" << Endl;
+    return S_HAS_INIT;
   }
 
   if (config_file_name == "") {
-    exit(1);
+    Cerr << "[FATAL] init() failed. config_file_name is empty" << Endl;
+    abort();
   }
 
   // It should be initialized here and JUST ONCE!!!
@@ -57,7 +65,6 @@ void Global::init(String& v_cur_path, String& config_file_name) {
   int i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
     Sharedpointer<Url> url_p(new Url(_seed_urls[i]));
-    //Url url(_seed_urls[i]);
     _urls_queue->push(url_p);
   }
 
@@ -67,32 +74,38 @@ void Global::init(String& v_cur_path, String& config_file_name) {
         Sharedpointer<Squeue<Sharedpointer<Url> > >
         (new Squeue<Sharedpointer<Url> >()));
   }
+
+  return S_OK;
 }
 
-void Global::load_default_file_types() {
+RES_CODE Global::load_default_file_types() {
   _file_types.clear();
   _file_types.push_back(".htm");
   _file_types.push_back(".html");
+  return S_OK;
 }
 
-void Global::parse_config() {
-  ASSERT(_has_init);
+RES_CODE Global::parse_config() {
+  if (!_has_init) {
+    Cerr << "[FATAL] glob has not been initialized" << Endl;
+    abort();
+  }
 
   if (_config_file == "") {
-    exit(1);
+    Cerr << "[FATAL] parse_config() failed. _config_file is empty" << Endl;
+    abort();
   } else {
     FILE* config_file_p = fopen(_config_file.c_str(), "r");
 
     if (config_file_p == NULL) {
-      Cerr << "[Error] Configure file in your home directory can't be read." 
-        << Endl << "[Error] You must specify the correct configure file." 
-        << Endl << "[Error] Exit..." << Endl;
-      exit(1);
+      Cerr << "[FATAL] fopen() failed." << Endl;
+      Cerr << "[FATAL] can not open the file " << _config_file << Endl;
+      abort();
     }
 
 #define MAX_BUF_LEN 1024
     char buffer[MAX_BUF_LEN];
-    while (fgets(buffer, MAX_BUF_LEN - 1, config_file_p)) {
+    while (fgets(buffer, MAX_BUF_LEN - 1, config_file_p)) { 
 #undef MAX_BUF_LEN
       Utility::trim(buffer);
       if (buffer[0] == '\0' || buffer[0] == '#') {
@@ -129,85 +142,117 @@ void Global::parse_config() {
 
     if (_seed_urls.empty()) {
       fclose(config_file_p);
+      Cerr << "[FATAL] The _seed_urls is empty. Stop crawling" << Endl;
       exit(1);
     }
 
     fclose(config_file_p);
   }
+
+  return S_OK;
 }
 
-void Global::set_seed_urls(Vector<String>& seed_urls) {
+RES_CODE Global::set_seed_urls(Vector<String>& seed_urls) {
   _seed_urls.clear();
+
   int i;
   for (i = 1; i < seed_urls.size(); ++i) {
     _seed_urls.push_back(seed_urls[i]);
   }
+
+  return S_OK;
 }
 
-void Global::set_file_types(Vector<String>& file_types) {
+RES_CODE Global::set_file_types(Vector<String>& file_types) {
   _file_types.clear();
+
   int i;
   for (i = 1; i < file_types.size(); ++i) {
     _file_types.push_back(file_types[i]);
   }
+
+  return S_OK;
 }
 
-void Global::set_downloader_num(String& downloader_num) {
-  ASSERT(_has_init);
+RES_CODE Global::set_downloader_num(String& downloader_num) {
+  CHECK_HAS_INIT();
   _downloader_num = atoi(downloader_num.c_str());
+
+  return S_OK;
 }
 
-int Global::get_downloader_num() {
-  ASSERT(_has_init);
-  return _downloader_num;
+RES_CODE Global::get_downloader_num(int& num) {
+  CHECK_HAS_INIT();
+  num = _downloader_num;
+
+  return S_OK;
 }
 
-void Global::set_extractor_num(String& extractor_num) {
-  ASSERT(_has_init);
+RES_CODE Global::set_extractor_num(String& extractor_num) {
+  CHECK_HAS_INIT();
   _extractor_num = atoi(extractor_num.c_str());
 }
 
-int Global::get_extractor_num() {
-  ASSERT(_has_init);
-  return _extractor_num;
+RES_CODE Global::get_extractor_num(int& num) {
+  CHECK_HAS_INIT();
+  num = _extractor_num;
+
+  return S_OK;
 }
 
-void Global::set_scheduler_num(String& scheduler_num) {
-  ASSERT(_has_init);
+RES_CODE Global::set_scheduler_num(String& scheduler_num) {
+  CHECK_HAS_INIT();
   _scheduler_num = atoi(scheduler_num.c_str());
+
+  return S_OK;
 }
 
-int Global::get_scheduler_num() {
-  ASSERT(_has_init);
-  return _scheduler_num;
+RES_CODE Global::get_scheduler_num(int& num) {
+  CHECK_HAS_INIT();
+  num = _scheduler_num;
+
+  return S_OK;
 }
 
-void Global::set_save_path(String& path) {
-  ASSERT(_has_init);
+RES_CODE Global::set_save_path(String& path) {
+  CHECK_HAS_INIT();
   _save_path = path;
+
+  return S_OK;
 }
 
-void Global::get_save_path(String& save_path) {
-  ASSERT(_has_init);
+RES_CODE Global::get_save_path(String& save_path) {
+  CHECK_HAS_INIT();
   save_path = _save_path;
+
+  return S_OK;
 }
 
-void Global::set_depth(String& dep) {
-  ASSERT(_has_init);
+RES_CODE Global::set_depth(String& dep) {
+  CHECK_HAS_INIT();
   _depth = atoi(dep.c_str());
+
+  return S_OK;
 }
 
-Sharedpointer<Squeue<Sharedpointer<Url> > >
-Global::get_downloader_queue(int id) {
-  ASSERT(_has_init);
-  int downloader_num = get_downloader_num();
+RES_CODE Global::get_downloader_queue(int id, 
+    Sharedpointer<Squeue<Sharedpointer<Url> > >& queue) {
+  CHECK_HAS_INIT();
+
+  int downloader_num = 0;
+  get_downloader_num(downloader_num);
+
   if (id >= downloader_num || id < 0) {
-    Sharedpointer<Squeue<Sharedpointer<Url> > > res(NULL);
-    return res;
+    queue = Sharedpointer<Squeue<Sharedpointer<Url> > >(NULL);
+    return S_OUT_RANGE;
   }
 
-  return _downloader_queues[id];
+  queue = _downloader_queues[id];
+
+  return S_OK;
 }
+
+#undef CHECK_HAS_INIT
 
 _END_MYJFM_NAMESPACE_
 

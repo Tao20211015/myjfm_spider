@@ -10,10 +10,12 @@ _START_MYJFM_NAMESPACE_
 class Shared {
 public:
   virtual ~Shared() {};
-  void add_ref();
+  RES_CODE add_ref();
   unsigned int dec_ref(bool* flag = NULL);
+
 protected:
   Shared();
+
 private:
   unsigned int _count;
   Mutex _mutex;

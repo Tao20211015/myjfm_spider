@@ -10,7 +10,7 @@ class Scheduletask : public Task {
 public:
   Scheduletask(int);
   ~Scheduletask();
-  virtual int operator()(void* arg = NULL);
+  virtual RES_CODE operator()(void* arg = NULL);
 
 private:
   int _id;

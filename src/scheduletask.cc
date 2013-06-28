@@ -15,19 +15,19 @@ Scheduletask::Scheduletask(int id) : _id(id) {}
 
 Scheduletask::~Scheduletask() {}
 
-int Scheduletask::operator()(void* arg) {
+RES_CODE Scheduletask::operator()(void* arg) {
   int i = 0;
   for (;;) {
     Cout << "[" << i++ << "] [Scheduler]: I'm thread " << _id << Endl;
     sleep(1);
   }
 
-  return 0;
+  return S_OK;
 }
 
 #if 0
-int Scheduletask::operator()(void* arg) {
-  return 0;
+RES_CODE Scheduletask::operator()(void* arg) {
+  return S_OK;
 }
 #endif
 

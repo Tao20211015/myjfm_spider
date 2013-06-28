@@ -9,9 +9,9 @@ _START_MYJFM_NAMESPACE_
 class Printtask : public Task {
 public:
   Printtask(String& value) : _value(value) {}
-  virtual int operator()(void* arg = NULL) {
+  virtual RES_CODE operator()(void* arg = NULL) {
     Cout << _value << Endl;
-    return 0;
+    return S_OK;
   }
 
 private:
@@ -43,6 +43,7 @@ int main() {
   String string2 = "This is the second task";
   Printtask_p task1(new Printtask(string1));
   Printtask_p task2(new Printtask(string2));
+  threadpool->add_task(task1);
   threadpool->add_task(task1);
   threadpool->add_task(task2);
 

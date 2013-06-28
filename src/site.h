@@ -2,23 +2,33 @@
 #define _SITE_H_
 
 #include "config.h"
+#include "shared.h"
 
 _START_MYJFM_NAMESPACE_
 
-class Site {
+class Site : public Shared {
 public:
   Site(const String& site_name = "");
   ~Site();
-  void get_site_name(String& site_name);
-  void get_all_ips(Vector<String>& ips);
-  void get_one_ip(String& ip);
-  void get_first_ip(String& ip);
-  void insert_ip(const String& ip);
-  void insert_ips(const Vector<String>& ips);
+
+  RES_CODE get_site_name(String&);
+  RES_CODE get_all_ips(Vector<String>&);
+  RES_CODE get_one_ip(String&);
+  RES_CODE get_first_ip(String&);
+  RES_CODE get_ip_type(IPTYPE&);
+
+  // get ip addresses from DNS cache
+  RES_CODE set_ips(Vector<String>& ips);
+
+  // get ip addresses from DNS query
+  // although we provide this routine, you'd better not use it
+  RES_CODE dns();
 
 private:
+  int _has_get_ips;
   String _site_name;
   Vector<String> _ips;
+  IPTYPE _ip_type;
 };
 
 _END_MYJFM_NAMESPACE_

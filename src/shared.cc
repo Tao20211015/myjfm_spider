@@ -6,9 +6,11 @@ _START_MYJFM_NAMESPACE_
 
 Shared::Shared() : _count(0) {}
 
-void Shared::add_ref() {
+RES_CODE Shared::add_ref() {
   Scopeguard<Mutex> t(&_mutex);
   _count++;
+
+  return S_OK;
 }
 
 // the flag indicates whether the _count is decreased successfully

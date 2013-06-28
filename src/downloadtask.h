@@ -3,6 +3,7 @@
 
 #include "config.h"
 #include "task.h"
+#include "sharedpointer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -10,10 +11,11 @@ class Downloadtask : public Task {
 public:
   Downloadtask(int id);
   ~Downloadtask();
-  virtual int operator()(void* arg = NULL);
+  virtual RES_CODE operator()(void* arg = NULL);
 
 private:
   int _id;
+  Sharedpointer<Squeue<Sharedpointer<Url> > > _url_queue;
 };
 
 _END_MYJFM_NAMESPACE_

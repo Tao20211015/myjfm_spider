@@ -6,7 +6,7 @@ LDFLAGS	= -lpthread
 
 OBJS		= myjfm_spider.o utility.o global.o shared.o \
 					thread.o threadpool.o threadtask.o \
-					site.o url.o md5.o \
+					site.o url.o md5.o dnscache.o \
 					downloadtask.o extracttask.o scheduletask.o
 BIN			= myjfm_spider
 
@@ -116,6 +116,9 @@ md5.o : md5.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 md5_test.o : md5_test.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+dnscache.o : dnscache.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 downloadtask.o : downloadtask.cc

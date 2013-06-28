@@ -20,24 +20,31 @@ public:
 
   // can not use reference
   // because the caller may pass stack variable to this callee
-  void push(T t) {
+  RES_CODE push(T t) {
     Scopeguard<Mutex> lock(&_mutex);
     _queue.push(t);
     _cond.signal();
+
+    return S_OK;
   }
 
-  void pop(T& t) {
+  RES_CODE pop(T& t) {
     Scopeguard<Mutex> lock(&_mutex);
     while (_queue.empty()) {
       _cond.wait();
     }
+
     t = _queue.front();
     _queue.pop();
+
+    return S_OK;
   }
 
-  int size() {
+  RES_CODE size(int& s) {
     Scopeguard<Mutex> lock(&_mutex);
-    return _queue.size();
+    s = _queue.size();
+
+    return S_OK;
   }
 
 private:

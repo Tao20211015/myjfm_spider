@@ -22,6 +22,7 @@ public:
       _lock->unlock();
     }
   }
+
 private:
   Lock* _lock;
 };

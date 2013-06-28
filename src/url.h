@@ -5,37 +5,32 @@
 #include "shared.h"
 #include "site.h"
 #include "md5.h"
+#include "sharedpointer.h"
 
 _START_MYJFM_NAMESPACE_
-
-enum Protocol {
-  DUMMY = 0x0, 
-  HTTP = 0x1,
-  FTP = 0x2
-};
 
 class Url : public Shared {
 public:
   Url(const String& url = "");
   ~Url() {}
 
-  Protocol get_protocol();
+  RES_CODE get_protocol(Protocol&);
   //void set_protocol(Protocol);
 
-  void get_site(Site&);
+  RES_CODE get_site(Sharedpointer<Site>&);
   //void set_site(Site&);
 
-  void get_file(String&);
+  RES_CODE get_file(String&);
   //void set_file(String&);
 
-  void get_args(String&);
+  RES_CODE get_args(String&);
   //void set_args(String&);
 
-  int get_md5(MD5&);
+  RES_CODE get_md5(MD5&);
 
 private:
   Protocol _protocol;
-  Site _site;
+  Sharedpointer<Site> _site;
   String _file;
   String _args;
 

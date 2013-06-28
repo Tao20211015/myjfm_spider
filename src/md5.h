@@ -26,28 +26,28 @@ public:
   typedef unsigned long Ulong;
 
   MD5caculator();
-  MD5caculator(const void* input, size_t length);
-	MD5caculator(const String& str);
-	MD5caculator(Ifstream& in);
+  MD5caculator(const void*, size_t);
+	MD5caculator(const String&);
+	MD5caculator(Ifstream&);
 
-	void update(const void* input, size_t length);
-	void update(const String& str);
-	void update(Ifstream& in);
-	void digest(MD5& md5);
-	String to_string();
-	void reset();
+	RES_CODE update(const void*, size_t);
+	RES_CODE update(const String&);
+	RES_CODE update(Ifstream&);
+	RES_CODE digest(MD5& md5);
+	RES_CODE to_string(String&);
+	RES_CODE reset();
 
 private:
 	MD5caculator(const MD5caculator&);
 	MD5caculator& operator=(const MD5caculator&);
 
-	void update(const Byte* input, size_t length);
-	void final();
+	RES_CODE update(const Byte*, size_t);
+	RES_CODE final();
 	const Byte* digest();
-	void transform(const Byte block[64]);
-	void encode(const Ulong* input, Byte* output, size_t length);
-	void decode(const Byte* input, Ulong* output, size_t length);
-	String bytes_to_hexstring(const Byte* input, size_t length);
+	RES_CODE transform(const Byte block[64]);
+	RES_CODE encode(const Ulong*, Byte*, size_t);
+	RES_CODE decode(const Byte*, Ulong*, size_t);
+	RES_CODE bytes_to_hexstring(const Byte*, size_t, String&);
 
 	// state (ABCD)
 	Ulong _state[4];

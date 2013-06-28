@@ -11,28 +11,20 @@ extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-Downloadtask::Downloadtask(int id) : _id(id) {}
+Downloadtask::Downloadtask(int id) : 
+  _id(id), 
+  _url_queue(Sharedpointer<Squeue<Sharedpointer<Url> > >(NULL))
+{}
 
 Downloadtask::~Downloadtask() {}
 
-#if 0
-int Downloadtask::operator()(void* arg) {
-  int i = 0;
-  for (;;) {
-    Cout << "[" << i++ << "] [Downloader]: I'm thread " << _id << Endl;
-    sleep(1);
-  }
+RES_CODE Downloadtask::operator()(void* arg) {
+   glob->get_downloader_queue(_id, _url_queue);
 
-  return 0;
-}
-#endif
-
-int Downloadtask::operator()(void* arg) {
-  Sharedpointer<Squeue<Sharedpointer<Url> > > queue = 
-    glob->get_downloader_queue(_id);
   Sharedpointer<Url> url_p;
-  queue->pop(url_p);
-  return 0;
+  _url_queue->pop(url_p);
+
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

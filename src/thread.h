@@ -31,23 +31,23 @@ public:
   ~Thread();
 
   // start the execution
-  int start();
+  RES_CODE start();
 
   // stop the execution
   // invoke the pthread_cancel() and return immediately
   // do not wait the thread finishing
-  int stop_nonblocking();
+  RES_CODE stop_nonblocking();
 
   // stop the execution
   // invoke the pthread_cancel() and then invoke the
   // pthread_join(), so will block until this thread finished
-  int stop_blocking();
+  RES_CODE stop_blocking();
 
   // wait this thread until exiting
-  int join();
+  RES_CODE join();
 
   // get the thread id via pthread_self()
-  pthread_t gettid() const;
+  RES_CODE gettid(pthread_t&) const;
 
 private:
   static void* thread_core_shell(void*);

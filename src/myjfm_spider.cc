@@ -27,25 +27,27 @@ typedef _MYJFM_NAMESPACE_::Sharedpointer<Extracttask> Extracttaskptr;
 typedef _MYJFM_NAMESPACE_::Scheduletask Scheduletask;
 typedef _MYJFM_NAMESPACE_::Sharedpointer<Scheduletask> Scheduletaskptr;
 
-void usage(char *argv0) {
+RES_CODE usage(char *argv0) {
   Cerr << "[Usage] " << argv0 << " [-f configure_file_name]" << Endl;
+  return S_OK;
 }
 
-static void load_config(String cur_path, String config_file_name) {
+static RES_CODE load_config(String cur_path, String config_file_name) {
   int res = access(config_file_name.c_str(), F_OK);
+
   if (res != 0) {
-    Cerr << "[Error] The configure file '" 
-      << config_file_name << "'is not exist." << Endl
-      << "[Error] You must specify the configure file using -f option or " << 
+    Cerr << "[FATAL] The configure file '" << config_file_name 
+      << "'is not exist." << Endl 
+      << "[FATAL] You must specify the configure file using -f option or " << 
       "put the configure file into current directory." << Endl;
     exit(1);
   }
 
   // init the object
-  glob->init(cur_path, config_file_name);
+  return glob->init(cur_path, config_file_name);
 }
 
-void parse_args(int argc, char *argv[]) {
+RES_CODE parse_args(int argc, char *argv[]) {
 #define MAX_BUF_LEN 1024
   char buffer[MAX_BUF_LEN];
   getcwd(buffer, MAX_BUF_LEN);
@@ -66,6 +68,8 @@ void parse_args(int argc, char *argv[]) {
     usage(argv[0]);
     exit(1);
   }
+
+  return S_OK;
 }
 
 int main(int argc, char *argv[]) {
@@ -74,9 +78,14 @@ int main(int argc, char *argv[]) {
 
   parse_args(argc, argv);
 
-  int downloader_num = glob->get_downloader_num();
-  int extractor_num = glob->get_extractor_num();
-  int scheduler_num = glob->get_scheduler_num();
+  int downloader_num = 0;
+  glob->get_downloader_num(downloader_num);
+
+  int extractor_num = 0;
+  glob->get_extractor_num(extractor_num);
+
+  int scheduler_num = 0;
+  glob->get_scheduler_num(scheduler_num);
 
   Threadpoolptr downloader_threadpool(new Threadpool(downloader_num));
   downloader_threadpool->init();

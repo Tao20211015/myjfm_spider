@@ -22,15 +22,15 @@ public:
   Threadpool(int n);
   ~Threadpool();
 
-  int init();
+  RES_CODE init();
 
-  void stop();
+  RES_CODE stop();
 
-  size_t size();
+  RES_CODE size(int&);
 
-  void add_task(Sharedpointer<Task> task);
+  RES_CODE add_task(Sharedpointer<Task> task);
 
-  void get_task(Sharedpointer<Task>& task);
+  RES_CODE get_task(Sharedpointer<Task>& task);
 
 private:
   int _n;
@@ -38,8 +38,7 @@ private:
   Vector< Sharedpointer<Thread> > _threads;
   Squeue< Sharedpointer<Task> > _tasks;
 
-  // return: 0, success; 1, error
-  int add_worker();
+  RES_CODE add_worker();
 };
 
 _END_MYJFM_NAMESPACE_

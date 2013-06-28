@@ -10,7 +10,7 @@ Threadtask::Threadtask(Threadpool* threadpool) : _threadpool(threadpool) {}
 
 // This functor get the task from the _tasks
 // It never stops unless the parent thread canceled it
-int Threadtask::operator()(void* arg) {
+RES_CODE Threadtask::operator()(void* arg) {
   if (_threadpool) {
     for(;;) {
       Sharedpointer<Task> task;
@@ -21,7 +21,8 @@ int Threadtask::operator()(void* arg) {
       }
     }
   }
-  return 0;
+
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

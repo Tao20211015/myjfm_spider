@@ -35,6 +35,7 @@ public:
     }
 
     hash_size_type h = 0;
+
     while (*s) {
       h = 5 * h + *s++;
     }
@@ -49,10 +50,12 @@ class Stringhashfunction : Hashfunction<String> {
 public:
   hash_size_type operator()(String& s) {
     hash_size_type h = 0;
+
     int i = 0;
     for (; i < s.length(); ++i) {
       h = 5 * h + s[i];
     }
+
     return h;
   }
 
@@ -133,20 +136,20 @@ class Ulonghashfunction : Hashfunction<unsigned long> {
 
 template <class T>
 class _hash_list_node {
-  public:
-    _hash_list_node(const T& value) {
-      _next = NULL;
-      // copy constructor
-      _value = new T(value);
-    }
+public:
+  _hash_list_node(const T& value) {
+    _next = NULL;
+    // copy constructor
+    _value = new T(value);
+  }
 
-    ~_hash_list_node() {
-      _next = NULL;
-      delete _value;
-    }
-
-    _hash_list_node *_next;
-    T* _value;
+  ~_hash_list_node() {
+    _next = NULL;
+    delete _value;
+  }
+  
+  _hash_list_node *_next;
+  T* _value;
 };
 
 // the class T should has overloaded the operator==
@@ -182,11 +185,13 @@ public:
     for (i = 0; i < _buckets_size; ++i) {
       _rwlocks[i].wrlock();
       Hashnode* p = _buckets[i];
+
       while (p) {
         Hashnode* q = p;
         p = p->_next;
         delete q;
       }
+
       _buckets[i] = NULL;
       _rwlocks[i].unlock();
     }
@@ -195,23 +200,29 @@ public:
     _buckets_size = 0;
     delete []_rwlocks;
   }
+  
+  // for consistency
+  RES_CODE size(hash_size_type& s) {
+    s = _buckets_size;
 
-  hash_size_type size() {
-    return _buckets_size;
+    return S_OK;
   }
 
-  int insert(T& value) {
+  RES_CODE insert(T& value) {
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
       _buckets[key] = new Hashnode(value);
-      return 0;
+
+      return S_OK;
     }
 
     Hashnode* nodep = _buckets[key];
+
     while (nodep) {
       if (*(nodep->_value) == value) {
-        return 1;
+        return S_ALREADY_EXIST;
       }
+
       nodep = nodep->_next;
     }
 
@@ -219,10 +230,10 @@ public:
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
 
-    return 0;
+    return S_OK;
   }
 
-  int insert_safe(T& value) {
+  RES_CODE insert_safe(T& value) {
     hash_size_type key = get_key(value);
 
     _rwlocks[key].wrlock();
@@ -230,14 +241,14 @@ public:
     if (_buckets[key] == NULL) {
       _buckets[key] = new Hashnode(value);
       _rwlocks[key].unlock();
-      return 0;
+      return S_OK;
     }
 
     Hashnode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
         _rwlocks[key].unlock();
-        return 1;
+        return S_ALREADY_EXIST;
       }
 
       nodep = nodep->_next;
@@ -248,35 +259,35 @@ public:
     _buckets[key] = nodep;
 
     _rwlocks[key].unlock();
-    return 0;
+    return S_OK;
   }
 
-  int is_exist(T& value) {
+  RES_CODE is_exist(T& value) {
     hash_size_type key = get_key(value);
 
     if (_buckets[key] == NULL) {
-      return 0;
+      return S_NOT_EXIST;
     }
 
     Hashnode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
-        return 1;
+        return S_EXIST;
       }
 
       nodep = nodep->_next;
     }
 
-    return 0;
+    return S_NOT_EXIST;
   }
 
-  int is_exist_safe(T& value) {
+  RES_CODE is_exist_safe(T& value) {
     hash_size_type key = get_key(value);
     _rwlocks[key].rdlock();
 
     if (_buckets[key] == NULL) {
       _rwlocks[key].unlock();
-      return 0;
+      return S_NOT_EXIST;
     }
 
     Hashnode* nodep = _buckets[key];
@@ -284,13 +295,13 @@ public:
     while (nodep) {
       if (*(nodep->_value) == value) {
         _rwlocks[key].unlock();
-        return 1;
+        return S_EXIST;
       }
       nodep = nodep->_next;
     }
 
     _rwlocks[key].unlock();
-    return 0;
+    return S_NOT_EXIST;
   }
 
 private:

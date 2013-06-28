@@ -10,7 +10,7 @@ _START_MYJFM_NAMESPACE_
 // that the threads use to execute
 class Task : public Shared {
 public:
-  virtual int operator()(void* arg = NULL) = 0;
+  virtual RES_CODE operator()(void* arg = NULL) = 0;
   virtual ~Task() {}
 };
 

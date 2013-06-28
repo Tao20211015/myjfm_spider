@@ -13,23 +13,27 @@ class Global {
 public:
   Global();
   ~Global();
-  void init(String& v_cur_path, String& config_file_name);
-  void parse_config();
-  void get_save_path(String&);
-  int get_downloader_num();
-  int get_extractor_num();
-  int get_scheduler_num();
-  Sharedpointer<Squeue<Sharedpointer<Url> > > get_downloader_queue(int);
+
+  RES_CODE init(String& v_cur_path, String& config_file_name);
+  RES_CODE parse_config();
+
+  // for consistency, we use reference to bring back what we want
+  RES_CODE get_save_path(String&);
+  RES_CODE get_downloader_num(int&);
+  RES_CODE get_extractor_num(int&);
+  RES_CODE get_scheduler_num(int&);
+  RES_CODE get_downloader_queue(int, 
+      Sharedpointer<Squeue<Sharedpointer<Url> > >&);
 
 private:
-  void load_default_file_types();
-  void set_seed_urls(Vector<String>& seed_urls);
-  void set_file_types(Vector<String>& file_types);
-  void set_save_path(String& path);
-  void set_depth(String& dep);
-  void set_downloader_num(String& downloader_num);
-  void set_extractor_num(String& extractor_num);
-  void set_scheduler_num(String& scheduler_num);
+  RES_CODE load_default_file_types();
+  RES_CODE set_seed_urls(Vector<String>& seed_urls);
+  RES_CODE set_file_types(Vector<String>& file_types);
+  RES_CODE set_save_path(String& path);
+  RES_CODE set_depth(String& dep);
+  RES_CODE set_downloader_num(String& downloader_num);
+  RES_CODE set_extractor_num(String& extractor_num);
+  RES_CODE set_scheduler_num(String& scheduler_num);
 
   // current work path
   String _cur_path;

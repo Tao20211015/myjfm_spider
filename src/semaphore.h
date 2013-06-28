@@ -11,7 +11,13 @@ _START_MYJFM_NAMESPACE_
 // This is the semaphore class which can only be shared between threads
 class Semaphore {
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
-  if (_has_init && func(&_semaphore) != 0) { \
+  if (!_has_init) { \
+    Cerr << "[FATAL] semaphore has not been initialized" << Endl; \
+    abort(); \
+  } \
+  \
+  if (func(&_semaphore) != 0) { \
+    Cerr << "[FATAL] " << #func << "() failed" << Endl; \
     abort(); \
   } \
 } while (0)
@@ -32,12 +38,16 @@ public:
     RUN_FUNC_IF_HAS_INIT(sem_destroy);
   }
 
-  inline void wait() {
+  inline RES_CODE wait() {
     RUN_FUNC_IF_HAS_INIT(sem_wait);
+
+    return S_OK;
   }
 
-  inline void post() {
+  inline RES_CODE post() {
     RUN_FUNC_IF_HAS_INIT(sem_post);
+
+    return S_OK;
   }
 
 private:

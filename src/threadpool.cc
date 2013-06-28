@@ -13,54 +13,64 @@ Threadpool::~Threadpool() {
   stop();
 }
 
-int Threadpool::init() {
+RES_CODE Threadpool::init() {
   int retry = 0;
+
   if (_state == CONSTRUCTED) {
     int i;
     for (i = 0; i < _n; ++i) {
       if (add_worker()) {
         if (retry >= MAX_RETRY) {
-          return 1;
+          return S_FAIL;
         } else {
           retry++;
           i--;
         }
       }
     }
-    return 0;
+    return S_OK;
   }
-  return 1;
+
+  return S_NOT_CONSTRUCTED;
 }
 
-void Threadpool::stop() {
+RES_CODE Threadpool::stop() {
   int i;
   for (i = 0; i < _threads.size(); ++i) {
     _threads[i]->stop_blocking();
   }
+
+  return S_OK;
 }
 
-size_t Threadpool::size() {
-  return _n;
+RES_CODE Threadpool::size(int& s) {
+  s = _n;
+  return S_OK;
 }
 
-void Threadpool::add_task(Sharedpointer<Task> task) {
+RES_CODE Threadpool::add_task(Sharedpointer<Task> task) {
   if (!task.is_null()) {
-    _tasks.push(task);
+    return _tasks.push(task);
   }
+
+  return S_BAD_ARG;
 }
 
-void Threadpool::get_task(Sharedpointer<Task>& task) {
-  _tasks.pop(task);
+RES_CODE Threadpool::get_task(Sharedpointer<Task>& task) {
+  return _tasks.pop(task);
 }
 
-int Threadpool::add_worker() {
+RES_CODE Threadpool::add_worker() {
   Sharedpointer<Threadtask> threadtask(new Threadtask(this));
   Sharedpointer<Thread> thread = Threadfactory::create_thread(threadtask);
+
   if (thread.is_null()) {
-    return 1;
+    return S_THREAD_CREATE_FAILED;
   }
+
   _threads.push_back(thread);
-  return 0;
+
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

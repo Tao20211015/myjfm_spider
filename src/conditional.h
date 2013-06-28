@@ -21,6 +21,7 @@ public:
     _state = CONSTRUCTED;
     _mutex = NULL;
     if (pthread_cond_init(&_cond, NULL)) {
+      Cerr << "[FATAL] pthread_cond_init() failed" << Endl;
       abort();
     }
   }
@@ -28,30 +29,39 @@ public:
   ~Conditional() {
     if (_state != UNCONSTRUCTED && 
         pthread_cond_destroy(&_cond)) {
+      Cerr << "[FATAL] pthread_cond_destroy() failed" << Endl;
       abort();
     }
   }
 
-  inline void init(Mutex* mutex) {
+  inline RES_CODE init(Mutex* mutex) {
     if (!mutex) {
+      Cerr << "[FATAL] NULL pointer! Conditional.init() failed" << Endl;
       abort();
     }
     _state = INITIALIZED;
     _mutex = mutex;
+    return S_OK;
   }
 
-  inline void wait() {
+  inline RES_CODE wait() {
     if (_state == INITIALIZED && 
         pthread_cond_wait(&_cond, &(_mutex->_mutex))) {
+      Cerr << "[FATAL] pthread_cond_wait() failed" << Endl;
       abort();
     }
+
+    return S_OK;
   }
 
-  inline void signal() {
+  inline RES_CODE signal() {
     if (_state == INITIALIZED && 
         pthread_cond_signal(&_cond)) {
+      Cerr << "[FATAL] pthread_cond_signal() failed" << Endl;
       abort();
     }
+
+    return S_OK;
   }
 
 private:

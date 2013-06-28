@@ -14,6 +14,7 @@ class Sharedpointer {
     _p->add_ref(); \
   } \
 } while (0)
+
 public:
   Sharedpointer(const Sharedpointer& p) : _p(p._p) {
     INC_REF;
@@ -69,8 +70,10 @@ public:
   T& operator*() const {
     return *_p;
   }
+
 private:
   T* _p;
+
 #undef INC_REF
 };
 

@@ -10,7 +10,13 @@ _START_MYJFM_NAMESPACE_
 
 class RWlock {
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
-  if (_has_init && func(&_rwlock) != 0) { \
+  if (!_has_init) { \
+    Cerr << "[FATAL] rwlock has not been initialized" << Endl; \
+    abort(); \
+  } \
+  \
+  if (func(&_rwlock) != 0) { \
+    Cerr << "[FATAL] " << #func << "() failed" << Endl; \
     abort(); \
   } \
 } while (0)
@@ -25,36 +31,48 @@ public:
     RUN_FUNC_IF_HAS_INIT(pthread_rwlock_destroy);
   }
 
-  inline void rdlock() {
+  inline RES_CODE rdlock() {
     RUN_FUNC_IF_HAS_INIT(pthread_rwlock_rdlock);
+
+    return S_OK;
   }
 
-  inline void wrlock() {
+  inline RES_CODE wrlock() {
     RUN_FUNC_IF_HAS_INIT(pthread_rwlock_wrlock);
+
+    return S_OK;
   }
 
-  // success if return 0
-  // fail otherwise
-  inline int try_rdlock() {
+  inline RES_CODE try_rdlock() {
     if (!_has_init) {
-      return 1;
+      Cerr << "[FATAL] rwlock has not been initialized" << Endl;
+      abort();
     }
 
-    return pthread_rwlock_tryrdlock(&_rwlock);
+    if (pthread_rwlock_tryrdlock(&_rwlock) == 0) {
+      return S_OK;
+    } else {
+      return S_FAIL;
+    }
   }
 
-  // success if return 0
-  // fail otherwise
-  inline int try_wrlock() {
+  inline RES_CODE try_wrlock() {
     if (!_has_init) {
-      return 1;
+      Cerr << "[FATAL] rwlock has not been initialized" << Endl;
+      abort();
     }
 
-    return pthread_rwlock_trywrlock(&_rwlock);
+    if (pthread_rwlock_trywrlock(&_rwlock) == 0) {
+      return S_OK;
+    } else {
+      return S_FAIL;
+    }
   }
 
-  inline void unlock() {
+  inline RES_CODE unlock() {
     RUN_FUNC_IF_HAS_INIT(pthread_rwlock_unlock);
+
+    return S_OK;
   }
 
 private:

@@ -28,93 +28,103 @@ Thread::~Thread() {
   _state = STOP;
 }
 
-int Thread::start() {
-  int res = 1;
+RES_CODE Thread::start() {
   if (_state != INIT) {
-    return res;
+    return S_HAS_STARTED;
   }
 
   pthread_attr_t attr;                                                       
-  res = pthread_attr_init(&attr);                                            
-  if (res) {                                                            
-    return res;                                                          
-  }                                                                          
+  int res = pthread_attr_init(&attr);                                            
+  if (res) {
+    return S_SET_ATTR_FAILED;
+  }
 
-  res = pthread_attr_setdetachstate(&attr,                                   
-      _detached ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE); 
-  if (res) {                                                            
-    pthread_attr_destroy(&attr);                                           
-    return res;                                                          
-  }                                                                          
+  res = pthread_attr_setdetachstate(&attr, 
+      _detached ? PTHREAD_CREATE_DETACHED : PTHREAD_CREATE_JOINABLE);
+
+  if (res) {
+    pthread_attr_destroy(&attr);
+    return S_SET_ATTR_FAILED;
+  }
   
   // create thread
   // use the shell function to encapsulate the runner and func
-  res = pthread_create(&_tid, &attr, thread_core_shell, this);  
+  res = pthread_create(&_tid, &attr, thread_core_shell, this);
 
   if (!res) {
     _semaphore.wait();
   }
 
-  pthread_attr_destroy(&attr);                                               
+  pthread_attr_destroy(&attr);
 
-  if (!res) {                                                            
+  if (!res) {
     _state = RUNNING;
-  }                                                                          
+    return S_OK;
+  }
 
-  return res;
+  return S_THREAD_CREATE_FAILED;
 }
 
-int Thread::join() {
-  int res = 1;
+RES_CODE Thread::join() {
   if (_state != RUNNING) {
-    return res;
+    return S_NOT_RUNNING;
   }
+
   if (pthread_self() != _tid) {
     int tres = pthread_join(_tid, NULL);
+
     if (!tres) {
       _state = STOP;
+      return S_OK;
     }
-    res = tres;
+
+    return S_JOIN_FAILED;
   }
-  return res;
+
+  return S_OK;
 }
 
-int Thread::stop_nonblocking() {
+RES_CODE Thread::stop_nonblocking() {
   switch (_state) {
     case INIT:
     case STOP:
-      return 1;
+      return S_NOT_RUNNING;
     case RUNNING:
       if (pthread_cancel(_tid)) {
-        return 1;
+        return S_CANCEL_FAILED;
       }
+
       _state = STOP;
-      return 0;
+
+      return S_OK;
     default:
-      return 1;
+      return S_UNKOWN_STATE;
   }
 }
 
-int Thread::stop_blocking() {
+RES_CODE Thread::stop_blocking() {
   switch (_state) {
     case INIT:
     case STOP:
-      return 1;
+      return S_NOT_RUNNING;
     case RUNNING:
       if (pthread_cancel(_tid)) {
-        return 1;
+        return S_CANCEL_FAILED;
       }
+
       if (join()) {
-        return 1;
+        return S_JOIN_FAILED;
       }
-      return 0;
+
+      return S_OK;
     default:
-      return 1;
+      return S_UNKOWN_STATE;
   }
 }
 
-pthread_t Thread::gettid() const {
-  return _tid;
+RES_CODE Thread::gettid(pthread_t& tid) const {
+  tid = _tid;
+  return S_OK;
 }
 
 void* Thread::thread_core_shell(void* arg) {
@@ -140,10 +150,11 @@ Sharedpointer<Thread> Threadfactory::create_thread(Sharedpointer<Task> task) {
   Sharedpointer<Thread> thread;
   if (!task.is_null()) {
     Sharedpointer<Thread> t(new Thread(task));
-    if (!(t->start())) {
+    if (t->start() == S_OK) {
       thread = t;
     }
   }
+
   return thread;
 }
 

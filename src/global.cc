@@ -18,6 +18,8 @@ _START_MYJFM_NAMESPACE_
 Global::Global() : 
   _has_init(false), 
   _config_file(""), 
+  _log_file(""), _log(NULL), 
+  _err_file(""), _err(NULL), 
   _cur_path(""), 
   _depth(5), 
   _downloader_num(5), 
@@ -28,7 +30,10 @@ Global::Global() :
   _downloader_queues.clear();
 }
 
-Global::~Global() {}
+Global::~Global() {
+  close_log_file();
+  close_err_file();
+}
 
 RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   if (_has_init) {
@@ -75,6 +80,9 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
         (new Squeue<Sharedpointer<Url> >()));
   }
 
+  open_log_file();
+  open_err_file();
+
   return S_OK;
 }
 
@@ -86,10 +94,7 @@ RES_CODE Global::load_default_file_types() {
 }
 
 RES_CODE Global::parse_config() {
-  if (!_has_init) {
-    Cerr << "[FATAL] glob has not been initialized" << Endl;
-    abort();
-  }
+  CHECK_HAS_INIT();
 
   if (_config_file == "") {
     Cerr << "[FATAL] parse_config() failed. _config_file is empty" << Endl;
@@ -123,6 +128,10 @@ RES_CODE Global::parse_config() {
 
       if (key_and_value[0] == "SAVEPATH") {
         set_save_path(key_and_value[1]);
+      } else if (key_and_value[0] == "LOGFILEPATH") {
+        set_log_file(key_and_value[1]);
+      } else if (key_and_value[0] == "ERRFILEPATH") {
+        set_err_file(key_and_value[1]);
       } else if (key_and_value[0] == "DEPTH") {
         set_depth(key_and_value[1]);
       } else if (key_and_value[0] == "DOWNLOADERS") {
@@ -228,6 +237,20 @@ RES_CODE Global::get_save_path(String& save_path) {
   return S_OK;
 }
 
+RES_CODE Global::set_log_file(String& path) {
+  CHECK_HAS_INIT();
+  _log_file = path + "/log.txt";
+
+  return S_OK;
+}
+
+RES_CODE Global::set_err_file(String& path) {
+  CHECK_HAS_INIT();
+  _err_file = path + "/err.txt";
+
+  return S_OK;
+}
+
 RES_CODE Global::set_depth(String& dep) {
   CHECK_HAS_INIT();
   _depth = atoi(dep.c_str());
@@ -248,6 +271,82 @@ RES_CODE Global::get_downloader_queue(int id,
   }
 
   queue = _downloader_queues[id];
+
+  return S_OK;
+}
+
+RES_CODE Global::open_log_file() {
+  CHECK_HAS_INIT();
+
+  Ofstream* tmp = new Ofstream();
+  tmp->open(_log_file.c_str(), Ofstream::out | Ofstream::app);
+
+  if (!(*tmp)) {
+    Cerr << "[WARNING] Can not create log file: " << _log_file << Endl;
+    Cerr << "[WARNING] Will create it on current path." << Endl;
+
+    _log_file = _cur_path + "/log.txt";
+    tmp->open(_log_file.c_str(), Ofstream::out | Ofstream::app);
+
+    if (!(*tmp)) {
+      Cerr << "[WARNING] Can not create log file: " << _log_file << Endl;
+      Cerr << "[WARNING] Will use std::cout." << Endl;
+
+      _log = (Ofstream*)&Cout;
+
+      return S_OK;
+    }
+  }
+
+  _log = tmp;
+
+  return S_OK;
+}
+
+RES_CODE Global::open_err_file() {
+  CHECK_HAS_INIT();
+
+  Ofstream* tmp = new Ofstream();
+  tmp->open(_err_file.c_str(), Ofstream::out | Ofstream::app);
+
+  if (!(*tmp)) {
+    Cerr << "[WARNING] Can not create error file: " << _err_file << Endl;
+    Cerr << "[WARNING] Will create it on current path." << Endl;
+
+    _err_file = _cur_path + "/err.txt";
+    tmp->open(_err_file.c_str(), Ofstream::out | Ofstream::app);
+
+    if (!(*tmp)) {
+      Cerr << "[WARNING] Can not create error file: " << _err_file << Endl;
+      Cerr << "[WARNING] Will use std::cerr." << Endl;
+
+      _err = (Ofstream*)&Cerr;
+
+      return S_OK;
+    }
+  }
+
+  _err = tmp;
+
+  return S_OK;
+}
+
+RES_CODE Global::close_log_file() {
+  CHECK_HAS_INIT();
+
+  if (_log && _log != (Ofstream*)&Cout) {
+    _log->close();
+  }
+
+  return S_OK;
+}
+
+RES_CODE Global::close_err_file() {
+  CHECK_HAS_INIT();
+
+  if (_err && _err != (Ofstream*)&Cerr) {
+    _err->close();
+  }
 
   return S_OK;
 }

@@ -30,6 +30,8 @@
 #define Map std::map
 #define Pair std::pair
 
+#define Ofstream std::ofstream
+
 enum IPTYPE {
   IP_DUMMY = 0x0, 
   IPv4 = 0x1, 

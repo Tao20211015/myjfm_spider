@@ -23,3 +23,8 @@ FILETYPES .html .htm .jpg .jpeg
 # the start urls
 SEEDURLS www.cnblogs.com www.cppblog.com
 
+# save info log here
+LOGFILEPATH /home/myjfm/work/myjfm_spider/output
+
+# save error and fatal log here
+ERRFILEPATH /home/myjfm/work/myjfm_spider/output

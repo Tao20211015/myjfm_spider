@@ -25,15 +25,24 @@ public:
   RES_CODE get_downloader_queue(int, 
       Sharedpointer<Squeue<Sharedpointer<Url> > >&);
 
+  Ofstream* _log;
+  Ofstream* _err;
+
 private:
   RES_CODE load_default_file_types();
   RES_CODE set_seed_urls(Vector<String>& seed_urls);
   RES_CODE set_file_types(Vector<String>& file_types);
   RES_CODE set_save_path(String& path);
+  RES_CODE set_log_file(String& path);
+  RES_CODE set_err_file(String& path);
   RES_CODE set_depth(String& dep);
   RES_CODE set_downloader_num(String& downloader_num);
   RES_CODE set_extractor_num(String& extractor_num);
   RES_CODE set_scheduler_num(String& scheduler_num);
+  RES_CODE open_log_file();
+  RES_CODE open_err_file();
+  RES_CODE close_log_file();
+  RES_CODE close_err_file();
 
   // current work path
   String _cur_path;
@@ -41,10 +50,15 @@ private:
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
   volatile bool _has_init;
+
   String _config_file;
 
   // the path saved all the web pages and all the indexes
   String _save_path;
+
+  String _log_file;
+
+  String _err_file;
 
   // the depth of downloading recursively
   int _depth;

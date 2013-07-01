@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "dnscache.h"
+#include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -62,7 +63,9 @@ RES_CODE Dnscache::dns_query(String& site,
   struct hostent* entry = gethostbyname(site.c_str());
 
   if (!entry) {
-    Cerr << "[ERROR] Can't get the IPs of the site: " << site << Endl;
+    String s = "Can't get the IPs of the site: ";
+    s += site;
+    LOG(ERROR, s.c_str());
     return S_FAIL;
   }
 
@@ -83,7 +86,7 @@ RES_CODE Dnscache::dns_query(String& site,
       ips.push_back(CHARS2STR(buffer));
     }
   } else {
-    Cerr << "[ERROR] Invalid address!" << Endl;
+    LOG(ERROR, "Invalid address!");
     ip_type = IP_DUMMY;
     return S_UNKNOWN_PROTOCOL;
   }

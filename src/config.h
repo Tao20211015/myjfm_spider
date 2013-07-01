@@ -32,6 +32,14 @@
 
 #define Ofstream std::ofstream
 
+enum LOG_LEVEL {
+  LOG_DUMMY = 0x0, 
+  INFO = 0x1, 
+  ERROR = 0x2, 
+  WARNING = 0x4, 
+  FATAL = 0x8
+};
+
 enum IPTYPE {
   IP_DUMMY = 0x0, 
   IPv4 = 0x1, 

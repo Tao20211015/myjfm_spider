@@ -6,6 +6,7 @@
 
 #include "config.h"
 #include "mutex.h"
+#include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -20,8 +21,9 @@ public:
   Conditional() {
     _state = CONSTRUCTED;
     _mutex = NULL;
+
     if (pthread_cond_init(&_cond, NULL)) {
-      Cerr << "[FATAL] pthread_cond_init() failed" << Endl;
+      LOG(FATAL, "pthread_cond_init() failed");
       abort();
     }
   }
@@ -29,14 +31,14 @@ public:
   ~Conditional() {
     if (_state != UNCONSTRUCTED && 
         pthread_cond_destroy(&_cond)) {
-      Cerr << "[FATAL] pthread_cond_destroy() failed" << Endl;
+      LOG(FATAL, "pthread_cond_destroy() failed");
       abort();
     }
   }
 
   inline RES_CODE init(Mutex* mutex) {
     if (!mutex) {
-      Cerr << "[FATAL] NULL pointer! Conditional.init() failed" << Endl;
+      LOG(FATAL, "NULL pointer! Conditional.init() failed");
       abort();
     }
     _state = INITIALIZED;
@@ -47,7 +49,7 @@ public:
   inline RES_CODE wait() {
     if (_state == INITIALIZED && 
         pthread_cond_wait(&_cond, &(_mutex->_mutex))) {
-      Cerr << "[FATAL] pthread_cond_wait() failed" << Endl;
+      LOG(FATAL, "pthread_cond_wait() failed");
       abort();
     }
 
@@ -57,7 +59,7 @@ public:
   inline RES_CODE signal() {
     if (_state == INITIALIZED && 
         pthread_cond_signal(&_cond)) {
-      Cerr << "[FATAL] pthread_cond_signal() failed" << Endl;
+      LOG(FATAL, "pthread_cond_signal() failed");
       abort();
     }
 

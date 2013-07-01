@@ -5,15 +5,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-enum LOG_LEVEL {
-  LOG_DUMMY = 0x0, 
-  INFO = 0x1, 
-  ERROR = 0x2, 
-  WARNING = 0x4, 
-  FATAL = 0x8
-};
-
-inline void LOG(LOG_LEVEL, String&);
+void LOG(LOG_LEVEL, const char*);
 
 _END_MYJFM_NAMESPACE_
 

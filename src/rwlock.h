@@ -5,18 +5,21 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
 class RWlock {
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
   if (!_has_init) { \
-    Cerr << "[FATAL] rwlock has not been initialized" << Endl; \
+    LOG(FATAL, "rwlock has not been initialized"); \
     abort(); \
   } \
   \
   if (func(&_rwlock) != 0) { \
-    Cerr << "[FATAL] " << #func << "() failed" << Endl; \
+    String s = #func; \
+    s += "() failed"; \
+    LOG(FATAL, s.c_str()); \
     abort(); \
   } \
 } while (0)
@@ -45,7 +48,7 @@ public:
 
   inline RES_CODE try_rdlock() {
     if (!_has_init) {
-      Cerr << "[FATAL] rwlock has not been initialized" << Endl;
+      LOG(FATAL, "rwlock has not been initialized");
       abort();
     }
 
@@ -58,7 +61,7 @@ public:
 
   inline RES_CODE try_wrlock() {
     if (!_has_init) {
-      Cerr << "[FATAL] rwlock has not been initialized" << Endl;
+      LOG(FATAL, "rwlock has not been initialized");
       abort();
     }
 

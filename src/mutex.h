@@ -5,18 +5,21 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
 class Mutex {
 #define RUN_FUNC_IF_HAS_INIT(func) do { \
   if (!_has_init) { \
-    Cerr << "[FATAL] mutex has not been initialized" << Endl; \
+    LOG(FATAL, "mutex has not been initialized"); \
     abort(); \
   } \
   \
   if (func(&_mutex) != 0) { \
-    Cerr << "[FATAL] " << #func << "() failed" << Endl; \
+    String s = #func; \
+    s += "() failed"; \
+    LOG(FATAL, s.c_str()); \
     abort(); \
   } \
 } while (0)
@@ -41,7 +44,7 @@ public:
 
   inline RES_CODE try_lock() {
     if (!_has_init) {
-      Cerr << "[FATAL] mutex has not been initialized" << Endl;
+      LOG(FATAL, "mutex has not been initialized");
       abort();
     }
 

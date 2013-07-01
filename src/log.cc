@@ -6,7 +6,7 @@ extern _MYJFM_NAMESPACE_::Global *glob;
 
 _START_MYJFM_NAMESPACE_
 
-inline void LOG(LOG_LEVEL level, String& msg) {
+void LOG(LOG_LEVEL level, const char* msg) {
   switch (level) {
     case INFO:
       (*(glob->_log)) << msg << Endl;

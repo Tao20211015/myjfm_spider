@@ -6,6 +6,7 @@
 #include <time.h>
 
 #include "site.h"
+#include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -98,7 +99,9 @@ RES_CODE Site::dns() {
   struct hostent* entry = gethostbyname(_site_name.c_str());
 
   if (!entry) {
-    Cerr << "[ERROR] Can't get the IPs of the site: " << _site_name << Endl;
+    String s = "Can't get the IPs of the site: ";
+    s += _site_name;
+    LOG(ERROR, s.c_str());
     return S_FAIL;
   }
 
@@ -114,7 +117,7 @@ RES_CODE Site::dns() {
       entry->h_addr_list += 1;
     }
   } else {
-    Cerr << "[ERROR] Invalid address!" << Endl;
+    LOG(ERROR, "Invalid address!");
     return S_UNKNOWN_PROTOCOL;
   }
 

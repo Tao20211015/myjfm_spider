@@ -4,26 +4,36 @@ CFLAGS	= -Wall -c -g
 LD			= g++
 LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o utility.o log.o global.o shared.o \
-					thread.o threadpool.o threadtask.o \
-					site.o url.o md5.o dnscache.o \
-					downloadtask.o extracttask.o scheduletask.o
+OBJS		= myjfm_spider.o utility.o log.o global.o shared.o threadpool.o \
+					thread.o threadtask.o logger.o site.o url.o md5.o dnscache.o \
+					downloadtask.o extracttask.o scheduletask.o loggertask.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
 UTILITY_UT_BIN	= utility_ut
 
-THREAD_TEST_OBJS	= thread_test.o thread.o threadpool.o \
-										threadtask.o shared.o log.o
+THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o \
+										threadpool.o thread.o threadtask.o logger.o site.o \
+										url.o md5.o dnscache.o downloadtask.o extracttask.o \
+										scheduletask.o loggertask.o
 THREAD_TEST_BIN	= thread_test
 
-HASH_TEST_OBJS	= hash_test.o shared.o log.o
+HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o \
+										threadpool.o thread.o threadtask.o logger.o site.o \
+										url.o md5.o dnscache.o downloadtask.o extracttask.o \
+										scheduletask.o loggertask.o
 HASH_TEST_BIN	= hash_test
 
-MD5_TEST_OBJS	= md5_test.o md5.o
+MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o \
+										threadpool.o thread.o threadtask.o logger.o site.o \
+										url.o md5.o dnscache.o downloadtask.o extracttask.o \
+										scheduletask.o loggertask.o
 MD5_TEST_BIN	= md5_test
 
-URL_TEST_OBJS	= url_test.o url.o shared.o site.o md5.o log.o
+URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o \
+										threadpool.o thread.o threadtask.o logger.o site.o \
+										url.o md5.o dnscache.o downloadtask.o extracttask.o \
+										scheduletask.o loggertask.o
 URL_TEST_BIN	= url_test
 
 export OUTPUT_PATH=../output
@@ -132,5 +142,11 @@ scheduletask.o : scheduletask.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 log.o : log.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+logger.o : logger.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+loggertask.o : loggertask.cc
 	$(CC) $(CFLAGS) -o $@ $<
 

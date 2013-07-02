@@ -1,24 +1,17 @@
 #include "config.h"
-#include "global.h"
 #include "log.h"
+#include "global.h"
+#include "logger.h"
 
-extern _MYJFM_NAMESPACE_::Global *glob;
+extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-void LOG(LOG_LEVEL level, const char* msg) {
-  switch (level) {
-    case INFO:
-      (*(glob->_log)) << msg << Endl;
-      break;
-    case WARNING:
-    case ERROR:
-    case FATAL:
-      (*(glob->_err)) << msg << Endl;
-      break;
-    default:
-      break;
-  }
+RES_CODE LOG(LOG_LEVEL level, const char* str) {
+  Message msg = {level, str};
+  Logger* logger = NULL;
+  glob->get_logger(logger);
+  return logger->log(msg);
 }
 
 _END_MYJFM_NAMESPACE_

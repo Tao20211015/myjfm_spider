@@ -111,7 +111,7 @@ RES_CODE Site::dns() {
       entry->h_addr_list += 1;
       _ips.push_back(CHARS2STR(buffer));
     }
-  } else if (entry->h_addrtype = AF_INET6 && entry->h_length == 6) {
+  } else if (entry->h_addrtype == AF_INET6 && entry->h_length == 6) {
     while (*(entry->h_addr_list)) {
       inet_ntop(AF_INET6, *(entry->h_addr_list), buffer, sizeof(buffer));
       entry->h_addr_list += 1;

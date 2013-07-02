@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "global.h"
@@ -6,6 +7,7 @@
 #include "squeue.h"
 #include "sharedpointer.h"
 #include "extracttask.h"
+#include "log.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -16,10 +18,11 @@ Extracttask::Extracttask(int id) : _id(id) {}
 Extracttask::~Extracttask() {}
 
 RES_CODE Extracttask::operator()(void* arg) {
-  int i = 0;
+  char buffer[100];
+  sprintf(buffer, "%s %d", "#Extractor#", _id);
   for (;;) {
-    Cout << "[" << i++ << "] [Extractor]: I'm thread " << _id << Endl;
-    sleep(1);
+    LOG(INFO, buffer);
+    usleep(1000);
   }
 
   return S_OK;

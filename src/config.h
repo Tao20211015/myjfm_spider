@@ -91,10 +91,15 @@ enum RES_CODE {
 
   // Threadpool member functions use these
   S_NOT_CONSTRUCTED = 0x4, 
-  S_BAD_ARG = 0x8, 
+  S_BAD_ARG = 0x00040000, // Loggertask member functions also use these
 
   // Url member functions use these
-  S_INVALID_URL = 0x4
+  S_INVALID_URL = 0x4, 
+
+  //Logger member functions use these
+  S_INVALID_LOG = 0x4, 
+  S_IS_LOGGING = 0x8, 
+  S_FAILED_TO_LOG_ON_DISK = 0x10
 };
 
 #endif

@@ -4,6 +4,7 @@
 #include "config.h"
 #include "global.h"
 #include "utility.h"
+#include "logger.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -18,22 +19,20 @@ _START_MYJFM_NAMESPACE_
 Global::Global() : 
   _has_init(false), 
   _config_file(""), 
-  _log_file(""), _log(NULL), 
-  _err_file(""), _err(NULL), 
+  _log_path(""), 
+  _err_path(""), 
   _cur_path(""), 
   _depth(5), 
   _downloader_num(5), 
   _extractor_num(5), 
-  _scheduler_num(1) {
+  _scheduler_num(1), 
+  _logger(NULL) {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
 }
 
-Global::~Global() {
-  close_log_file();
-  close_err_file();
-}
+Global::~Global() {}
 
 RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   if (_has_init) {
@@ -80,8 +79,8 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
         (new Squeue<Sharedpointer<Url> >()));
   }
 
-  open_log_file();
-  open_err_file();
+  _logger = new Logger(10000);
+  _logger->init();
 
   return S_OK;
 }
@@ -129,9 +128,9 @@ RES_CODE Global::parse_config() {
       if (key_and_value[0] == "SAVEPATH") {
         set_save_path(key_and_value[1]);
       } else if (key_and_value[0] == "LOGFILEPATH") {
-        set_log_file(key_and_value[1]);
+        set_log_path(key_and_value[1]);
       } else if (key_and_value[0] == "ERRFILEPATH") {
-        set_err_file(key_and_value[1]);
+        set_err_path(key_and_value[1]);
       } else if (key_and_value[0] == "DEPTH") {
         set_depth(key_and_value[1]);
       } else if (key_and_value[0] == "DOWNLOADERS") {
@@ -200,6 +199,8 @@ RES_CODE Global::get_downloader_num(int& num) {
 RES_CODE Global::set_extractor_num(String& extractor_num) {
   CHECK_HAS_INIT();
   _extractor_num = atoi(extractor_num.c_str());
+
+  return S_OK;
 }
 
 RES_CODE Global::get_extractor_num(int& num) {
@@ -223,9 +224,16 @@ RES_CODE Global::get_scheduler_num(int& num) {
   return S_OK;
 }
 
-RES_CODE Global::set_save_path(String& path) {
+RES_CODE Global::get_cur_path(String& cur_path) {
   CHECK_HAS_INIT();
-  _save_path = path;
+  cur_path = _cur_path;
+
+  return S_OK;
+}
+
+RES_CODE Global::set_cur_path(String& cur_path) {
+  CHECK_HAS_INIT();
+  _cur_path = cur_path;
 
   return S_OK;
 }
@@ -237,16 +245,44 @@ RES_CODE Global::get_save_path(String& save_path) {
   return S_OK;
 }
 
-RES_CODE Global::set_log_file(String& path) {
+RES_CODE Global::set_save_path(String& path) {
   CHECK_HAS_INIT();
-  _log_file = path + "/log.txt";
+  _save_path = path;
 
   return S_OK;
 }
 
-RES_CODE Global::set_err_file(String& path) {
+RES_CODE Global::get_log_path(String& path) {
   CHECK_HAS_INIT();
-  _err_file = path + "/err.txt";
+  path = _log_path;
+
+  return S_OK;
+}
+
+RES_CODE Global::set_log_path(String& path) {
+  CHECK_HAS_INIT();
+  _log_path = path;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_err_path(String& path) {
+  CHECK_HAS_INIT();
+  path = _err_path;
+
+  return S_OK;
+}
+
+RES_CODE Global::set_err_path(String& path) {
+  CHECK_HAS_INIT();
+  _err_path = path;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_depth(int& dep) {
+  CHECK_HAS_INIT();
+  dep = _depth;
 
   return S_OK;
 }
@@ -275,78 +311,9 @@ RES_CODE Global::get_downloader_queue(int id,
   return S_OK;
 }
 
-RES_CODE Global::open_log_file() {
+RES_CODE Global::get_logger(Logger*& logger) {
   CHECK_HAS_INIT();
-
-  Ofstream* tmp = new Ofstream();
-  tmp->open(_log_file.c_str(), Ofstream::out | Ofstream::app);
-
-  if (!(*tmp)) {
-    Cerr << "[WARNING] Can not create log file: " << _log_file << Endl;
-    Cerr << "[WARNING] Will create it on current path." << Endl;
-
-    _log_file = _cur_path + "/log.txt";
-    tmp->open(_log_file.c_str(), Ofstream::out | Ofstream::app);
-
-    if (!(*tmp)) {
-      Cerr << "[WARNING] Can not create log file: " << _log_file << Endl;
-      Cerr << "[WARNING] Will use std::cout." << Endl;
-
-      _log = (Ofstream*)&Cout;
-
-      return S_OK;
-    }
-  }
-
-  _log = tmp;
-
-  return S_OK;
-}
-
-RES_CODE Global::open_err_file() {
-  CHECK_HAS_INIT();
-
-  Ofstream* tmp = new Ofstream();
-  tmp->open(_err_file.c_str(), Ofstream::out | Ofstream::app);
-
-  if (!(*tmp)) {
-    Cerr << "[WARNING] Can not create error file: " << _err_file << Endl;
-    Cerr << "[WARNING] Will create it on current path." << Endl;
-
-    _err_file = _cur_path + "/err.txt";
-    tmp->open(_err_file.c_str(), Ofstream::out | Ofstream::app);
-
-    if (!(*tmp)) {
-      Cerr << "[WARNING] Can not create error file: " << _err_file << Endl;
-      Cerr << "[WARNING] Will use std::cerr." << Endl;
-
-      _err = (Ofstream*)&Cerr;
-
-      return S_OK;
-    }
-  }
-
-  _err = tmp;
-
-  return S_OK;
-}
-
-RES_CODE Global::close_log_file() {
-  CHECK_HAS_INIT();
-
-  if (_log && _log != (Ofstream*)&Cout) {
-    _log->close();
-  }
-
-  return S_OK;
-}
-
-RES_CODE Global::close_err_file() {
-  CHECK_HAS_INIT();
-
-  if (_err && _err != (Ofstream*)&Cerr) {
-    _err->close();
-  }
+  logger = _logger;
 
   return S_OK;
 }

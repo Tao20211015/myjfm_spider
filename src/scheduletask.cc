@@ -1,4 +1,5 @@
 #include <stdlib.h>
+#include <unistd.h>
 
 #include "config.h"
 #include "global.h"
@@ -16,10 +17,11 @@ Scheduletask::Scheduletask(int id) : _id(id) {}
 Scheduletask::~Scheduletask() {}
 
 RES_CODE Scheduletask::operator()(void* arg) {
-  int i = 0;
+  char buffer[100];
+  sprintf(buffer, "%s %d", "#Scheduler#", _id);
   for (;;) {
-    Cout << "[" << i++ << "] [Scheduler]: I'm thread " << _id << Endl;
-    sleep(1);
+    LOG(INFO, buffer);
+    usleep(1000);
   }
 
   return S_OK;

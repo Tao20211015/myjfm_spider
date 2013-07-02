@@ -5,7 +5,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-void LOG(LOG_LEVEL, const char*);
+RES_CODE LOG(LOG_LEVEL, const char*);
 
 _END_MYJFM_NAMESPACE_
 

@@ -77,7 +77,7 @@ RES_CODE Dnscache::dns_query(String& site,
       entry->h_addr_list += 1;
       ips.push_back(CHARS2STR(buffer));
     }
-  } else if (entry->h_addrtype = AF_INET6 && entry->h_length == 6) {
+  } else if (entry->h_addrtype == AF_INET6 && entry->h_length == 6) {
     ip_type = IPv6;
 
     while (*(entry->h_addr_list)) {

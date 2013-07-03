@@ -13,7 +13,7 @@ struct Message {
 };
 
 class Logger {
-  friend class Loggertask;
+  friend class LoggerTask;
 
 #define DEFAULT_THRESHOLD 10000
 

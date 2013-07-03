@@ -4,36 +4,36 @@ CFLAGS	= -Wall -c -g
 LD			= g++
 LDFLAGS	= -lpthread
 
-OBJS		= myjfm_spider.o utility.o log.o global.o shared.o threadpool.o \
-					thread.o threadtask.o logger.o site.o url.o md5.o dnscache.o \
-					downloadtask.o extracttask.o scheduletask.o loggertask.o
+OBJS		= myjfm_spider.o utility.o log.o global.o shared.o thread_pool.o \
+					thread.o thread_task.o logger.o site.o url.o md5.o dns_cache.o \
+					downloader_task.o extractor_task.o scheduler_task.o logger_task.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
 UTILITY_UT_BIN	= utility_ut
 
-THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o \
-										threadpool.o thread.o threadtask.o logger.o site.o \
-										url.o md5.o dnscache.o downloadtask.o extracttask.o \
-										scheduletask.o loggertask.o
+THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o url.o \
+										thread_pool.o thread.o thread_task.o logger.o site.o \
+										md5.o dns_cache.o downloader_task.o extractor_task.o \
+										scheduler_task.o logger_task.o
 THREAD_TEST_BIN	= thread_test
 
-HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o \
-										threadpool.o thread.o threadtask.o logger.o site.o \
-										url.o md5.o dnscache.o downloadtask.o extracttask.o \
-										scheduletask.o loggertask.o
+HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o url.o \
+										thread_pool.o thread.o thread_task.o logger.o site.o \
+										md5.o dns_cache.o downloader_task.o extractor_task.o \
+										scheduler_task.o logger_task.o
 HASH_TEST_BIN	= hash_test
 
-MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o \
-										threadpool.o thread.o threadtask.o logger.o site.o \
-										url.o md5.o dnscache.o downloadtask.o extracttask.o \
-										scheduletask.o loggertask.o
+MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o url.o \
+										thread_pool.o thread.o thread_task.o logger.o site.o \
+										md5.o dns_cache.o downloader_task.o extractor_task.o \
+										scheduler_task.o logger_task.o
 MD5_TEST_BIN	= md5_test
 
-URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o \
-										threadpool.o thread.o threadtask.o logger.o site.o \
-										url.o md5.o dnscache.o downloadtask.o extracttask.o \
-										scheduletask.o loggertask.o
+URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o url.o \
+										thread_pool.o thread.o thread_task.o logger.o site.o \
+										md5.o dns_cache.o downloader_task.o extractor_task.o \
+										scheduler_task.o logger_task.o
 URL_TEST_BIN	= url_test
 
 export OUTPUT_PATH=../output
@@ -105,10 +105,10 @@ shared.o : shared.cc
 thread.o : thread.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-threadpool.o : threadpool.cc
+thread_pool.o : thread_pool.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-threadtask.o : threadtask.cc
+thread_task.o : thread_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 thread_test.o : thread_test.cc
@@ -129,16 +129,16 @@ md5.o : md5.cc
 md5_test.o : md5_test.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-dnscache.o : dnscache.cc
+dns_cache.o : dns_cache.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-downloadtask.o : downloadtask.cc
+downloader_task.o : downloader_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-extracttask.o : extracttask.cc
+extractor_task.o : extractor_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-scheduletask.o : scheduletask.cc
+scheduler_task.o : scheduler_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 log.o : log.cc
@@ -147,6 +147,6 @@ log.o : log.cc
 logger.o : logger.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
-loggertask.o : loggertask.cc
+logger_task.o : logger_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 

@@ -1,5 +1,5 @@
-#ifndef _SCOPEGUARD_H_
-#define _SCOPEGUARD_H_
+#ifndef _SCOPE_GUARD_H_
+#define _SCOPE_GUARD_H_
 
 #include <stdlib.h>
 
@@ -9,15 +9,15 @@ _START_MYJFM_NAMESPACE_
 
 // use this template class to implement the smart mutex lock and unlock
 template <class Lock>
-class Scopeguard {
+class ScopeGuard {
 public:
-  Scopeguard(Lock* lock) : _lock(lock) {
+  ScopeGuard(Lock* lock) : _lock(lock) {
     if (_lock != NULL) {
       _lock->lock();
     }
   }
 
-  ~Scopeguard() {
+  ~ScopeGuard() {
     if (_lock != NULL) {
       _lock->unlock();
     }

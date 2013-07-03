@@ -3,7 +3,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-Thread::Thread(const Sharedpointer<Task>& task, int detached) : 
+Thread::Thread(const SharedPointer<Task>& task, int detached) : 
   _use_task(1), 
   _task(task), 
   _task_func(NULL), 
@@ -131,7 +131,7 @@ void* Thread::thread_core_shell(void* arg) {
   Thread* tthis = (Thread*)arg;
 
   int use_task = tthis->_use_task;
-  Sharedpointer<Task> task = tthis->_task;
+  SharedPointer<Task> task = tthis->_task;
   thread_task_func task_func = tthis->_task_func;
   void* func_arg = tthis->_func_arg;
 
@@ -146,10 +146,10 @@ void* Thread::thread_core_shell(void* arg) {
   return NULL;
 }
 
-Sharedpointer<Thread> Threadfactory::create_thread(Sharedpointer<Task> task) {
-  Sharedpointer<Thread> thread;
+SharedPointer<Thread> ThreadFactory::create_thread(SharedPointer<Task> task) {
+  SharedPointer<Thread> thread;
   if (!task.is_null()) {
-    Sharedpointer<Thread> t(new Thread(task));
+    SharedPointer<Thread> t(new Thread(task));
     if (t->start() == S_OK) {
       thread = t;
     }

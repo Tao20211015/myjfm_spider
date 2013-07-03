@@ -4,7 +4,7 @@
 #include "config.h"
 #include "url.h"
 #include "squeue.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -30,7 +30,7 @@ public:
   RES_CODE get_extractor_num(int&);
   RES_CODE get_scheduler_num(int&);
   RES_CODE get_downloader_queue(int, 
-      Sharedpointer<Squeue<Sharedpointer<Url> > >&);
+      SharedPointer<SQueue<SharedPointer<Url> > >&);
 
   RES_CODE get_logger(Logger*&);
 
@@ -79,11 +79,11 @@ private:
   // url queue. This queue is used by all threads.
   // All download threads will produce urls, and, 
   // the scheduler threads consume the urls.
-  Sharedpointer<Squeue<Sharedpointer<Url> > > _urls_queue;
+  SharedPointer<SQueue<SharedPointer<Url> > > _urls_queue;
 
   // downloader queue. Each download thread has one queue.
   // The queue is shared between this downloader and all scheduler threads.
-  Vector<Sharedpointer<Squeue<Sharedpointer<Url> > > > _downloader_queues;
+  Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queues;
 };
 
 _END_MYJFM_NAMESPACE_

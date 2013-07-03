@@ -63,20 +63,20 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
 
   // initialize the url queue
   _urls_queue = 
-    Sharedpointer<Squeue<Sharedpointer<Url> > >
-    (new Squeue<Sharedpointer<Url> >());
+    SharedPointer<SQueue<SharedPointer<Url> > >
+    (new SQueue<SharedPointer<Url> >());
 
   int i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
-    Sharedpointer<Url> url_p(new Url(_seed_urls[i]));
+    SharedPointer<Url> url_p(new Url(_seed_urls[i]));
     _urls_queue->push(url_p);
   }
 
   // initialize all the downloader queues
   for (i = 0; i < _downloader_num; ++i) {
     _downloader_queues.push_back(
-        Sharedpointer<Squeue<Sharedpointer<Url> > >
-        (new Squeue<Sharedpointer<Url> >()));
+        SharedPointer<SQueue<SharedPointer<Url> > >
+        (new SQueue<SharedPointer<Url> >()));
   }
 
   _logger = new Logger(10000);
@@ -295,14 +295,14 @@ RES_CODE Global::set_depth(String& dep) {
 }
 
 RES_CODE Global::get_downloader_queue(int id, 
-    Sharedpointer<Squeue<Sharedpointer<Url> > >& queue) {
+    SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
   CHECK_HAS_INIT();
 
   int downloader_num = 0;
   get_downloader_num(downloader_num);
 
   if (id >= downloader_num || id < 0) {
-    queue = Sharedpointer<Squeue<Sharedpointer<Url> > >(NULL);
+    queue = SharedPointer<SQueue<SharedPointer<Url> > >(NULL);
     return S_OUT_RANGE;
   }
 

@@ -1,15 +1,15 @@
-#ifndef _DNSCACHE_H_
-#define _DNSCACHE_H_
+#ifndef _DNS_CACHE_H_
+#define _DNS_CACHE_H_
 
 #include "config.h"
 #include "shared.h"
 
 _START_MYJFM_NAMESPACE_
 
-class Dnscache : public Shared {
+class DnsCache : public Shared {
 public:
-  Dnscache();
-  ~Dnscache();
+  DnsCache();
+  ~DnsCache();
 
   RES_CODE find(String&, Vector<String>&);
   RES_CODE insert(String&, Vector<String>&);

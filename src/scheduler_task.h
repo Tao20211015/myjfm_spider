@@ -1,15 +1,15 @@
-#ifndef _SCHEDULETASK_H_
-#define _SCHEDULETASK_H_
+#ifndef _SCHEDULER_TASK_H_
+#define _SCHEDULER_TASK_H_
 
 #include "config.h"
 #include "task.h"
 
 _START_MYJFM_NAMESPACE_
 
-class Scheduletask : public Task {
+class SchedulerTask : public Task {
 public:
-  Scheduletask(int);
-  ~Scheduletask();
+  SchedulerTask(int);
+  ~SchedulerTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:

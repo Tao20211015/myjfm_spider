@@ -6,11 +6,11 @@
 #include "task.h"
 #include "thread.h"
 #include "squeue.h"
-#include "threadtask.h"
+#include "thread_task.h"
 
 _START_MYJFM_NAMESPACE_
 
-class Threadpool : public Shared {
+class ThreadPool : public Shared {
 #define MAX_RETRY 10
 
   enum _enum_state {
@@ -19,8 +19,8 @@ class Threadpool : public Shared {
   };
 
 public:
-  Threadpool(int n);
-  ~Threadpool();
+  ThreadPool(int n);
+  ~ThreadPool();
 
   RES_CODE init();
 
@@ -28,15 +28,15 @@ public:
 
   RES_CODE size(int&);
 
-  RES_CODE add_task(Sharedpointer<Task> task);
+  RES_CODE add_task(SharedPointer<Task> task);
 
-  RES_CODE get_task(Sharedpointer<Task>& task);
+  RES_CODE get_task(SharedPointer<Task>& task);
 
 private:
   int _n;
   int _state;
-  Vector< Sharedpointer<Thread> > _threads;
-  Squeue< Sharedpointer<Task> > _tasks;
+  Vector< SharedPointer<Thread> > _threads;
+  SQueue< SharedPointer<Task> > _tasks;
 
   RES_CODE add_worker();
 };

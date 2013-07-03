@@ -1,13 +1,13 @@
 #include "config.h"
 #include "shared.h"
-#include "scopeguard.h"
+#include "scope_guard.h"
 
 _START_MYJFM_NAMESPACE_
 
 Shared::Shared() : _count(0) {}
 
 RES_CODE Shared::add_ref() {
-  Scopeguard<Mutex> t(&_mutex);
+  ScopeGuard<Mutex> t(&_mutex);
   _count++;
 
   return S_OK;
@@ -16,7 +16,7 @@ RES_CODE Shared::add_ref() {
 // the flag indicates whether the _count is decreased successfully
 // this can avoid that two threads destruct the object at the sametime
 unsigned int Shared::dec_ref(bool* flag) {
-  Scopeguard<Mutex> t(&_mutex);
+  ScopeGuard<Mutex> t(&_mutex);
   if (_count > 0) {
     if (flag) {
       *flag = true;

@@ -4,24 +4,24 @@
 #include "config.h"
 #include "mutex.h"
 #include "shared.h"
-#include "scopeguard.h"
+#include "scope_guard.h"
 #include "conditional.h"
 
 _START_MYJFM_NAMESPACE_
 
 template <class T>
-class Squeue : public Shared {
+class SQueue : public Shared {
 public:
-  Squeue() {
+  SQueue() {
     _cond.init(&_mutex);
   }
 
-  ~Squeue() {}
+  ~SQueue() {}
 
   // can not use reference
   // because the caller may pass stack variable to this callee
   RES_CODE push(T t) {
-    Scopeguard<Mutex> lock(&_mutex);
+    ScopeGuard<Mutex> lock(&_mutex);
     _queue.push(t);
     _cond.signal();
 
@@ -29,7 +29,7 @@ public:
   }
 
   RES_CODE pop(T& t) {
-    Scopeguard<Mutex> lock(&_mutex);
+    ScopeGuard<Mutex> lock(&_mutex);
     while (_queue.empty()) {
       _cond.wait();
     }
@@ -41,7 +41,7 @@ public:
   }
 
   RES_CODE size(int& s) {
-    Scopeguard<Mutex> lock(&_mutex);
+    ScopeGuard<Mutex> lock(&_mutex);
     s = _queue.size();
 
     return S_OK;
@@ -49,8 +49,8 @@ public:
 
 private:
   // disallow copy constructor
-  Squeue(const Squeue&);
-  Squeue& operator=(const Squeue&);
+  SQueue(const SQueue&);
+  SQueue& operator=(const SQueue&);
   Queue<T> _queue;
   Mutex _mutex;
   Conditional _cond;

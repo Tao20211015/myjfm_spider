@@ -7,7 +7,7 @@
 #include "shared.h"
 #include "task.h"
 #include "semaphore.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -23,7 +23,7 @@ class Thread : public Shared {
 
 public:
   // run the task
-  Thread(const Sharedpointer<Task>& task, int detached = 0);
+  Thread(const SharedPointer<Task>& task, int detached = 0);
 
   // run the task routine body
   Thread(thread_task_func, void* arg, int detached = 0);
@@ -53,7 +53,7 @@ private:
   static void* thread_core_shell(void*);
 
   int _use_task;
-  Sharedpointer<Task> _task;
+  SharedPointer<Task> _task;
 
   thread_task_func _task_func;
   void* _func_arg;
@@ -69,13 +69,13 @@ private:
 };
 
 // use this factory to generate threads
-class Threadfactory {
+class ThreadFactory {
 public:
-  static Sharedpointer<Thread> create_thread(Sharedpointer<Task> task);
+  static SharedPointer<Thread> create_thread(SharedPointer<Task> task);
 
 private:
-  Threadfactory(const Threadfactory&);
-  Threadfactory& operator=(const Threadfactory&);
+  ThreadFactory(const ThreadFactory&);
+  ThreadFactory& operator=(const ThreadFactory&);
 };
 
 _END_MYJFM_NAMESPACE_

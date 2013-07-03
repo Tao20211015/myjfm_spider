@@ -1,5 +1,5 @@
-#ifndef _LOGGERTASK_H_
-#define _LOGGERTASK_H_
+#ifndef _LOGGER_TASK_H_
+#define _LOGGER_TASK_H_
 
 #include "config.h"
 #include "task.h"
@@ -7,10 +7,10 @@
 
 _START_MYJFM_NAMESPACE_
 
-class Loggertask : public Task {
+class LoggerTask : public Task {
 public:
-  Loggertask(Logger* const);
-  ~Loggertask();
+  LoggerTask(Logger* const);
+  ~LoggerTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:

@@ -5,11 +5,11 @@
 
 _START_MYJFM_NAMESPACE_
 
-#define Byte MD5caculator::Byte
-#define Ulong MD5caculator::Ulong
+#define Byte MD5Caculator::Byte
+#define Ulong MD5Caculator::Ulong
 
-const Byte MD5caculator::PADDING[64] = { 0x80 };
-const char MD5caculator::HEX[16] = {
+const Byte MD5Caculator::PADDING[64] = { 0x80 };
+const char MD5Caculator::HEX[16] = {
 	'0', '1', '2', '3',
 	'4', '5', '6', '7',
 	'8', '9', 'a', 'b',
@@ -70,29 +70,29 @@ const char MD5caculator::HEX[16] = {
 }
 
 // Default construct.
-MD5caculator::MD5caculator() {
+MD5Caculator::MD5Caculator() {
 	reset();
 }
 
-// Construct a MD5caculator object with a input buffer.
-MD5caculator::MD5caculator(const void* input, size_t length) {
+// Construct a MD5Caculator object with a input buffer.
+MD5Caculator::MD5Caculator(const void* input, size_t length) {
 	reset();
 	update(input, length);
 }
 
-// Construct a MD5caculator object with a string.
-MD5caculator::MD5caculator(const String &str) {
+// Construct a MD5Caculator object with a string.
+MD5Caculator::MD5Caculator(const String &str) {
 	reset();
 	update(str);
 }
 
-// Construct a MD5caculator object with a file.
-MD5caculator::MD5caculator(Ifstream &in) {
+// Construct a MD5Caculator object with a file.
+MD5Caculator::MD5Caculator(Ifstream &in) {
 	reset();
 	update(in);
 }
 
-RES_CODE MD5caculator::digest(MD5& md5) {
+RES_CODE MD5Caculator::digest(MD5& md5) {
 	if (!_finished) {
 		_finished = true;
 		final();
@@ -103,7 +103,7 @@ RES_CODE MD5caculator::digest(MD5& md5) {
   return S_OK;
 }
 
-const Byte* MD5caculator::digest() {
+const Byte* MD5Caculator::digest() {
 	if (!_finished) {
 		_finished = true;
 		final();
@@ -113,7 +113,7 @@ const Byte* MD5caculator::digest() {
 }
 
 // Reset the calculate state
-RES_CODE MD5caculator::reset() {
+RES_CODE MD5Caculator::reset() {
 	_finished = false;
 	// reset number of bits.
 	_count[0] = _count[1] = 0;
@@ -127,17 +127,17 @@ RES_CODE MD5caculator::reset() {
 }
 
 // Updating the context with a input buffer.
-RES_CODE MD5caculator::update(const void* input, size_t length) {
+RES_CODE MD5Caculator::update(const void* input, size_t length) {
 	return update((const Byte*)input, length);
 }
 
 // Updating the context with a string.
-RES_CODE MD5caculator::update(const String& str) {
+RES_CODE MD5Caculator::update(const String& str) {
 	return update((const Byte*)str.c_str(), str.length());
 }
 
 // Updating the context with a file.
-RES_CODE MD5caculator::update(Ifstream& in) {
+RES_CODE MD5Caculator::update(Ifstream& in) {
 	if (!in) {
 		return S_STREAM_NOT_EXIST;
   }
@@ -168,7 +168,7 @@ RES_CODE MD5caculator::update(Ifstream& in) {
 
 // MD5 block update operation. Continues an MD5 message-digest operation, 
 // processing another message block, and updating the context.
-RES_CODE MD5caculator::update(const Byte* input, size_t length) {
+RES_CODE MD5Caculator::update(const Byte* input, size_t length) {
   if (!input || length <= 0) {
     return S_NO_INPUT;
   }
@@ -213,7 +213,7 @@ RES_CODE MD5caculator::update(const Byte* input, size_t length) {
 
 // MD5 finalization. Ends an MD5 message-_digest operation, writing the
 // the message _digest and zeroizing the context.
-RES_CODE MD5caculator::final() {
+RES_CODE MD5Caculator::final() {
 	Byte bits[8];
 	Ulong old_state[4];
 	Ulong old_count[2];
@@ -246,7 +246,7 @@ RES_CODE MD5caculator::final() {
 }
 
 // MD5 basic transformation. Transforms _state based on block.
-RES_CODE MD5caculator::transform(const Byte block[64]) {
+RES_CODE MD5Caculator::transform(const Byte block[64]) {
 	Ulong a = _state[0];
   Ulong b = _state[1];
   Ulong c = _state[2];
@@ -337,7 +337,7 @@ RES_CODE MD5caculator::transform(const Byte block[64]) {
 
 // Encode input (Ulong) into output (Byte).
 // Assume length is a multiple of 4.
-RES_CODE MD5caculator::encode(const Ulong* input, 
+RES_CODE MD5Caculator::encode(const Ulong* input, 
     Byte* output, size_t length) {
 	for (size_t i = 0, j = 0; j < length; ++i, j += 4) {
 		output[j] = (Byte)(input[i] & 0xff);
@@ -351,7 +351,7 @@ RES_CODE MD5caculator::encode(const Ulong* input,
 
 // Decodes input (Byte) into output (Ulong).
 // Assumes length is a multiple of 4.
-RES_CODE MD5caculator::decode(const Byte* input, 
+RES_CODE MD5Caculator::decode(const Byte* input, 
     Ulong* output, size_t length) {
 	for (size_t i = 0, j = 0; j < length; ++i, j += 4) {	
 		output[i] = ((Ulong)input[j]) | (((Ulong)input[j + 1]) << 8) | 
@@ -362,7 +362,7 @@ RES_CODE MD5caculator::decode(const Byte* input,
 }
 
 // Convert byte array to hex string.
-RES_CODE MD5caculator::bytes_to_hexstring(const Byte* input, 
+RES_CODE MD5Caculator::bytes_to_hexstring(const Byte* input, 
     size_t length, String& str) {
   str = "";
 	str.reserve(length << 1);
@@ -379,7 +379,7 @@ RES_CODE MD5caculator::bytes_to_hexstring(const Byte* input,
 }
 
 // Convert digest to string value
-RES_CODE MD5caculator::to_string(String& str) {
+RES_CODE MD5Caculator::to_string(String& str) {
 	return bytes_to_hexstring(digest(), 16, str);
 }
 

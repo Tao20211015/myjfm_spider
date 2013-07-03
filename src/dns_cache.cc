@@ -5,20 +5,20 @@
 #include <netdb.h>
 
 #include "config.h"
-#include "dnscache.h"
+#include "dns_cache.h"
 #include "log.h"
 
 _START_MYJFM_NAMESPACE_
 
-Dnscache::Dnscache() {
+DnsCache::DnsCache() {
   _dns.clear();
 }
 
-Dnscache::~Dnscache() {
+DnsCache::~DnsCache() {
   _dns.clear();
 }
 
-RES_CODE Dnscache::find(String& site, Vector<String>& ips) {
+RES_CODE DnsCache::find(String& site, Vector<String>& ips) {
   ips.clear();
   Map<String, Vector<String> >::iterator itr = _dns.find(site);
 
@@ -34,7 +34,7 @@ RES_CODE Dnscache::find(String& site, Vector<String>& ips) {
   return S_OK;
 }
 
-RES_CODE Dnscache::insert(String& site, Vector<String>& ips) {
+RES_CODE DnsCache::insert(String& site, Vector<String>& ips) {
   Vector<String> tmp;
   if (find(site, tmp)) {
     return S_ALREADY_EXIST;
@@ -45,7 +45,7 @@ RES_CODE Dnscache::insert(String& site, Vector<String>& ips) {
   return S_OK;
 }
 
-RES_CODE Dnscache::update(String& site, Vector<String>& ips) {
+RES_CODE DnsCache::update(String& site, Vector<String>& ips) {
   Vector<String> tmp;
   if (!find(site, tmp)) {
     return S_NOT_FOUND;
@@ -55,7 +55,7 @@ RES_CODE Dnscache::update(String& site, Vector<String>& ips) {
   return S_OK;
 }
 
-RES_CODE Dnscache::dns_query(String& site, 
+RES_CODE DnsCache::dns_query(String& site, 
     Vector<String>& ips, IPTYPE& ip_type) {
   ips.clear();
 

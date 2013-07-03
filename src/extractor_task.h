@@ -1,15 +1,15 @@
-#ifndef _EXTRACTTASK_H_
-#define _EXTRACTTASK_H_
+#ifndef _EXTRACTOR_TASK_H_
+#define _EXTRACTOR_TASK_H_
 
 #include "config.h"
 #include "task.h"
 
 _START_MYJFM_NAMESPACE_
 
-class Extracttask : public Task {
+class ExtractorTask : public Task {
 public:
-  Extracttask(int id);
-  ~Extracttask();
+  ExtractorTask(int id);
+  ~ExtractorTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:

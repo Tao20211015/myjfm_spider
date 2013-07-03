@@ -1,13 +1,13 @@
 #include "config.h"
 #include "url.h"
 #include "site.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
 Url::Url(const String& url) : 
   _protocol(PRO_DUMMY), 
-  _site(Sharedpointer<Site>(NULL)), 
+  _site(SharedPointer<Site>(NULL)), 
   _file(""), 
   _args(""), 
   has_get_md5(0) {
@@ -34,10 +34,10 @@ Url::Url(const String& url) :
     _file = "";
     _args = "";
     site = url.substr(protocol_pos + 3);
-    _site = Sharedpointer<Site>(new Site(site));
+    _site = SharedPointer<Site>(new Site(site));
   } else {
     site = url.substr(protocol_pos + 3, site_pos - protocol_pos - 3);
-    _site = Sharedpointer<Site>(new Site(site));
+    _site = SharedPointer<Site>(new Site(site));
     String_size_t file_pos = url.find("?", site_pos);
     if (file_pos == String_tail) {
       _file = url.substr(site_pos);
@@ -64,14 +64,14 @@ void Url::set_protocol(Protocol protocol) {
 }
 */
 
-RES_CODE Url::get_site(Sharedpointer<Site>& site) {
+RES_CODE Url::get_site(SharedPointer<Site>& site) {
   site = _site;
 
   return S_OK;
 }
 
 /*
-void Url::set_site(Sharedpointer<Site>& site) {
+void Url::set_site(SharedPointer<Site>& site) {
   _site = site;
   has_get_md5 = 0;
 }
@@ -133,7 +133,7 @@ RES_CODE Url::get_md5(MD5& md5) {
 
   url += site_name + file + args;
 
-  MD5caculator md5caculator(url);
+  MD5Caculator md5caculator(url);
   md5caculator.digest(_md5);
   md5 = _md5;
   has_get_md5 = 1;

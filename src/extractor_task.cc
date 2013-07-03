@@ -3,21 +3,18 @@
 
 #include "config.h"
 #include "global.h"
-#include "url.h"
-#include "squeue.h"
-#include "sharedpointer.h"
-#include "extracttask.h"
+#include "extractor_task.h"
 #include "log.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-Extracttask::Extracttask(int id) : _id(id) {}
+ExtractorTask::ExtractorTask(int id) : _id(id) {}
 
-Extracttask::~Extracttask() {}
+ExtractorTask::~ExtractorTask() {}
 
-RES_CODE Extracttask::operator()(void* arg) {
+RES_CODE ExtractorTask::operator()(void* arg) {
   char buffer[100];
   sprintf(buffer, "%s %d", "#Extractor#", _id);
   for (;;) {

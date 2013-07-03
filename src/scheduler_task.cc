@@ -5,18 +5,18 @@
 #include "global.h"
 #include "url.h"
 #include "squeue.h"
-#include "sharedpointer.h"
-#include "scheduletask.h"
+#include "shared_pointer.h"
+#include "scheduler_task.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-Scheduletask::Scheduletask(int id) : _id(id) {}
+SchedulerTask::SchedulerTask(int id) : _id(id) {}
 
-Scheduletask::~Scheduletask() {}
+SchedulerTask::~SchedulerTask() {}
 
-RES_CODE Scheduletask::operator()(void* arg) {
+RES_CODE SchedulerTask::operator()(void* arg) {
   char buffer[100];
   sprintf(buffer, "%s %d", "#Scheduler#", _id);
   for (;;) {
@@ -28,7 +28,7 @@ RES_CODE Scheduletask::operator()(void* arg) {
 }
 
 #if 0
-RES_CODE Scheduletask::operator()(void* arg) {
+RES_CODE SchedulerTask::operator()(void* arg) {
   return S_OK;
 }
 #endif

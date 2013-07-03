@@ -21,13 +21,13 @@ static const unsigned long  _prime_list[_num_primes] = {
 
 // the pure virtual functor class
 template <class T>
-class Hashfunction {
+class HashFunction {
 public:
   virtual hash_size_type operator()(T&) = 0;
-  virtual ~Hashfunction() {}
+  virtual ~HashFunction() {}
 };
 
-class Charphashfunction : Hashfunction<char*> {
+class CharPHashFunction : HashFunction<char*> {
 public:
   virtual hash_size_type operator()(char* s) {
     if (!s) {
@@ -43,10 +43,10 @@ public:
     return h;
   }
   
-  virtual ~Charphashfunction() {}
+  virtual ~CharPHashFunction() {}
 };
 
-class Stringhashfunction : Hashfunction<String> {
+class StringHashFunction : HashFunction<String> {
 public:
   hash_size_type operator()(String& s) {
     hash_size_type h = 0;
@@ -59,96 +59,96 @@ public:
     return h;
   }
 
-  virtual ~Stringhashfunction() {}
+  virtual ~StringHashFunction() {}
 };
 
-class Charhashfunction : Hashfunction<char> {
+class CharHashFunction : HashFunction<char> {
 public:
   virtual hash_size_type operator()(char& s) {
     return hash_size_type(s);
   }
 
-  virtual ~Charhashfunction() {}
+  virtual ~CharHashFunction() {}
 };
 
-class Ucharhashfunction : Hashfunction<unsigned char> {
+class UcharHashFunction : HashFunction<unsigned char> {
   public:
     virtual hash_size_type operator()(unsigned char& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Ucharhashfunction() {}
+    virtual ~UcharHashFunction() {}
 };
 
-class Shorthashfunction : Hashfunction<short> {
+class ShortHashFunction : HashFunction<short> {
   public:
     virtual hash_size_type operator()(short& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Shorthashfunction() {}
+    virtual ~ShortHashFunction() {}
 };
 
-class Ushorthashfunction : Hashfunction<unsigned short> {
+class UshortHashFunction : HashFunction<unsigned short> {
   public:
     virtual hash_size_type operator()(unsigned short& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Ushorthashfunction() {}
+    virtual ~UshortHashFunction() {}
 };
 
-class Inthashfunction : Hashfunction<int> {
+class IntHashFunction : HashFunction<int> {
   public:
     virtual hash_size_type operator()(int& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Inthashfunction() {}
+    virtual ~IntHashFunction() {}
 };
 
-class Uinthashfunction : Hashfunction<unsigned int> {
+class UintHashFunction : HashFunction<unsigned int> {
   public:
     virtual hash_size_type operator()(unsigned int& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Uinthashfunction() {}
+    virtual ~UintHashFunction() {}
 };
 
-class Longhashfunction : Hashfunction<long> {
+class LongHashFunction : HashFunction<long> {
   public:
     virtual hash_size_type operator()(long& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Longhashfunction() {}
+    virtual ~LongHashFunction() {}
 };
 
-class Ulonghashfunction : Hashfunction<unsigned long> {
+class UlongHashFunction : HashFunction<unsigned long> {
   public:
     virtual hash_size_type operator()(unsigned long& s) {
       return hash_size_type(s);
     }
 
-    virtual ~Ulonghashfunction() {}
+    virtual ~UlongHashFunction() {}
 };
 
 template <class T>
-class _hash_list_node {
+class HashListNode {
 public:
-  _hash_list_node(const T& value) {
+  HashListNode(const T& value) {
     _next = NULL;
     // copy constructor
     _value = new T(value);
   }
 
-  ~_hash_list_node() {
+  ~HashListNode() {
     _next = NULL;
     delete _value;
   }
   
-  _hash_list_node *_next;
+  HashListNode *_next;
   T* _value;
 };
 
@@ -156,11 +156,11 @@ public:
 // and
 // should also have the copy constructor
 // and
-// the functor class Hashfunc should has overloaded the operator()
-template <class T, class Hashfunc>
+// the functor class HashFunc should has overloaded the operator()
+template <class T, class HashFunc>
 class Hash : public Shared {
-  typedef _hash_list_node<T> Hashnode;
-  typedef Vector<Hashnode*> Buckets;
+  typedef HashListNode<T> HashNode;
+  typedef Vector<HashNode*> Buckets;
 
 public:
   Hash(hash_size_type n) {
@@ -176,7 +176,7 @@ public:
       _buckets_size = _prime_list[_num_primes - 1];
     }
 
-    _buckets.resize(_buckets_size, (Hashnode*)0);
+    _buckets.resize(_buckets_size, (HashNode*)0);
     _rwlocks = new RWlock[_buckets_size];
   }
 
@@ -184,10 +184,10 @@ public:
     int i;
     for (i = 0; i < _buckets_size; ++i) {
       _rwlocks[i].wrlock();
-      Hashnode* p = _buckets[i];
+      HashNode* p = _buckets[i];
 
       while (p) {
-        Hashnode* q = p;
+        HashNode* q = p;
         p = p->_next;
         delete q;
       }
@@ -211,12 +211,12 @@ public:
   RES_CODE insert(T& value) {
     hash_size_type key = get_key(value);
     if (_buckets[key] == NULL) {
-      _buckets[key] = new Hashnode(value);
+      _buckets[key] = new HashNode(value);
 
       return S_OK;
     }
 
-    Hashnode* nodep = _buckets[key];
+    HashNode* nodep = _buckets[key];
 
     while (nodep) {
       if (*(nodep->_value) == value) {
@@ -226,7 +226,7 @@ public:
       nodep = nodep->_next;
     }
 
-    nodep = new Hashnode(value);
+    nodep = new HashNode(value);
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
 
@@ -239,12 +239,12 @@ public:
     _rwlocks[key].wrlock();
 
     if (_buckets[key] == NULL) {
-      _buckets[key] = new Hashnode(value);
+      _buckets[key] = new HashNode(value);
       _rwlocks[key].unlock();
       return S_OK;
     }
 
-    Hashnode* nodep = _buckets[key];
+    HashNode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
         _rwlocks[key].unlock();
@@ -254,7 +254,7 @@ public:
       nodep = nodep->_next;
     }
 
-    nodep = new Hashnode(value);
+    nodep = new HashNode(value);
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
 
@@ -269,7 +269,7 @@ public:
       return S_NOT_EXIST;
     }
 
-    Hashnode* nodep = _buckets[key];
+    HashNode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
         return S_EXIST;
@@ -290,7 +290,7 @@ public:
       return S_NOT_EXIST;
     }
 
-    Hashnode* nodep = _buckets[key];
+    HashNode* nodep = _buckets[key];
 
     while (nodep) {
       if (*(nodep->_value) == value) {
@@ -305,7 +305,7 @@ public:
   }
 
 private:
-  Hashfunc _hasher;
+  HashFunc _hasher;
 
   hash_size_type get_key(T& value) {
     return get_key(bucket_num(value));

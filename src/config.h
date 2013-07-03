@@ -75,7 +75,7 @@ enum RES_CODE {
   S_BAD_IP_TYPE = 0x8, 
   S_HAS_SET = 0x10, 
 
-  // Dnscache member functions use these
+  // DnsCache member functions use these
   S_NOT_FOUND = 0x4, 
   S_ALREADY_EXIST = 0x00040000, //Hash member functions also use it
   S_UNKNOWN_PROTOCOL = 0x00080000, //Site member functions also use it

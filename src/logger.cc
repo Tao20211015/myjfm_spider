@@ -1,9 +1,9 @@
 #include "config.h"
 #include "log.h"
 #include "logger.h"
-#include "loggertask.h"
+#include "logger_task.h"
 #include "global.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 #include "thread.h"
 
 extern _MYJFM_NAMESPACE_::Global *glob;
@@ -137,7 +137,7 @@ RES_CODE Logger::log(Message& msg) {
     _primary.swap(_secondary);
     _mutex.unlock();
 
-    Sharedpointer<Loggertask> task(new Loggertask(this));
+    SharedPointer<LoggerTask> task(new LoggerTask(this));
     Thread thread(task);
 
     if (thread.start() != S_OK) {

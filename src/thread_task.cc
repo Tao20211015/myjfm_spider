@@ -1,19 +1,19 @@
 #include "config.h"
 #include "task.h"
-#include "threadtask.h"
-#include "threadpool.h"
-#include "sharedpointer.h"
+#include "thread_task.h"
+#include "thread_pool.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
-Threadtask::Threadtask(Threadpool* threadpool) : _threadpool(threadpool) {}
+ThreadTask::ThreadTask(ThreadPool* threadpool) : _threadpool(threadpool) {}
 
 // This functor get the task from the _tasks
 // It never stops unless the parent thread canceled it
-RES_CODE Threadtask::operator()(void* arg) {
+RES_CODE ThreadTask::operator()(void* arg) {
   if (_threadpool) {
     for(;;) {
-      Sharedpointer<Task> task;
+      SharedPointer<Task> task;
       // if there is no task, it will block
       _threadpool->get_task(task);
       if (!task.is_null()) {

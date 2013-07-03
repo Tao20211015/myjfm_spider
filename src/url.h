@@ -5,7 +5,7 @@
 #include "shared.h"
 #include "site.h"
 #include "md5.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -17,7 +17,7 @@ public:
   RES_CODE get_protocol(Protocol&);
   //void set_protocol(Protocol);
 
-  RES_CODE get_site(Sharedpointer<Site>&);
+  RES_CODE get_site(SharedPointer<Site>&);
   //void set_site(Site&);
 
   RES_CODE get_file(String&);
@@ -30,7 +30,7 @@ public:
 
 private:
   Protocol _protocol;
-  Sharedpointer<Site> _site;
+  SharedPointer<Site> _site;
   String _file;
   String _args;
 

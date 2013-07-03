@@ -1,19 +1,19 @@
 #include "config.h"
 #include "task.h"
 #include "thread.h"
-#include "threadpool.h"
-#include "threadtask.h"
-#include "sharedpointer.h"
+#include "thread_pool.h"
+#include "thread_task.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
-Threadpool::Threadpool(int n) : _n(n), _state(CONSTRUCTED) {}
+ThreadPool::ThreadPool(int n) : _n(n), _state(CONSTRUCTED) {}
 
-Threadpool::~Threadpool() {
+ThreadPool::~ThreadPool() {
   stop();
 }
 
-RES_CODE Threadpool::init() {
+RES_CODE ThreadPool::init() {
   int retry = 0;
 
   if (_state == CONSTRUCTED) {
@@ -34,7 +34,7 @@ RES_CODE Threadpool::init() {
   return S_NOT_CONSTRUCTED;
 }
 
-RES_CODE Threadpool::stop() {
+RES_CODE ThreadPool::stop() {
   int i;
   for (i = 0; i < _threads.size(); ++i) {
     _threads[i]->stop_blocking();
@@ -43,12 +43,12 @@ RES_CODE Threadpool::stop() {
   return S_OK;
 }
 
-RES_CODE Threadpool::size(int& s) {
+RES_CODE ThreadPool::size(int& s) {
   s = _n;
   return S_OK;
 }
 
-RES_CODE Threadpool::add_task(Sharedpointer<Task> task) {
+RES_CODE ThreadPool::add_task(SharedPointer<Task> task) {
   if (!task.is_null()) {
     return _tasks.push(task);
   }
@@ -56,13 +56,13 @@ RES_CODE Threadpool::add_task(Sharedpointer<Task> task) {
   return S_BAD_ARG;
 }
 
-RES_CODE Threadpool::get_task(Sharedpointer<Task>& task) {
+RES_CODE ThreadPool::get_task(SharedPointer<Task>& task) {
   return _tasks.pop(task);
 }
 
-RES_CODE Threadpool::add_worker() {
-  Sharedpointer<Threadtask> threadtask(new Threadtask(this));
-  Sharedpointer<Thread> thread = Threadfactory::create_thread(threadtask);
+RES_CODE ThreadPool::add_worker() {
+  SharedPointer<ThreadTask> threadtask(new ThreadTask(this));
+  SharedPointer<Thread> thread = ThreadFactory::create_thread(threadtask);
 
   if (thread.is_null()) {
     return S_THREAD_CREATE_FAILED;

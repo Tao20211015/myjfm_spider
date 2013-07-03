@@ -5,11 +5,11 @@
 #include "config.h"
 #include "global.h"
 #include "utility.h"
-#include "downloadtask.h"
-#include "extracttask.h"
-#include "scheduletask.h"
-#include "threadpool.h"
-#include "sharedpointer.h"
+#include "downloader_task.h"
+#include "extractor_task.h"
+#include "scheduler_task.h"
+#include "thread_pool.h"
+#include "shared_pointer.h"
 
 // the global variable
 // contains many information of the server
@@ -18,14 +18,14 @@
 // init(config_file) member function to init the object
 _MYJFM_NAMESPACE_::Global *glob = NULL;
 
-typedef _MYJFM_NAMESPACE_::Threadpool Threadpool;
-typedef _MYJFM_NAMESPACE_::Sharedpointer<Threadpool> Threadpoolptr;
-typedef _MYJFM_NAMESPACE_::Downloadtask Downloadtask;
-typedef _MYJFM_NAMESPACE_::Sharedpointer<Downloadtask> Downloadtaskptr;
-typedef _MYJFM_NAMESPACE_::Extracttask Extracttask;
-typedef _MYJFM_NAMESPACE_::Sharedpointer<Extracttask> Extracttaskptr;
-typedef _MYJFM_NAMESPACE_::Scheduletask Scheduletask;
-typedef _MYJFM_NAMESPACE_::Sharedpointer<Scheduletask> Scheduletaskptr;
+typedef _MYJFM_NAMESPACE_::ThreadPool ThreadPool;
+typedef _MYJFM_NAMESPACE_::SharedPointer<ThreadPool> ThreadPoolPtr;
+typedef _MYJFM_NAMESPACE_::DownloaderTask DownloaderTask;
+typedef _MYJFM_NAMESPACE_::SharedPointer<DownloaderTask> DownloaderTaskPtr;
+typedef _MYJFM_NAMESPACE_::ExtractorTask ExtractorTask;
+typedef _MYJFM_NAMESPACE_::SharedPointer<ExtractorTask> ExtractorTaskPtr;
+typedef _MYJFM_NAMESPACE_::SchedulerTask SchedulerTask;
+typedef _MYJFM_NAMESPACE_::SharedPointer<SchedulerTask> SchedulerTaskPtr;
 
 RES_CODE usage(char *argv0) {
   Cerr << "[Usage] " << argv0 << " [-f configure_file_name]" << Endl;
@@ -87,27 +87,27 @@ int main(int argc, char *argv[]) {
   int scheduler_num = 0;
   glob->get_scheduler_num(scheduler_num);
 
-  Threadpoolptr downloader_threadpool(new Threadpool(downloader_num));
+  ThreadPoolPtr downloader_threadpool(new ThreadPool(downloader_num));
   downloader_threadpool->init();
 
-  Threadpoolptr extractor_threadpool(new Threadpool(extractor_num));
+  ThreadPoolPtr extractor_threadpool(new ThreadPool(extractor_num));
   extractor_threadpool->init();
 
-  Threadpoolptr scheduler_threadpool(new Threadpool(scheduler_num));
+  ThreadPoolPtr scheduler_threadpool(new ThreadPool(scheduler_num));
   scheduler_threadpool->init();
 
   for (i = 0; i < downloader_num; ++i) {
-    Downloadtaskptr task(new Downloadtask(i));
+    DownloaderTaskPtr task(new DownloaderTask(i));
     downloader_threadpool->add_task(task);
   }
 
   for (i = 0; i < extractor_num; ++i) {
-    Extracttaskptr task(new Extracttask(i));
+    ExtractorTaskPtr task(new ExtractorTask(i));
     extractor_threadpool->add_task(task);
   }
 
   for (i = 0; i < scheduler_num; ++i) {
-    Scheduletaskptr task(new Scheduletask(i));
+    SchedulerTaskPtr task(new SchedulerTask(i));
     scheduler_threadpool->add_task(task);
   }
 

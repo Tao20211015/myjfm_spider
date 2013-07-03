@@ -1,13 +1,13 @@
 #include "config.h"
-#include "loggertask.h"
+#include "logger_task.h"
 
 _START_MYJFM_NAMESPACE_
 
-Loggertask::Loggertask(Logger* const logger) : _logger(logger) {}
+LoggerTask::LoggerTask(Logger* const logger) : _logger(logger) {}
 
-Loggertask::~Loggertask() {}
+LoggerTask::~LoggerTask() {}
 
-RES_CODE Loggertask::operator()(void* arg) {
+RES_CODE LoggerTask::operator()(void* arg) {
   if (!_logger || !(_logger->_log) || !(_logger->_err)) {
     return S_BAD_ARG;
   }

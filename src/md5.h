@@ -20,15 +20,15 @@ struct MD5 {
 };
 
 /* MD5caculator declaration. */
-class MD5caculator {
+class MD5Caculator {
 public:
   typedef unsigned char Byte;
   typedef unsigned long Ulong;
 
-  MD5caculator();
-  MD5caculator(const void*, size_t);
-	MD5caculator(const String&);
-	MD5caculator(Ifstream&);
+  MD5Caculator();
+  MD5Caculator(const void*, size_t);
+	MD5Caculator(const String&);
+	MD5Caculator(Ifstream&);
 
 	RES_CODE update(const void*, size_t);
 	RES_CODE update(const String&);
@@ -38,8 +38,8 @@ public:
 	RES_CODE reset();
 
 private:
-	MD5caculator(const MD5caculator&);
-	MD5caculator& operator=(const MD5caculator&);
+	MD5Caculator(const MD5Caculator&);
+	MD5Caculator& operator=(const MD5Caculator&);
 
 	RES_CODE update(const Byte*, size_t);
 	RES_CODE final();

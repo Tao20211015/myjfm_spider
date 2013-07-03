@@ -2,15 +2,15 @@
 
 #include "config.h"
 #include "hash.h"
-#include "sharedpointer.h"
+#include "shared_pointer.h"
 
-typedef _MYJFM_NAMESPACE_::Stringhashfunction Stringhashfunction;
-typedef _MYJFM_NAMESPACE_::Hash<String, Stringhashfunction> Stringhash;
-typedef _MYJFM_NAMESPACE_::Sharedpointer<Stringhash> Sharedpointerhash;
+typedef _MYJFM_NAMESPACE_::StringHashFunction StringHashFunction;
+typedef _MYJFM_NAMESPACE_::Hash<String, StringHashFunction> StringHash;
+typedef _MYJFM_NAMESPACE_::SharedPointer<StringHash> SharedPointerHash;
 
 int main() {
-  Sharedpointerhash htablep(new Stringhash(10));
-  //Stringhash htable(10);
+  SharedPointerHash htablep(new StringHash(10));
+  //StringHash htable(10);
   String str("hashtable");
   assert(htablep->is_exist(str) == S_NOT_EXIST);
   assert(htablep->insert(str) == S_OK);

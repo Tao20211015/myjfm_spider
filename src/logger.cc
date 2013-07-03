@@ -1,3 +1,5 @@
+#include <stdlib.h>
+
 #include "config.h"
 #include "log.h"
 #include "logger.h"
@@ -13,12 +15,43 @@ _START_MYJFM_NAMESPACE_
 Logger::Logger(int threshold) : 
   _threshold(threshold), 
   _log(NULL), 
-  _err(NULL) {
+  _err(NULL), _thread(NULL) {
   _primary.clear();
   _secondary.clear();
 }
 
+// when destruct the logger, all the child threads(the downloaders, 
+// the extractors and the schedulers) have stopped.
+// So only the main thread and the logger thread are living.
 Logger::~Logger() {
+  int i;
+  for (i = 0; i < 5; ++i) {
+    if (_secondary.size() <= 0) {
+      break;
+    }
+
+    sleep(2);
+  }
+
+  // write the log in the _primary buffer onto the disk
+  if (i < 5) {
+    _primary.swap(_secondary);
+    _semaphore.post();
+  }
+
+  // we assume that writing all the remaining logs in the _primary buffer onto 
+  // the disk will take less than 10 seconds
+  for (i = 0; i < 5; ++i) {
+    if (_secondary.size() <= 0) {
+      break;
+    }
+
+    sleep(2);
+  }
+
+  // wait for the thread stopping
+  _thread->stop_blocking();
+
   if (_log && _log != (Ofstream*)&Cout) {
     _log->close();
     delete _log;
@@ -89,6 +122,14 @@ RES_CODE Logger::init() {
       _err = (Ofstream*)&Cerr;
     }
   }
+  
+  SharedPointer<LoggerTask> task(new LoggerTask(this));
+  SharedPointer<Thread> thread(new Thread(task));
+  _thread = thread;
+  
+  if (_thread->start() != S_OK) {
+    return S_FAILED_TO_LOG_ON_DISK;
+  }
 
   return S_OK;
 }
@@ -127,7 +168,7 @@ RES_CODE Logger::log(Message& msg) {
   _primary.push_back(msg);
 
   if (_primary.size() > _threshold) {
-    // the Writer is writing the log on the disk
+    // the Writer thread is writing the log on the disk
     // so write it later
     if (_secondary.size() > 0) {
       _mutex.unlock();
@@ -135,16 +176,7 @@ RES_CODE Logger::log(Message& msg) {
     }
     
     _primary.swap(_secondary);
-    _mutex.unlock();
-
-    SharedPointer<LoggerTask> task(new LoggerTask(this));
-    Thread thread(task);
-
-    if (thread.start() != S_OK) {
-      return S_FAILED_TO_LOG_ON_DISK;
-    } else {
-      return S_OK;
-    }
+    _semaphore.post();
   }
 
   _mutex.unlock();

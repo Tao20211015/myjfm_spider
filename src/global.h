@@ -5,6 +5,7 @@
 #include "url.h"
 #include "squeue.h"
 #include "shared_pointer.h"
+#include "thread_pool.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -31,8 +32,16 @@ public:
   RES_CODE get_scheduler_num(int&);
   RES_CODE get_downloader_queue(int, 
       SharedPointer<SQueue<SharedPointer<Url> > >&);
+  RES_CODE set_downloader_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE set_extractor_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE set_scheduler_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE get_downloader_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE get_extractor_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE get_scheduler_threadpool(SharedPointer<ThreadPool>&);
 
   RES_CODE get_logger(Logger*&);
+  int get_to_be_shutdown();
+  RES_CODE set_to_be_shutdown(int);
 
 private:
   RES_CODE load_default_file_types();
@@ -84,6 +93,12 @@ private:
   // downloader queue. Each download thread has one queue.
   // The queue is shared between this downloader and all scheduler threads.
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queues;
+
+  int _to_be_shutdown;
+
+  SharedPointer<ThreadPool> _downloader_threadpool;
+  SharedPointer<ThreadPool> _extractor_threadpool;
+  SharedPointer<ThreadPool> _scheduler_threadpool;
 };
 
 _END_MYJFM_NAMESPACE_

@@ -19,7 +19,7 @@ RES_CODE ThreadPool::init() {
   if (_state == CONSTRUCTED) {
     int i;
     for (i = 0; i < _n; ++i) {
-      if (add_worker()) {
+      if (add_worker() != S_OK) {
         if (retry >= MAX_RETRY) {
           return S_FAIL;
         } else {

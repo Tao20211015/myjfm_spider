@@ -99,9 +99,7 @@ RES_CODE Site::dns() {
   struct hostent* entry = gethostbyname(_site_name.c_str());
 
   if (!entry) {
-    String s = "Can't get the IPs of the site: ";
-    s += _site_name;
-    LOG(ERROR, s.c_str());
+    LOG(ERROR, "Can't get the IPs of the site: %s", _site_name.c_str());
     return S_FAIL;
   }
 

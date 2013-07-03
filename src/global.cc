@@ -26,13 +26,21 @@ Global::Global() :
   _downloader_num(5), 
   _extractor_num(5), 
   _scheduler_num(1), 
-  _logger(NULL) {
+  _logger(NULL), 
+  _to_be_shutdown(0), 
+  _downloader_threadpool(NULL), 
+  _extractor_threadpool(NULL), 
+  _scheduler_threadpool(NULL) {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
 }
 
-Global::~Global() {}
+Global::~Global() {
+  // write all the logs that are still in the buffer onto the disk
+  // and close the log file
+  delete _logger;
+}
 
 RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   if (_has_init) {
@@ -224,6 +232,51 @@ RES_CODE Global::get_scheduler_num(int& num) {
   return S_OK;
 }
 
+RES_CODE Global::set_downloader_threadpool(SharedPointer<ThreadPool>& ptr) {
+  if (ptr.is_null()) {
+    return S_BAD_ARG;
+  }
+
+  _downloader_threadpool = ptr;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_downloader_threadpool(SharedPointer<ThreadPool>& ptr) {
+  ptr = _downloader_threadpool;
+  return S_OK;
+}
+
+RES_CODE Global::set_extractor_threadpool(SharedPointer<ThreadPool>& ptr) {
+  if (ptr.is_null()) {
+    return S_BAD_ARG;
+  }
+
+  _extractor_threadpool = ptr;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_extractor_threadpool(SharedPointer<ThreadPool>& ptr) {
+  ptr = _extractor_threadpool;
+  return S_OK;
+}
+
+RES_CODE Global::set_scheduler_threadpool(SharedPointer<ThreadPool>& ptr) {
+  if (ptr.is_null()) {
+    return S_BAD_ARG;
+  }
+
+  _scheduler_threadpool = ptr;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_scheduler_threadpool(SharedPointer<ThreadPool>& ptr) {
+  ptr = _scheduler_threadpool;
+  return S_OK;
+}
+
 RES_CODE Global::get_cur_path(String& cur_path) {
   CHECK_HAS_INIT();
   cur_path = _cur_path;
@@ -315,6 +368,15 @@ RES_CODE Global::get_logger(Logger*& logger) {
   CHECK_HAS_INIT();
   logger = _logger;
 
+  return S_OK;
+}
+
+int Global::get_to_be_shutdown() {
+  return _to_be_shutdown;
+}
+
+RES_CODE Global::set_to_be_shutdown(int v) {
+  _to_be_shutdown = v;
   return S_OK;
 }
 

@@ -17,10 +17,8 @@ SchedulerTask::SchedulerTask(int id) : _id(id) {}
 SchedulerTask::~SchedulerTask() {}
 
 RES_CODE SchedulerTask::operator()(void* arg) {
-  char buffer[100];
-  sprintf(buffer, "%s %d", "#Scheduler#", _id);
   for (;;) {
-    LOG(INFO, buffer);
+    LOG(INFO, "#Scheduler# %d", _id);
     usleep(1000);
   }
 

@@ -63,9 +63,7 @@ RES_CODE DnsCache::dns_query(String& site,
   struct hostent* entry = gethostbyname(site.c_str());
 
   if (!entry) {
-    String s = "Can't get the IPs of the site: ";
-    s += site;
-    LOG(ERROR, s.c_str());
+    LOG(ERROR, "Can't get the IPs of the site: %s", site.c_str());
     return S_FAIL;
   }
 

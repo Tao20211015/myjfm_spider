@@ -1,3 +1,9 @@
+#include <stdlib.h>
+#include <stdarg.h>
+#include <time.h>
+#include <sys/time.h>
+#include <string.h>
+
 #include "config.h"
 #include "log.h"
 #include "global.h"
@@ -5,14 +11,23 @@
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
-_START_MYJFM_NAMESPACE_
+RES_CODE LOG(LOG_LEVEL level, const char* fmt, ...) {
+  time_t now = time(NULL);
+  va_list ap;
+  char buffer[MAX_LOG_LEN];
 
-RES_CODE LOG(LOG_LEVEL level, const char* str) {
-  Message msg = {level, str};
-  Logger* logger = NULL;
+  strftime(buffer, MAX_LOG_LEN, "[%d %b %H:%M:%S] ", localtime(&now));
+  char *log = buffer + strlen(buffer);
+
+  va_start(ap, fmt);
+  vsnprintf(log, MAX_LOG_LEN - strlen(buffer), fmt, ap);
+  va_end(ap);
+
+  _MYJFM_NAMESPACE_::Message msg = {level, buffer};
+
+  _MYJFM_NAMESPACE_::Logger* logger = NULL;
   glob->get_logger(logger);
+
   return logger->log(msg);
 }
-
-_END_MYJFM_NAMESPACE_
 

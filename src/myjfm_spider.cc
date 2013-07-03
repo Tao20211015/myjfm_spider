@@ -1,8 +1,10 @@
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
+#include <signal.h>
 
 #include "config.h"
+#include "log.h"
 #include "global.h"
 #include "utility.h"
 #include "downloader_task.h"
@@ -72,49 +74,154 @@ RES_CODE parse_args(int argc, char *argv[]) {
   return S_OK;
 }
 
-int main(int argc, char *argv[]) {
+void sig_handler(int sig) {
+  LOG(INFO, "SIGTERM received, scheduling shutting down...");
+  glob->set_to_be_shutdown(1);
+}
+
+void set_sigaction() {
+  signal(SIGHUP, SIG_IGN);
+  signal(SIGPIPE, SIG_IGN);
+
+  struct sigaction act;
+  sigemptyset(&(act.sa_mask));
+  act.sa_flags = SA_NODEFER | SA_ONSTACK | SA_RESETHAND;
+  act.sa_handler = sig_handler;
+
+  sigaction (SIGTERM, &act, NULL);
+  sigaction (SIGINT, &act, NULL);
+}
+
+void init_modules() {
   int i = 0;
-  glob = new _MYJFM_NAMESPACE_::Global();
-
-  parse_args(argc, argv);
-
   int downloader_num = 0;
-  glob->get_downloader_num(downloader_num);
-
   int extractor_num = 0;
-  glob->get_extractor_num(extractor_num);
-
   int scheduler_num = 0;
+
+  glob->get_downloader_num(downloader_num);
+  glob->get_extractor_num(extractor_num);
   glob->get_scheduler_num(scheduler_num);
 
   ThreadPoolPtr downloader_threadpool(new ThreadPool(downloader_num));
-  downloader_threadpool->init();
-
   ThreadPoolPtr extractor_threadpool(new ThreadPool(extractor_num));
-  extractor_threadpool->init();
-
   ThreadPoolPtr scheduler_threadpool(new ThreadPool(scheduler_num));
-  scheduler_threadpool->init();
+
+  String flag = "";
+
+  if (glob->set_downloader_threadpool(downloader_threadpool) != S_OK) {
+    flag = "downloader";
+    goto failed;
+  }
+
+  if (glob->set_extractor_threadpool(extractor_threadpool) != S_OK) {
+    flag = "extractor";
+    goto failed;
+  }
+
+  if (glob->set_scheduler_threadpool(scheduler_threadpool) != S_OK) {
+    flag = "scheduler";
+    goto failed;
+  }
+
+  RES_CODE t;
+  if ((t = downloader_threadpool->init()) != S_OK) {
+    flag = "downloader";
+    goto failed;
+  }
+
+  if (extractor_threadpool->init() != S_OK) {
+    flag = "extractor";
+    goto failed;
+  }
+
+  if (scheduler_threadpool->init() != S_OK) {
+    flag = "scheduler";
+    goto failed;
+  }
 
   for (i = 0; i < downloader_num; ++i) {
     DownloaderTaskPtr task(new DownloaderTask(i));
-    downloader_threadpool->add_task(task);
+
+    if (downloader_threadpool->add_task(task) != S_OK) {
+      flag = "downloader";
+      goto failed;
+    }
   }
 
   for (i = 0; i < extractor_num; ++i) {
     ExtractorTaskPtr task(new ExtractorTask(i));
-    extractor_threadpool->add_task(task);
+
+    if (extractor_threadpool->add_task(task) != S_OK) {
+      flag = "extractor";
+      goto failed;
+    }
   }
 
   for (i = 0; i < scheduler_num; ++i) {
     SchedulerTaskPtr task(new SchedulerTask(i));
-    scheduler_threadpool->add_task(task);
+
+    if (scheduler_threadpool->add_task(task) != S_OK) {
+      flag = "scheduler";
+      goto failed;
+    }
   }
 
-  sleep(1000);
+  return;
 
+failed:
+  LOG(FATAL, 
+      "Failed to start %s threadpool. Server is shutting down...", 
+      flag.c_str());
+  glob->set_to_be_shutdown(1);
+}
+
+void init() {
+  init_modules();
+
+  set_sigaction();
+}
+
+void shutdown() {
+  LOG(INFO, "The server is shutting down...");
+
+  ThreadPoolPtr downloader_threadpool;
+  glob->get_downloader_threadpool(downloader_threadpool);
+
+  if (!downloader_threadpool.is_null()) {
+    downloader_threadpool->stop();
+  }
+
+  ThreadPoolPtr extractor_threadpool;
+  glob->get_extractor_threadpool(extractor_threadpool);
+
+  if (!extractor_threadpool.is_null()) {
+    extractor_threadpool->stop();
+  }
+
+  ThreadPoolPtr scheduler_threadpool;
+  glob->get_scheduler_threadpool(scheduler_threadpool);
+
+  if (!scheduler_threadpool.is_null()) {
+    scheduler_threadpool->stop();
+  }
+
+  // must destruct the glob last
   delete glob;
+}
 
+int main(int argc, char *argv[]) {
+  glob = new _MYJFM_NAMESPACE_::Global();
+
+  parse_args(argc, argv);
+
+  init();
+
+  // the main thread will sleep until the SIGTERM or SIGINT signal happenes
+  while (glob->get_to_be_shutdown() == 0) {
+    pause();
+  }
+
+  shutdown();
   return 0;
 }
 

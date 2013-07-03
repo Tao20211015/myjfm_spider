@@ -18,9 +18,7 @@ class Semaphore {
   } \
   \
   if (func(&_semaphore) != 0) { \
-    String s = #func; \
-    s += "() failed"; \
-    LOG(FATAL, s.c_str()); \
+    LOG(FATAL, "%s() failed", #func); \
     abort(); \
   } \
 } while (0)

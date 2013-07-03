@@ -14,27 +14,31 @@ RES_CODE LoggerTask::operator()(void* arg) {
 
   Vector<Message>::iterator itr;
 
-  for (itr = (_logger->_secondary).begin(); 
-      itr != (_logger->_secondary).end(); ++itr) {
-    switch(itr->_level) {
-      case INFO:
-        (*(_logger->_log)) << "[INFO] " << itr->_msg << Endl;
-        break;
-      case WARNING:
-        (*(_logger->_err)) << "[WARNING] " << itr->_msg << Endl;
-        break;
-      case ERROR:
-        (*(_logger->_err)) << "[ERROR] " << itr->_msg << Endl;
-        break;
-      case FATAL:
-        (*(_logger->_err)) << "[FATAL] " << itr->_msg << Endl;
-        break;
-      default:
-        break;
-    }
-  }
+  for (;;) {
+    (_logger->_semaphore).wait();
 
-  _logger->_secondary.clear();
+    for (itr = (_logger->_secondary).begin(); 
+        itr != (_logger->_secondary).end(); ++itr) {
+      switch(itr->_level) {
+        case INFO:
+          (*(_logger->_log)) << "[INFO] " << itr->_msg << Endl;
+          break;
+        case WARNING:
+          (*(_logger->_err)) << "[WARNING] " << itr->_msg << Endl;
+          break;
+        case ERROR:
+          (*(_logger->_err)) << "[ERROR] " << itr->_msg << Endl;
+          break;
+        case FATAL:
+          (*(_logger->_err)) << "[FATAL] " << itr->_msg << Endl;
+          break;
+        default:
+          break;
+      }
+    }
+
+    _logger->_secondary.clear();
+  }
 
   return S_OK;
 }

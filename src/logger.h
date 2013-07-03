@@ -3,7 +3,10 @@
 
 #include "config.h"
 #include "mutex.h"
+#include "semaphore.h"
 #include "task.h"
+#include "thread.h"
+#include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -34,6 +37,8 @@ private:
   Vector<Message> _primary;
   Vector<Message> _secondary;
   Mutex _mutex;
+  Semaphore _semaphore;
+  SharedPointer<Thread> _thread;
 };
 
 _END_MYJFM_NAMESPACE_

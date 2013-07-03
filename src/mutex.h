@@ -17,9 +17,7 @@ class Mutex {
   } \
   \
   if (func(&_mutex) != 0) { \
-    String s = #func; \
-    s += "() failed"; \
-    LOG(FATAL, s.c_str()); \
+    LOG(FATAL, "%s() failed", #func); \
     abort(); \
   } \
 } while (0)

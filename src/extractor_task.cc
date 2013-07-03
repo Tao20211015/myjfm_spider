@@ -15,10 +15,8 @@ ExtractorTask::ExtractorTask(int id) : _id(id) {}
 ExtractorTask::~ExtractorTask() {}
 
 RES_CODE ExtractorTask::operator()(void* arg) {
-  char buffer[100];
-  sprintf(buffer, "%s %d", "#Extractor#", _id);
   for (;;) {
-    LOG(INFO, buffer);
+    LOG(INFO, "#Extractor# %d", _id);
     usleep(1000);
   }
 

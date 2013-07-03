@@ -32,6 +32,8 @@
 
 #define Ofstream std::ofstream
 
+#define MAX_LOG_LEN 1024
+
 enum LOG_LEVEL {
   LOG_DUMMY = 0x0, 
   INFO = 0x1, 
@@ -66,7 +68,7 @@ enum RES_CODE {
   S_EXIST = 0x4, 
   S_NOT_EXIST = 0x8, 
 
-  // MD5caculator member functions use these
+  // MD5Caculator member functions use these
   S_STREAM_NOT_EXIST = 0x4, 
   S_NO_INPUT = 0x00040000, // Site member functions also use it
 
@@ -83,15 +85,16 @@ enum RES_CODE {
   // Thread member functions use these
   S_HAS_STARTED = 0x4, 
   S_SET_ATTR_FAILED = 0x8, 
-  S_THREAD_CREATE_FAILED = 0x00040000, //Threadpool member functions also use it
+  S_THREAD_CREATE_FAILED = 0x00040000, //ThreadPool member functions also use it
   S_NOT_RUNNING = 0x20, 
   S_JOIN_FAILED = 0x40, 
   S_CANCEL_FAILED = 0x80, 
   S_UNKOWN_STATE = 0x100, 
 
-  // Threadpool member functions use these
+  // ThreadPool member functions use these
   S_NOT_CONSTRUCTED = 0x4, 
-  S_BAD_ARG = 0x00040000, // Loggertask member functions also use these
+  // LoggerTask and Global member functions also use these
+  S_BAD_ARG = 0x00040000, 
 
   // Url member functions use these
   S_INVALID_URL = 0x4, 

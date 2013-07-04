@@ -1,0 +1,26 @@
+#!/bin/sh
+
+echo
+echo 'Starting the server...'
+sleep 1
+
+if [ -e myjfm_spider.pid ]; then
+  echo
+  echo 'Another myjfm_spider server is running.'
+  echo 'Please stop it first.'
+  exit 1
+fi
+
+nohup ./myjfm_spider -f myjfm_spider.conf &
+
+if [ $? -eq 0 ]; then
+  echo
+  echo 'Start OK!'
+  exit 0
+else
+  echo
+  echo 'Failed!'
+  echo 'Some errors occured, please check the err.txt.'
+  exit 1
+fi
+

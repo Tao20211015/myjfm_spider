@@ -57,7 +57,7 @@ RES_CODE parse_args(int argc, char *argv[]) {
   String cur_path(buffer);
 
   if (argc == 1) {
-    String full_config_file_name = cur_path + "/myjfmspider.conf";
+    String full_config_file_name = cur_path + "/myjfm_spider.conf";
     load_config(cur_path, full_config_file_name);
   } else if (argc == 3 && !strcmp(argv[1], "-f")) {
     load_config(cur_path, 
@@ -175,8 +175,47 @@ failed:
   glob->set_to_be_shutdown(1);
 }
 
+// create the myjfm_spider.pid file in the current directory
+void create_pid_file() {
+  FILE* fp = NULL;
+  String cur_path = "";
+  glob->get_cur_path(cur_path);
+
+  if (cur_path == "") {
+    cur_path = "myjfm_spider.pid";
+  } else {
+    cur_path += "/myjfm_spider.pid";
+  }
+  
+  fp = fopen(cur_path.c_str(), "w");
+
+  if (fp) {
+    fprintf(fp, "%d\n", (int)getpid());
+    fclose(fp);
+  } else {
+    LOG(WARNING, 
+        "cannot create the myjfm_spider.pid file in current directory");
+  }
+}
+
+// delete the myjfm_spider.pid file
+void delete_pid_file() {
+  String cur_path = "";
+  glob->get_cur_path(cur_path);
+
+  if (cur_path == "") {
+    cur_path = "myjfm_spider.pid";
+  } else {
+    cur_path += "/myjfm_spider.pid";
+  }
+  
+  unlink(cur_path.c_str());
+}
+
 void init() {
   init_modules();
+
+  create_pid_file();
 
   set_sigaction();
 }
@@ -204,6 +243,8 @@ void shutdown() {
   if (!scheduler_threadpool.is_null()) {
     scheduler_threadpool->stop();
   }
+
+  delete_pid_file();
 
   // must destruct the glob last
   delete glob;

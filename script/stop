@@ -1,0 +1,28 @@
+#!/bin/sh
+
+echo
+echo 'Stopping the server...'
+sleep 1
+
+if [ ! -e myjfm_spider.pid ]; then
+  echo
+  echo 'cannot find the myjfm_spider.pid file on current directory.'
+  echo 'the server may not be running.'
+  exit 1
+fi
+
+PID=`cat myjfm_spider.pid`
+
+kill -15 $PID
+
+if [ $? -eq 0 ]; then
+  echo
+  echo 'Stop OK!'
+  exit 0
+else
+  echo
+  echo 'Failed!'
+  echo 'Please check if the myjfm_spider server is running.'
+  exit 1
+fi
+

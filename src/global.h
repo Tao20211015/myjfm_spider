@@ -16,7 +16,7 @@ public:
   Global();
   ~Global();
 
-  RES_CODE init(String& v_cur_path, String& config_file_name);
+  RES_CODE init(String&, String&);
   RES_CODE parse_config();
 
   // for consistency, we use reference to bring back what we want
@@ -46,13 +46,13 @@ public:
 private:
   RES_CODE load_default_file_types();
   RES_CODE set_cur_path(String&);
-  RES_CODE set_seed_urls(Vector<String>& seed_urls);
-  RES_CODE set_file_types(Vector<String>& file_types);
-  RES_CODE set_save_path(String& path);
-  RES_CODE set_depth(String& dep);
-  RES_CODE set_downloader_num(String& downloader_num);
-  RES_CODE set_extractor_num(String& extractor_num);
-  RES_CODE set_scheduler_num(String& scheduler_num);
+  RES_CODE set_seed_urls(Vector<String>&);
+  RES_CODE set_file_types(Vector<String>&);
+  RES_CODE set_save_path(String&);
+  RES_CODE set_depth(String&);
+  RES_CODE set_downloader_num(String&);
+  RES_CODE set_extractor_num(String&);
+  RES_CODE set_scheduler_num(String&);
 
   // current work path
   String _cur_path;

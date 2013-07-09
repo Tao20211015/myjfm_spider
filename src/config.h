@@ -102,7 +102,10 @@ enum RES_CODE {
   //Logger member functions use these
   S_INVALID_LOG = 0x4, 
   S_IS_LOGGING = 0x8, 
-  S_FAILED_TO_LOG_ON_DISK = 0x10
+  S_FAILED_TO_LOG_ON_DISK = 0x10, 
+
+  // EventLoop member functions use these
+  S_EPOLL_CREATE_FAILED = 0x4
 };
 
 #endif

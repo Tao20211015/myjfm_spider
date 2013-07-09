@@ -37,6 +37,7 @@ public:
           delete _p;
         }
       }
+
       _p = r._p;
       INC_REF;
     }
@@ -50,6 +51,7 @@ public:
         if (flag) {
           delete _p;
         }
+
         _p = NULL;
       }
     }

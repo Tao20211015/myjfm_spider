@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * conditional.h - encapsulated the linux conditional API
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _CONDITIONAL_H_
 #define _CONDITIONAL_H_
 

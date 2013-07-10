@@ -71,14 +71,14 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   parse_config();
 
   // initialize the url queue
-  _urls_queue = 
+  _url_queue = 
     SharedPointer<SQueue<SharedPointer<Url> > >
     (new SQueue<SharedPointer<Url> >());
 
   int i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
     SharedPointer<Url> url_p(new Url(_seed_urls[i]));
-    _urls_queue->push(url_p);
+    _url_queue->push(url_p);
   }
 
   // initialize all the downloader queues
@@ -361,6 +361,13 @@ RES_CODE Global::get_downloader_queue(int id,
   }
 
   queue = _downloader_queues[id];
+
+  return S_OK;
+}
+
+RES_CODE Global::get_url_queue(
+    SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
+  queue = _url_queue;
 
   return S_OK;
 }

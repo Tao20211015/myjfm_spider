@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * event_loop.cc - the event-driven mechanism implementation
+ * At present, we do not use event-driven mechanism to set up the skeleton of
+ * our software. So, this class is not in use.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <string.h>
 #include <sys/epoll.h>
 #include <stdlib.h>

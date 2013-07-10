@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * dns_cache.cc - cache the mapping from site to ips
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _DNS_CACHE_H_
 #define _DNS_CACHE_H_
 

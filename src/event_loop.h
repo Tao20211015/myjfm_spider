@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * event_loop.h - the event-driven mechanism implementation
+ * At present, we do not use event-driven mechanism to set up the skeleton of
+ * our software. So, this class is not in use.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _EVENT_LOOP_H_
 #define _EVENT_LOOP_H_
 

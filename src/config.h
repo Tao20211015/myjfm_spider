@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * config.h - the declaration of macros and constants used by all other classes
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _CONFIG_H_
 #define _CONFIG_H_
 
@@ -6,6 +13,7 @@
 #include <queue>
 #include <fstream>
 #include <iostream>
+#include <sstream>
 #include <map>
 
 #define _MYJFM_NAMESPACE_ myjfm
@@ -22,6 +30,7 @@
 #define String_size_t String::size_type
 #define String_tail String::npos
 
+#define Stringstream std::stringstream
 #define Ifstream std::ifstream
 #define Stream_size std::streamsize
 

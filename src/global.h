@@ -27,19 +27,26 @@ public:
   RES_CODE set_err_path(String& path);
   RES_CODE get_save_path(String&);
   RES_CODE get_depth(int&);
+
   RES_CODE get_downloader_num(int&);
   RES_CODE get_extractor_num(int&);
   RES_CODE get_scheduler_num(int&);
+
   RES_CODE get_downloader_queue(int, 
       SharedPointer<SQueue<SharedPointer<Url> > >&);
+
   RES_CODE set_downloader_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE set_extractor_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE set_scheduler_threadpool(SharedPointer<ThreadPool>&);
+
   RES_CODE get_downloader_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE get_extractor_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE get_scheduler_threadpool(SharedPointer<ThreadPool>&);
 
+  RES_CODE get_url_queue(SharedPointer<SQueue<SharedPointer<Url> > >&);
+
   RES_CODE get_logger(Logger*&);
+
   int get_to_be_shutdown();
   RES_CODE set_to_be_shutdown(int);
 
@@ -88,7 +95,7 @@ private:
   // url queue. This queue is used by all threads.
   // All download threads will produce urls, and, 
   // the scheduler threads consume the urls.
-  SharedPointer<SQueue<SharedPointer<Url> > > _urls_queue;
+  SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
 
   // downloader queue. Each download thread has one queue.
   // The queue is shared between this downloader and all scheduler threads.

@@ -14,6 +14,11 @@ public:
 
 private:
   int _id;
+  int _downloader_num;
+  SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
+  Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queue;
+
+  RES_CODE init();
 };
 
 _END_MYJFM_NAMESPACE_

@@ -33,6 +33,39 @@ public:
       Vector<String>& container);
   
   static String get_file_full_path(String path);
+
+  template <class T>
+  static RES_CODE str2integer(const char* str, T& number) {
+    if (!str) {
+      return S_FAIL;
+    }
+    
+    Stringstream ss;
+    T tmp;
+    int ret = 0;
+    ss << str;
+    if (ss.str().length() > 0) {
+      try {
+        ss >> tmp;
+        if (ss.eof() && !ss.fail()) {
+          ret = 1;
+          number = tmp;
+        }
+      } catch (std::ios_base::failure&) {
+      }
+    }
+    
+    if (ret) {
+      return S_OK;
+    } else {
+      return S_FAIL;
+    }
+  }
+
+  template <class T>
+  static RES_CODE str2integer(String& str, T& number) {
+    return Utility::str2integer(str.c_str(), number);
+  }
 };
 
 _END_MYJFM_NAMESPACE_

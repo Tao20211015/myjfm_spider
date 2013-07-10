@@ -3,7 +3,7 @@
 
 #include "config.h"
 #include "shared.h"
-#include "site.h"
+//#include "site.h"
 #include "md5.h"
 #include "shared_pointer.h"
 
@@ -14,11 +14,17 @@ public:
   Url(const String& url = "");
   ~Url() {}
 
+  RES_CODE is_valid(int&);
+
   RES_CODE get_protocol(Protocol&);
   //void set_protocol(Protocol);
 
-  RES_CODE get_site(SharedPointer<Site>&);
+  RES_CODE get_site(String&);
+  //RES_CODE get_site(SharedPointer<Site>&);
   //void set_site(Site&);
+
+  RES_CODE get_port(String&);
+  //void set_port(String&);
 
   RES_CODE get_file(String&);
   //void set_file(String&);
@@ -29,8 +35,12 @@ public:
   RES_CODE get_md5(MD5&);
 
 private:
+  String _raw_url;
+  volatile int _is_valid;
   Protocol _protocol;
-  SharedPointer<Site> _site;
+  String _site;
+  String _port;
+  //SharedPointer<Site> _site;
   String _file;
   String _args;
 

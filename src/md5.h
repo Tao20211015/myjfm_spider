@@ -14,8 +14,9 @@ struct MD5 {
   MD5() {
     memset(_value, 0, 16);
   }
+
   int operator==(MD5& md5) {
-    return memcmp(_value, md5._value, 16);
+    return !memcmp(_value, md5._value, 16);
   }
 };
 

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * extractor_task.cc - the extractor module implementation
+ * each extractor is a thread. It analysises the web pages and extracts all the
+ * http urls, then put the urls in the global synchronous url queue.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <unistd.h>
 

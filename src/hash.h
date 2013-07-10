@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * hash.h - hashtable implementation
+ * borrow ideas from STL hashtable
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _HASH_H_
 #define _HASH_H_
 

@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * utility.h - the utility function
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _UTILITY_H_
 #define _UTILITY_H_
 

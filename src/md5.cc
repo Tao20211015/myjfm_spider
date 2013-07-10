@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * md5.cc - the md5 algorithm implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <string.h>
 
 #include "config.h"

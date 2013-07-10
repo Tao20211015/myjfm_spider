@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * mutex.h - encapsulated the linux pthread mutex API
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _MUTEX_H_
 #define _MUTEX_H_
 

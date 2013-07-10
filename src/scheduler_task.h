@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * scheduler_task.h - the scheduler module implementation
+ * each scheduler is a thread. It is responsible for the url scheduling and all
+ * the other jobs.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SCHEDULER_TASK_H_
 #define _SCHEDULER_TASK_H_
 

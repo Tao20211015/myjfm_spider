@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * global.cc - all the global variables are packeged into one class
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>

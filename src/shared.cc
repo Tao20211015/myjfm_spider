@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * shared.cc - all classes inherited from this class can use sharedpointer
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "shared.h"
 #include "scope_guard.h"

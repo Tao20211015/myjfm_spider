@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * log.h - the log function entry
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _LOG_H_
 #define _LOG_H_
 

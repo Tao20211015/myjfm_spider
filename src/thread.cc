@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * thread.cc - The thread implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "thread.h"
 

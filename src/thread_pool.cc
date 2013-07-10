@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * thread_pool.cc - The thread pool implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "task.h"
 #include "thread.h"

@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * utility.cc - the utility function
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <string.h>
 

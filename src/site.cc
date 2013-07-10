@@ -1,3 +1,11 @@
+/*******************************************************************************
+ * site.cc - the class includes the web site's name, ips
+ * this class is abandoned
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>

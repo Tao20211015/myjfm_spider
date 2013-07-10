@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * semaphore.h - encapsulated the linux semaphore API
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SEMAPHORE_H_
 #define _SEMAPHORE_H_
 

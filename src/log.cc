@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * log.cc - the log function entry
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <stdarg.h>
 #include <time.h>

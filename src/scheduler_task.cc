@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * scheduler_task.cc - the scheduler module implementation
+ * each scheduler is a thread. It is responsible for the url scheduling and all
+ * the other jobs.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -26,15 +35,22 @@ RES_CODE SchedulerTask::operator()(void* arg) {
   init();
 
   for (;;) {
+    // select one url
     SharedPointer<Url> url;
     _url_queue->pop(url);
     if (url.is_null()) {
       continue;
     }
 
+    // calculate the md5 value of this url
     MD5 md5;
     url->get_md5(md5);
 
+    // select one downloader randomly
+    // use this algorithm:
+    // ((md5[0-31] % _downloader_num) + (md5[32-63] % _downloader_num) + 
+    // (md5[64-95] % _downloader_num) + (md5[96-127] % _downloader_num)) % 
+    // _downloader_num
     int i;
     unsigned int index = 0;
 
@@ -45,6 +61,8 @@ RES_CODE SchedulerTask::operator()(void* arg) {
     }
 
     index %= _downloader_num;
+
+    //put the url into the downloader's url_queue
     _downloader_queue[index]->push(url);
   }
 

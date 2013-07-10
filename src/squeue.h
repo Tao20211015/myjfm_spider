@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * squeue.h - thread-safe queue implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SQUEUE_H_
 #define _SQUEUE_H_
 

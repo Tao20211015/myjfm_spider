@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * logger_task.h - the logger task implementation
+ * when the number of the messages are more than 10000, then
+ * start another thread to write the messages on disk. the thread executes the
+ * logger task to really write the messages on disk.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _LOGGER_TASK_H_
 #define _LOGGER_TASK_H_
 

@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * url.cc - the url class
+ * it includes the protocol(HTTP), the site's name, the port, the requested file
+ * name, the arguments, etc.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "url.h"
 //#include "site.h"

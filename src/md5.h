@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * md5.h - the md5 algorithm implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _MD5_H_
 #define _MD5_H_
 

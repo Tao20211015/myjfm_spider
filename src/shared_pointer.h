@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * shared_pointer.h - the smart pointer implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SHARED_POINTER_H_
 #define _SHARED_POINTER_H_
 

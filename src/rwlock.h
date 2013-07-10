@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * rw_lock.h - encapsulated the linux pthread rw_lock API
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _RWLOCK_H_
 #define _RWLOCK_H_
 

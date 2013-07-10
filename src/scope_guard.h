@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * scope_guard.h - lock and unlock the mutex smartly
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SCOPE_GUARD_H_
 #define _SCOPE_GUARD_H_
 

@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * shared.h - all classes inherited from this class can use sharedpointer
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _SHARED_H_
 #define _SHARED_H_
 

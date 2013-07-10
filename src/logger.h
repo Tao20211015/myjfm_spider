@@ -1,3 +1,14 @@
+/*******************************************************************************
+ * logger.h - the log class which implement the log function
+ * we use two buffer to cache the log message, one is used to receive from 
+ * all other modules, when the number of the messages is more than 10000, then
+ * dump all the messages into the second buffer. And, start another thread to 
+ * write all the messages on disk.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 

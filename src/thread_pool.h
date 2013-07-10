@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * thread_pool.h - The thread pool implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _THREADPOOL_H_
 #define _THREADPOOL_H_
 

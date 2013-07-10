@@ -1,5 +1,5 @@
 /*******************************************************************************
- * conditional.h - encapsulated the linux conditional API
+ * conditional.h - encapsulated the linux pthread conditional API
  *
  * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
  * All rights reserved.

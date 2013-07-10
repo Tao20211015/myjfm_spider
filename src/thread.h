@@ -1,3 +1,10 @@
+/*******************************************************************************
+ * thread.h - The thread implementation
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _THREAD_H_
 #define _THREAD_H_
 

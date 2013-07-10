@@ -1,3 +1,12 @@
+/*******************************************************************************
+ * thread_task.cc - thread task implementation
+ * thread can only execute thread task, thread task get various kinds of tasks,
+ * and then executes it
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "task.h"
 #include "thread_task.h"

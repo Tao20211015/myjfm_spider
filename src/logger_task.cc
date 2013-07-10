@@ -1,3 +1,13 @@
+/*******************************************************************************
+ * logger_task.cc - the logger task implementation
+ * when the number of the messages are more than 10000, then
+ * start another thread to write the messages on disk. the thread executes the
+ * logger task to really write the messages on disk.
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #include "config.h"
 #include "logger_task.h"
 

@@ -122,6 +122,8 @@ RES_CODE DownloaderTask::init_event_loop() {
 
 RES_CODE DownloaderTask::main_loop() {
   for (;;) {
+    LOG(WARNING, "[%d] fetch one url", _id);
+
     // get the url from global synchronous url queue
     SharedPointer<Url> url_p;
     _url_queue->pop(url_p);
@@ -191,13 +193,17 @@ RES_CODE DownloaderTask::main_loop() {
           continue;
         }
       } else {
+        LOG(WARNING, "[%d] query dns for %s", _id, site.c_str());
         IPTYPE iptype = IP_DUMMY;
         if (DnsCache::dns_query(site, ips, iptype) != S_OK) { //dns query failed
+          LOG(WARNING, "[%d] query dns for %s failed", _id, site.c_str());
           // retry
           url_p->inc_retries();
           _url_queue->push(url_p);
           continue;
         }
+        
+        LOG(WARNING, "[%d] query dns for %s successfully", _id, site.c_str());
 
         if (iptype != IPv4) { // only support ipv4 for now
           continue;
@@ -269,6 +275,8 @@ RES_CODE DownloaderTask::create_connection(String& ip, short& port, int& fd) {
 
     int ret = select(fd + 1, NULL, &fdset, NULL, &tm);
     if (ret == 0) { // timeout
+      LOG(WARNING, 
+          "[%d] %s:%d connection timeout1", _id, ip.c_str(), port);
       close(fd);
       fd = -1;
       return S_FAIL;
@@ -282,11 +290,15 @@ RES_CODE DownloaderTask::create_connection(String& ip, short& port, int& fd) {
             _id, ip.c_str(), port);
         return S_OK;
       } else {
+        LOG(WARNING, 
+            "[%d] %s:%d connection timeout2", _id, ip.c_str(), port);
         close(fd);
         fd = -1;
         return S_FAIL;
       }
     } else {
+      LOG(WARNING, 
+          "[%d] %s:%d connection timeout2", _id, ip.c_str(), port);
       close(fd);
       fd = -1;
       return S_FAIL;

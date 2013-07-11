@@ -24,24 +24,51 @@ _START_MYJFM_NAMESPACE_
     } \
   } while (0)
 
+Map<String, String> Global::_MIME;
+
 Global::Global() : 
   _has_init(false), 
   _config_file(""), 
+  _cur_path(""), 
+  _save_path(""), 
   _log_path(""), 
   _err_path(""), 
-  _cur_path(""), 
   _depth(5), 
+  _logger(NULL), 
   _downloader_num(5), 
   _extractor_num(5), 
   _scheduler_num(1), 
-  _logger(NULL), 
   _to_be_shutdown(0), 
+  _url_queue(NULL), 
   _downloader_threadpool(NULL), 
   _extractor_threadpool(NULL), 
-  _scheduler_threadpool(NULL) {
+  _scheduler_threadpool(NULL), 
+  _create_connection_timeout(2), 
+  _request_timeout(5),  
+  _request_header(""), 
+  _user_agent("myjfm_spider"), 
+  _sender("myjfm_spider@xxx.com") {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
+
+  _MIME[CHARS2STR(".html")] = CHARS2STR("text/html");
+  _MIME[CHARS2STR(".htm")] = CHARS2STR("text/html");
+  _MIME[CHARS2STR(".txt")] = CHARS2STR("text/plain");
+  _MIME[CHARS2STR(".rtf")] = CHARS2STR("application/rtf");
+  _MIME[CHARS2STR(".gif")] = CHARS2STR("image/gif");
+  _MIME[CHARS2STR(".jpeg")] = CHARS2STR("image/jpeg");
+  _MIME[CHARS2STR(".jpg")] = CHARS2STR("image/jpeg");
+  _MIME[CHARS2STR(".au")] = CHARS2STR("audio/basic");
+  _MIME[CHARS2STR(".mid")] = CHARS2STR("audio/midi");
+  _MIME[CHARS2STR(".midi")] = CHARS2STR("audio/midi");
+  _MIME[CHARS2STR(".ra")] = CHARS2STR("audio/x-pn-realaudio");
+  _MIME[CHARS2STR(".mpg")] = CHARS2STR("video/mpeg");
+  _MIME[CHARS2STR(".mpeg")] = CHARS2STR("video/mpeg");
+  _MIME[CHARS2STR(".avi")] = CHARS2STR("video/x-msvideo");
+  _MIME[CHARS2STR(".gz")] = CHARS2STR("application/x-gzip");
+  _MIME[CHARS2STR(".tar")] = CHARS2STR("application/x-tar");
+  // ...
 }
 
 Global::~Global() {
@@ -77,6 +104,8 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
 
   parse_config();
 
+  assemble_request_header();
+
   // initialize the url queue
   _url_queue = 
     SharedPointer<SQueue<SharedPointer<Url> > >
@@ -105,6 +134,44 @@ RES_CODE Global::load_default_file_types() {
   _file_types.clear();
   _file_types.push_back(".htm");
   _file_types.push_back(".html");
+  return S_OK;
+}
+
+RES_CODE Global::assemble_request_header() {
+  CHECK_HAS_INIT();
+  int i;
+
+  _request_header = "\r\nUser-Agent: ";
+  _request_header += _user_agent + " " + _sender;
+  _request_header += "\r\nAccept: ";
+  String accept = "";
+
+  Map<String, int> unique;
+  Map<String, String>::iterator itr_mime = _MIME.end();
+
+  for (i = 0; i < _file_types.size(); ++i) {
+    itr_mime = _MIME.find(_file_types[i]);
+    if (itr_mime == _MIME.end()) {
+      continue;
+    }
+
+    unique[_MIME[_file_types[i]]] = 1;
+  }
+
+  Map<String, int>::iterator itr_unique = unique.begin();
+  for (; itr_unique != unique.end(); ++itr_unique) {
+    accept += itr_unique->first + ", ";
+  }
+  
+  if (accept.length()) {
+    accept = accept.substr(0, accept.length() - 2);
+  } else {
+    accept = "*/*";
+  }
+
+  _request_header += accept + "\r\n";
+  _request_header += "Connection: Keep-Alive\r\n\r\n";
+
   return S_OK;
 }
 
@@ -392,6 +459,24 @@ int Global::get_to_be_shutdown() {
 
 RES_CODE Global::set_to_be_shutdown(int v) {
   _to_be_shutdown = v;
+  return S_OK;
+}
+
+RES_CODE Global::get_request_header(String& request_header) {
+  request_header = _request_header;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_request_timeout(int& timeout) {
+  timeout = _request_timeout;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_create_connection_timeout(int& timeout) {
+  timeout = _create_connection_timeout;
+
   return S_OK;
 }
 

@@ -42,8 +42,8 @@ public:
 private:
   int _n;
   int _state;
-  Vector< SharedPointer<Thread> > _threads;
-  SQueue< SharedPointer<Task> > _tasks;
+  Vector<SharedPointer<Thread> > _threads;
+  SQueue<SharedPointer<Task> > _tasks;
 
   RES_CODE add_worker();
 };

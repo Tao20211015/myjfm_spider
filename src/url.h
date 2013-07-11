@@ -43,6 +43,10 @@ public:
 
   RES_CODE get_md5(MD5&);
 
+  RES_CODE get_retries(int&);
+
+  RES_CODE inc_retries();
+
 private:
   String _raw_url;
   volatile int _is_valid;
@@ -55,6 +59,8 @@ private:
 
   int has_get_md5;
   MD5 _md5;
+
+  int _retries;
 };
 
 _END_MYJFM_NAMESPACE_

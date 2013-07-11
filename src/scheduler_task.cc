@@ -25,7 +25,7 @@ _START_MYJFM_NAMESPACE_
 SchedulerTask::SchedulerTask(int id) : 
   _id(id), 
   _downloader_num(0), 
-  _url_queue(SharedPointer<SQueue<SharedPointer<Url> > >(NULL)) {
+  _url_queue(NULL) {
   _downloader_queue.clear();
 }
 

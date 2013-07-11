@@ -24,9 +24,10 @@ extern _MYJFM_NAMESPACE_::Global *glob;
 _START_MYJFM_NAMESPACE_
 
 Logger::Logger(int threshold) : 
-  _threshold(threshold), 
   _log(NULL), 
-  _err(NULL), _thread(NULL) {
+  _err(NULL), 
+  _threshold(threshold), 
+  _thread(NULL) {
   _primary.clear();
   _secondary.clear();
 }

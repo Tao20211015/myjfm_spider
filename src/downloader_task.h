@@ -19,6 +19,8 @@
 
 _START_MYJFM_NAMESPACE_
 
+#define MAX_NUM_OF_RETRIES 3
+
 // when some socket can be read, then executes the read callback functor
 class ReadCallback : public Callback {
 public:
@@ -62,9 +64,13 @@ public:
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:
-  RES_CODE set_url_queue();
+  RES_CODE init();
+  RES_CODE main_loop();
+
+  RES_CODE init_url_queue();
   RES_CODE init_dns_cache();
   RES_CODE init_event_loop();
+
   RES_CODE create_connection(String&, short&, int&);
 
   int _id;

@@ -56,9 +56,13 @@ public:
 
   int get_to_be_shutdown();
   RES_CODE set_to_be_shutdown(int);
+  RES_CODE get_request_header(String&);
+  RES_CODE get_create_connection_timeout(int&);
+  RES_CODE get_request_timeout(int&);
 
 private:
   RES_CODE load_default_file_types();
+  RES_CODE assemble_request_header();
   RES_CODE set_cur_path(String&);
   RES_CODE set_seed_urls(Vector<String>&);
   RES_CODE set_file_types(Vector<String>&);
@@ -68,14 +72,14 @@ private:
   RES_CODE set_extractor_num(String&);
   RES_CODE set_scheduler_num(String&);
 
-  // current work path
-  String _cur_path;
-
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
   volatile bool _has_init;
 
   String _config_file;
+
+  // current work path
+  String _cur_path;
 
   // the path saved all the web pages and all the indexes
   String _save_path;
@@ -84,14 +88,16 @@ private:
 
   String _err_path;
 
-  Logger *_logger;
-
   // the depth of downloading recursively
   int _depth;
+
+  Logger *_logger;
 
   int _downloader_num;
   int _extractor_num;
   int _scheduler_num;
+
+  int _to_be_shutdown;
 
   // the types of file which downloader can download
   Vector<String> _file_types;
@@ -108,11 +114,18 @@ private:
   // The queue is shared between this downloader and all scheduler threads.
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queues;
 
-  int _to_be_shutdown;
-
   SharedPointer<ThreadPool> _downloader_threadpool;
   SharedPointer<ThreadPool> _extractor_threadpool;
   SharedPointer<ThreadPool> _scheduler_threadpool;
+
+  int _create_connection_timeout;
+  int _request_timeout;
+
+  String _request_header;
+  String _user_agent;
+  String _sender;
+
+  static Map<String, String> _MIME;
 };
 
 _END_MYJFM_NAMESPACE_

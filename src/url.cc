@@ -19,11 +19,12 @@ Url::Url(const String& url) :
   _is_valid(0), 
   _protocol(PRO_DUMMY), 
   _site(""), 
-  //_site(SharedPointer<Site>(NULL)), 
+  //_site(NULL), 
   _port(""), 
   _file(""), 
   _args(""), 
-  has_get_md5(0) {
+  has_get_md5(0), 
+  _retries(0) {
   if (url == "") {
     return;
   }
@@ -226,11 +227,22 @@ RES_CODE Url::get_md5(MD5& md5) {
     url += "?" + _args;
   }
 
-  std::cout << "!!!" << url << "!!!" << std::endl;
   MD5Caculator md5caculator(url);
   md5caculator.digest(_md5);
   md5 = _md5;
   has_get_md5 = 1;
+
+  return S_OK;
+}
+
+RES_CODE Url::get_retries(int& retries) {
+  retries = _retries;
+
+  return S_OK;
+}
+
+RES_CODE Url::inc_retries() {
+  ++_retries;
 
   return S_OK;
 }

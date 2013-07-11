@@ -53,15 +53,15 @@ public:
     _event_fd(-1), 
     _mask(EVENT_DUMMY), 
     _use_read_callback(0), 
-    _read_callback(SharedPointer<Callback>(NULL)), 
+    _read_callback(NULL), 
     _read_callback_func(NULL), 
     _read_arg(NULL), 
     _use_write_callback(0), 
-    _write_callback(SharedPointer<Callback>(NULL)), 
+    _write_callback(NULL), 
     _write_callback_func(NULL), 
     _write_arg(NULL), 
     _use_error_callback(0), 
-    _error_callback(SharedPointer<Callback>(NULL)), 
+    _error_callback(NULL), 
     _error_callback_func(NULL), 
     _error_arg(NULL) {
   }

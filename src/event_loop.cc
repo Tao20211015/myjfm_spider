@@ -19,7 +19,10 @@ _START_MYJFM_NAMESPACE_
 
 EventLoop::EventLoop() : 
   _state(CONSTRUCTED), 
-  _stop(1) {
+  _stop(1), 
+  _epoll_fd(-1), 
+  _events(NULL), 
+  _epoll_events(NULL) {
   _events = new Event[MAX_EPOLL_FD];
   _epoll_events = new struct epoll_event[MAX_EPOLL_FD];
   memset(_epoll_events, 0, sizeof(struct epoll_event) * MAX_EPOLL_FD);

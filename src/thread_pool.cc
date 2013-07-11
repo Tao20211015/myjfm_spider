@@ -14,7 +14,10 @@
 
 _START_MYJFM_NAMESPACE_
 
-ThreadPool::ThreadPool(int n) : _n(n), _state(CONSTRUCTED) {}
+ThreadPool::ThreadPool(int n) : 
+  _n(n), 
+  _state(CONSTRUCTED) {
+}
 
 ThreadPool::~ThreadPool() {
   stop();

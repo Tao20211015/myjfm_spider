@@ -17,17 +17,18 @@ Thread::Thread(const SharedPointer<Task>& task, int detached) :
   _func_arg(NULL), 
   _tid(-1), 
   _state(INIT), 
-  _detached(detached) 
-{}
+  _detached(detached) {
+}
 
 Thread::Thread(thread_task_func func, void* arg, int detached) : 
   _use_task(0), 
+  _task(NULL), 
   _task_func(func), 
   _func_arg(arg), 
   _tid(-1), 
   _state(INIT), 
-  _detached(detached)
-{}
+  _detached(detached) {
+}
 
 Thread::~Thread() {
   // wait until the thread execution is finished

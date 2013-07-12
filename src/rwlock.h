@@ -30,6 +30,42 @@ class RWlock {
 } while (0)
 
 public:
+  class ReadScopeGuard {
+  public:
+    ReadScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
+      if (_rwlock != NULL) {
+        _rwlock->rdlock();
+      }
+    }
+    
+    ~ReadScopeGuard() {
+      if (_rwlock != NULL) {
+        _rwlock->unlock();
+      }
+    }
+  
+  private:
+    RWlock* _rwlock;
+  };
+
+  class WriteScopeGuard {
+  public:
+    WriteScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
+      if (_rwlock != NULL) {
+        _rwlock->wrlock();
+      }
+    }
+    
+    ~WriteScopeGuard() {
+      if (_rwlock != NULL) {
+        _rwlock->unlock();
+      }
+    }
+  
+  private:
+    RWlock* _rwlock;
+  };
+
   RWlock() {
     _has_init = 1;
     pthread_rwlock_init(&_rwlock, NULL);

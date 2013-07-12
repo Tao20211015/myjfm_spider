@@ -11,7 +11,6 @@
 #include "config.h"
 #include "mutex.h"
 #include "shared.h"
-#include "scope_guard.h"
 #include "conditional.h"
 
 _START_MYJFM_NAMESPACE_
@@ -28,7 +27,7 @@ public:
   // can not use reference
   // because the caller may pass stack variable to this callee
   RES_CODE push(T t) {
-    ScopeGuard<Mutex> lock(&_mutex);
+    Mutex::ScopeGuard guard(&_mutex);
     _queue.push(t);
     _cond.signal();
 
@@ -36,7 +35,7 @@ public:
   }
 
   RES_CODE pop(T& t) {
-    ScopeGuard<Mutex> lock(&_mutex);
+    Mutex::ScopeGuard guard(&_mutex);
     while (_queue.empty()) {
       _cond.wait();
     }
@@ -48,7 +47,7 @@ public:
   }
 
   RES_CODE size(int& s) {
-    ScopeGuard<Mutex> lock(&_mutex);
+    Mutex::ScopeGuard guard(&_mutex);
     s = _queue.size();
 
     return S_OK;

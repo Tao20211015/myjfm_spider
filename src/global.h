@@ -56,21 +56,31 @@ public:
 
   int get_to_be_shutdown();
   RES_CODE set_to_be_shutdown(int);
+
   RES_CODE get_request_header(String&);
+
   RES_CODE get_create_connection_timeout(int&);
-  RES_CODE get_request_timeout(int&);
+  RES_CODE get_send_timeout(int&);
+  RES_CODE get_recv_timeout(int&);
 
 private:
   RES_CODE load_default_file_types();
+
   RES_CODE assemble_request_header();
+
   RES_CODE set_cur_path(String&);
   RES_CODE set_seed_urls(Vector<String>&);
   RES_CODE set_file_types(Vector<String>&);
   RES_CODE set_save_path(String&);
   RES_CODE set_depth(String&);
+
   RES_CODE set_downloader_num(String&);
   RES_CODE set_extractor_num(String&);
   RES_CODE set_scheduler_num(String&);
+
+  RES_CODE set_create_connection_timeout(String&);
+  RES_CODE set_send_timeout(String&);
+  RES_CODE set_recv_timeout(String&);
 
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
@@ -119,13 +129,16 @@ private:
   SharedPointer<ThreadPool> _scheduler_threadpool;
 
   int _create_connection_timeout;
-  int _request_timeout;
+  int _send_timeout;
+  int _recv_timeout;
 
   String _request_header;
   String _user_agent;
   String _sender;
 
+#if 0
   static Map<String, String> _MIME;
+#endif
 };
 
 _END_MYJFM_NAMESPACE_

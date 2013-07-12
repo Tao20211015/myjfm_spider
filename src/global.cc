@@ -24,7 +24,9 @@ _START_MYJFM_NAMESPACE_
     } \
   } while (0)
 
+#if 0
 Map<String, String> Global::_MIME;
+#endif
 
 Global::Global() : 
   _has_init(false), 
@@ -44,13 +46,28 @@ Global::Global() :
   _extractor_threadpool(NULL), 
   _scheduler_threadpool(NULL), 
   _create_connection_timeout(2), 
-  _request_timeout(5),  
+  _send_timeout(5),  
+  _recv_timeout(10),  
   _request_header(""), 
   _user_agent("myjfm_spider"), 
   _sender("myjfm_spider@xxx.com") {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
+
+#if 0
+  String default_mime = 
+    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
+  String all_mime = "*/*";
+  _MIME[CHARS2STR("")] = default_mime;
+  _MIME[CHARS2STR(".html")] = default_mime;
+  _MIME[CHARS2STR(".htm")] = default_mime;
+  _MIME[CHARS2STR(".gif")] = all_mime;
+  _MIME[CHARS2STR(".jpg")] = all_mime;
+  _MIME[CHARS2STR(".js")] = all_mime;
+  _MIME[CHARS2STR(".css")] = CHARS2STR("text/css,*/*;q=0.1");
+  _MIME[CHARS2STR(".aspx")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".aspx")] = CHARS2STR("*/*");
 
   _MIME[CHARS2STR(".html")] = CHARS2STR("text/html");
   _MIME[CHARS2STR(".htm")] = CHARS2STR("text/html");
@@ -69,6 +86,23 @@ Global::Global() :
   _MIME[CHARS2STR(".gz")] = CHARS2STR("application/x-gzip");
   _MIME[CHARS2STR(".tar")] = CHARS2STR("application/x-tar");
   // ...
+  _MIME[CHARS2STR(".html")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".htm")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".txt")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".rtf")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".gif")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".jpeg")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".jpg")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".au")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".mid")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".midi")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".ra")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".mpg")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".mpeg")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".avi")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".gz")] = CHARS2STR("*/*");
+  _MIME[CHARS2STR(".tar")] = CHARS2STR("*/*");
+#endif
 }
 
 Global::~Global() {
@@ -143,6 +177,8 @@ RES_CODE Global::assemble_request_header() {
 
   _request_header = "\r\nUser-Agent: ";
   _request_header += _user_agent + " " + _sender;
+
+#if 0
   _request_header += "\r\nAccept: ";
   String accept = "";
 
@@ -170,7 +206,11 @@ RES_CODE Global::assemble_request_header() {
   }
 
   _request_header += accept + "\r\n";
-  _request_header += "Connection: Keep-Alive\r\n\r\n";
+#endif
+  _request_header += "\r\nAccept: */*\r\n\
+                      Accept-Encoding: gzip,deflate,sdch\r\n\
+                      Accept-Language: en-US,en;q=0.8\r\n\
+                      Connection: Keep-Alive\r\n\r\n";
 
   return S_OK;
 }
@@ -226,6 +266,12 @@ RES_CODE Global::parse_config() {
         set_file_types(key_and_value);
       } else if (key_and_value[0] == "SEEDURLS") {
         set_seed_urls(key_and_value);
+      } else if (key_and_value[0] == "CREATE_CONNECTION_TIMEOUT") {
+        set_create_connection_timeout(key_and_value[1]);
+      } else if (key_and_value[0] == "SEND_TIMEOUT") {
+        set_send_timeout(key_and_value[1]);
+      } else if (key_and_value[0] == "RECV_TIMEOUT") {
+        set_recv_timeout(key_and_value[1]);
       } else {
         continue;
       }
@@ -468,14 +514,38 @@ RES_CODE Global::get_request_header(String& request_header) {
   return S_OK;
 }
 
-RES_CODE Global::get_request_timeout(int& timeout) {
-  timeout = _request_timeout;
+RES_CODE Global::set_create_connection_timeout(String& timeout) {
+  _create_connection_timeout = atoi(timeout.c_str());
+
+  return S_OK;
+}
+
+RES_CODE Global::set_send_timeout(String& timeout) {
+  _send_timeout = atoi(timeout.c_str());
+
+  return S_OK;
+}
+
+RES_CODE Global::set_recv_timeout(String& timeout) {
+  _recv_timeout = atoi(timeout.c_str());
 
   return S_OK;
 }
 
 RES_CODE Global::get_create_connection_timeout(int& timeout) {
   timeout = _create_connection_timeout;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_send_timeout(int& timeout) {
+  timeout = _send_timeout;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_recv_timeout(int& timeout) {
+  timeout = _recv_timeout;
 
   return S_OK;
 }

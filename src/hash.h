@@ -243,19 +243,16 @@ public:
 
   RES_CODE insert_safe(T& value) {
     hash_size_type key = get_key(value);
-
-    _rwlocks[key].wrlock();
+    RWlock::WriteScopeGuard guard(_rwlocks + key);
 
     if (_buckets[key] == NULL) {
       _buckets[key] = new HashNode(value);
-      _rwlocks[key].unlock();
       return S_OK;
     }
 
     HashNode* nodep = _buckets[key];
     while (nodep) {
       if (*(nodep->_value) == value) {
-        _rwlocks[key].unlock();
         return S_ALREADY_EXIST;
       }
 
@@ -266,7 +263,6 @@ public:
     nodep->_next = _buckets[key]->_next;
     _buckets[key] = nodep;
 
-    _rwlocks[key].unlock();
     return S_OK;
   }
 
@@ -291,10 +287,9 @@ public:
 
   RES_CODE is_exist_safe(T& value) {
     hash_size_type key = get_key(value);
-    _rwlocks[key].rdlock();
+    RWlock::ReadScopeGuard guard(_rwlocks + key);
 
     if (_buckets[key] == NULL) {
-      _rwlocks[key].unlock();
       return S_NOT_EXIST;
     }
 
@@ -302,13 +297,11 @@ public:
 
     while (nodep) {
       if (*(nodep->_value) == value) {
-        _rwlocks[key].unlock();
         return S_EXIST;
       }
       nodep = nodep->_next;
     }
 
-    _rwlocks[key].unlock();
     return S_NOT_EXIST;
   }
 

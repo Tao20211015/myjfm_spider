@@ -1,5 +1,6 @@
 /*******************************************************************************
- * mutex.h - encapsulated the linux pthread mutex API
+ * mutex.h - The Mutex class encapsulated the linux pthread mutex API
+ * the ScopeGuard class can lock and unlock the mutex smartly
  *
  * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
  * All rights reserved.
@@ -31,6 +32,24 @@ class Mutex {
 
 public:
   friend class Conditional;
+
+  class ScopeGuard {
+  public:
+    ScopeGuard(Mutex* mutex) : _mutex(mutex) {
+      if (_mutex != NULL) {
+        _mutex->lock();
+      }
+    }
+    
+    ~ScopeGuard() {
+      if (_mutex != NULL) {
+        _mutex->unlock();
+      }
+    }
+  
+  private:
+    Mutex* _mutex;
+  };
 
   Mutex() {
     _has_init = 1;

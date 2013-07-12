@@ -51,8 +51,12 @@ DownloaderTask::DownloaderTask(int id) :
   _id(id), 
   _dns_cache(NULL), 
   _url_queue(NULL), 
-  _event_loop(NULL) {
+  _event_loop(NULL), 
+  _create_connection_timeout(0), 
+  _send_timeout(0), 
+  _recv_timeout(0) {
   _sock_fd_map.clear();
+  memset(_page_buffer, 0, MAX_PAGE_SIZE);
 }
 
 DownloaderTask::~DownloaderTask() {
@@ -91,6 +95,10 @@ RES_CODE DownloaderTask::init() {
   }
   */
 
+  glob->get_create_connection_timeout(_create_connection_timeout);
+  glob->get_send_timeout(_send_timeout);
+  glob->get_recv_timeout(_recv_timeout);
+
   return S_OK;
 }
 
@@ -99,6 +107,7 @@ RES_CODE DownloaderTask::init_url_queue() {
 }
 
 RES_CODE DownloaderTask::init_dns_cache() {
+  //return glob->get_dns_cache(_dns_cache);
   SharedPointer<DnsCache> tmp_cache(new DnsCache());
   _dns_cache = tmp_cache;
 
@@ -136,10 +145,10 @@ RES_CODE DownloaderTask::main_loop() {
     String args;
     int retries = 0;
 
+    int valid = 0;
     int fd = -1;
 
     // if the url is not valid, then drop it
-    int valid = 0;
     url_p->is_valid(valid);
     if (!valid) {
       continue;
@@ -169,6 +178,12 @@ RES_CODE DownloaderTask::main_loop() {
     // then drop it
     url_p->get_retries(retries);
     if (retries >= MAX_NUM_OF_RETRIES) {
+      Map<String, int>::iterator iter = _sock_fd_map.find(site);
+      if (iter != _sock_fd_map.end()) {
+        close(iter->second);
+        _sock_fd_map.erase(iter);
+      }
+
       LOG(WARNING, 
           "[%d] %s:%d retry times are more than %d, drop it", 
           _id, site.c_str(), port, MAX_NUM_OF_RETRIES);
@@ -181,6 +196,7 @@ RES_CODE DownloaderTask::main_loop() {
       Vector<String> ips;
       if (_dns_cache->find(site, ips) == S_OK) { // dns cached
         if (ips.size() <= 0) { // can't find the site's ip
+          //we should not retry
           continue;
         }
 
@@ -206,15 +222,18 @@ RES_CODE DownloaderTask::main_loop() {
         LOG(WARNING, "[%d] query dns for %s successfully", _id, site.c_str());
 
         if (iptype != IPv4) { // only support ipv4 for now
+          // should not retry
           continue;
         }
 
         if (ips.size() <= 0) { // can't find the site's ip
+          // should not retry
           continue;
         }
 
         _dns_cache->insert(site, ips);
 
+        // pick up the first ip
         if (create_connection(ips[0], port, fd) == S_OK) {
           _sock_fd_map[site] = fd;
         } else { // cannot create the TCP connection
@@ -228,9 +247,21 @@ RES_CODE DownloaderTask::main_loop() {
       fd = itr->second;
     }
 
+#if 0
     String request = "GET ";
-    request += "/" + file + "?" + args + " HTTP/1.1\r\nHost: ";
-    request += "http://" + site;
+
+    if (file.length() <= 0) {
+      request += "/index.html";
+    } else {
+      request += "/" + file;
+
+      if (args.length() > 0) {
+        request += "?" + args;
+      }
+    }
+    request += " HTTP/1.1\r\nHost: ";
+    request += site;
+
     if (port != 80) {
       request += str_port;
     }
@@ -239,70 +270,128 @@ RES_CODE DownloaderTask::main_loop() {
     glob->get_request_header(request_header);
     request += request_header;
     LOG(WARNING, "[%d] %s", _id, request.c_str());
+
+    int send_timeout = 0;
+    int recv_timeout = 0;
+    glob->get_send_timeout(send_timeout);
+    glob->get_recv_timeout(recv_timeout);
+    struct timeval send_tm = {(time_t)send_timeout, (suseconds_t)0};
+    struct timeval recv_tm = {(time_t)recv_timeout, (suseconds_t)0};
+    setsockopt(fd, SOL_SOCKET, 
+        SO_SNDTIMEO, &send_tm, sizeof(send_tm));
+    setsockopt(fd, SOL_SOCKET, 
+        SO_RCVTIMEO, &recv_tm, sizeof(recv_tm));
+
+    if (write(fd, request.c_str(), request.length()) < -1) {
+      LOG(WARNING, "[%d]: write error", _id);
+      url_p->inc_retries();
+      _url_queue->push(url_p);
+      continue;
+    }
+
+    int error_flag = 0;
+    int page_len = 0;
+    char *buffer = _page_buffer;
+
+    page_len = read(fd, buffer, MAX_PAGE_SIZE);
+    if (page_len < 0) {
+      LOG(WARNING, "[%d]: read error", _id);
+      url_p->inc_retries();
+      _url_queue->push(url_p);
+      continue;
+    }
+
+      /*
+    while (1) {
+      int len = read(fd, buffer, MAX_PAGE_SIZE - page_len);
+
+      if (len < 0) {
+        LOG(WARNING, "[%d]: read error", _id);
+        error_flag = 1;
+        break;
+      } else if (len > 0) {
+        buffer += len;
+
+        if ((page_len += len) >= MAX_PAGE_SIZE) {
+          error_flag = 1;
+          break;
+        }
+
+        continue;
+      } else {
+        break;
+      }
+    }
+
+    if (error_flag) {
+      url_p->inc_retries();
+      _url_queue->push(url_p);
+      continue;
+    }
+    */
+
+    _page_buffer[page_len] = '\0';
+    LOG(WARNING, "[%d] %s:%d %s", _id, site.c_str(), port, _page_buffer);
+#endif
   }
 
   return S_OK;
 }
 
 RES_CODE DownloaderTask::create_connection(String& ip, short& port, int& fd) {
+  fd_set fdset;
+  int mask;
   struct sockaddr_in stat_addr;
-  bzero((char*)&stat_addr, sizeof(stat_addr));
+  struct timeval tm = {(time_t)_create_connection_timeout, (suseconds_t)0};
 
+  bzero((char*)&stat_addr, sizeof(stat_addr));
   stat_addr.sin_family = AF_INET;
   stat_addr.sin_port = htons(port);
   stat_addr.sin_addr.s_addr = inet_addr(ip.c_str());
-  
+
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     fd = -1;
     return S_FAIL;
   }
-  
-  fcntl(fd, F_SETFL, O_NONBLOCK);
-  if (connect(fd, (struct sockaddr*)&stat_addr, 
-        sizeof(struct sockaddr_in)) == 0) {
-    LOG(WARNING, "[%d] %s:%d connection established immediately", 
-        _id, ip.c_str(), port);
-    return S_OK;
-  } else {
-    fd_set fdset;
-    FD_ZERO(&fdset);
-    FD_SET(fd, &fdset);
 
-    int timeout = 0;
-    glob->get_create_connection_timeout(timeout);
+  mask = fcntl(fd, F_GETFL, 0);
+  if (mask < 0) {
+    fd = -1;
+    return S_FAIL;
+  }
 
-    struct timeval tm = {(time_t)timeout, (suseconds_t)0};
+  if (fcntl(fd, F_SETFL, mask | O_NONBLOCK) < 0) {
+    fd = -1;
+    return S_FAIL;
+  }
 
-    int ret = select(fd + 1, NULL, &fdset, NULL, &tm);
-    if (ret == 0) { // timeout
-      LOG(WARNING, 
-          "[%d] %s:%d connection timeout1", _id, ip.c_str(), port);
-      close(fd);
-      fd = -1;
-      return S_FAIL;
-    } else if (ret > 0) {
-      int error = -1;
-      int len = sizeof(int);
-      getsockopt(fd, SOL_SOCKET, SO_ERROR, &error, (socklen_t*)&len);
-      if (error == 0) {
-        LOG(WARNING, 
-            "[%d] %s:%d connection established within timeout", 
-            _id, ip.c_str(), port);
-        return S_OK;
-      } else {
-        LOG(WARNING, 
-            "[%d] %s:%d connection timeout2", _id, ip.c_str(), port);
-        close(fd);
-        fd = -1;
-        return S_FAIL;
-      }
-    } else {
-      LOG(WARNING, 
-          "[%d] %s:%d connection timeout2", _id, ip.c_str(), port);
+  if (connect(fd, (struct sockaddr*)&stat_addr, sizeof(struct sockaddr)) == 0) {
+    if (fcntl(fd, F_SETFL, mask & ~O_NONBLOCK) < 0) {
       close(fd);
       fd = -1;
       return S_FAIL;
     }
+
+    return S_OK;
+  }
+
+  FD_ZERO(&fdset);
+  FD_SET(fd, &fdset);
+
+  int ret = select(fd + 1, NULL, &fdset, NULL, &tm);
+  if (ret <= 0) { // timeout(0) or select error(<0)
+    fcntl(fd, F_SETFL, mask & ~O_NONBLOCK);
+    close(fd);
+    fd = -1;
+    return S_FAIL;
+  } else {
+    if (fcntl(fd, F_SETFL, mask & ~O_NONBLOCK) < 0) {
+      close(fd);
+      fd = -1;
+      return S_FAIL;
+    }
+
+    return S_OK;
   }
 }
 

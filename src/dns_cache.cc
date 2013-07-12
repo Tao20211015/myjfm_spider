@@ -14,6 +14,7 @@
 #include "config.h"
 #include "dns_cache.h"
 #include "log.h"
+#include "rwlock.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -26,38 +27,29 @@ DnsCache::~DnsCache() {
 }
 
 RES_CODE DnsCache::find(String& site, Vector<String>& ips) {
-  ips.clear();
+  if (site.length() <= 0 || ips.size() > 0) {
+    return S_FAIL;
+  }
+
+  RWlock::ReadScopeGuard guard(&_rwlock);
+
   Map<String, Vector<String> >::iterator itr = _dns.find(site);
 
   if (itr == _dns.end()) {
     return S_NOT_FOUND;
   }
 
-  int i;
-  for (i = 0; i < ips.size(); ++i) {
-    ips.push_back((itr->second)[i]);
-  }
+  ips = itr->second;
 
   return S_OK;
 }
 
 RES_CODE DnsCache::insert(String& site, Vector<String>& ips) {
-  Vector<String> tmp;
-  if (find(site, tmp)) {
-    return S_ALREADY_EXIST;
+  if (site.length() <= 0 || ips.size() <= 0) {
+    return S_FAIL;
   }
 
-  Pair<String, Vector<String> > value(site, ips);
-  _dns.insert(value);
-  return S_OK;
-}
-
-RES_CODE DnsCache::update(String& site, Vector<String>& ips) {
-  Vector<String> tmp;
-  if (!find(site, tmp)) {
-    return S_NOT_FOUND;
-  }
-
+  RWlock::WriteScopeGuard guard(&_rwlock);
   _dns[site] = ips;
   return S_OK;
 }

@@ -28,3 +28,13 @@ LOGFILEPATH /home/myjfm/work/myjfm_spider/output
 
 # save error and fatal log here
 ERRFILEPATH /home/myjfm/work/myjfm_spider/output
+
+# create TCP connecton timeout
+CREATE_CONNECTION_TIMEOUT 5
+
+# send TCP packet timeout
+SEND_TIMEOUT 20
+
+# recv TCP packet timeout
+RECV_TIMEOUT 60
+

@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "shared.h"
+#include "rwlock.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -20,11 +21,11 @@ public:
 
   RES_CODE find(String&, Vector<String>&);
   RES_CODE insert(String&, Vector<String>&);
-  RES_CODE update(String&, Vector<String>&);
   static RES_CODE dns_query(String&, Vector<String>&, IPTYPE&);
 
 private:
   Map<String, Vector<String> > _dns;
+  RWlock _rwlock;
 };
 
 _END_MYJFM_NAMESPACE_

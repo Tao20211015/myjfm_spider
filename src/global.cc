@@ -46,11 +46,12 @@ Global::Global() :
   _extractor_threadpool(NULL), 
   _scheduler_threadpool(NULL), 
   _create_connection_timeout(2), 
-  _send_timeout(5),  
-  _recv_timeout(10),  
+  _send_timeout(5), 
+  _recv_timeout(30), 
   _request_header(""), 
   _user_agent("myjfm_spider"), 
-  _sender("myjfm_spider@xxx.com") {
+  _sender("myjfm_spider@xxx.com"), 
+  _dns_cache(NULL) {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
@@ -158,6 +159,10 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
         (new SQueue<SharedPointer<Url> >()));
   }
 
+  // initialize the dns cache
+  SharedPointer<DnsCache> tmp_dns_cache(new DnsCache());
+  _dns_cache = tmp_dns_cache;
+
   _logger = new Logger(10000);
   _logger->init();
 
@@ -173,9 +178,8 @@ RES_CODE Global::load_default_file_types() {
 
 RES_CODE Global::assemble_request_header() {
   CHECK_HAS_INIT();
-  int i;
 
-  _request_header = "\r\nUser-Agent: ";
+  _request_header = "User-Agent: ";
   _request_header += _user_agent + " " + _sender;
 
 #if 0
@@ -207,10 +211,10 @@ RES_CODE Global::assemble_request_header() {
 
   _request_header += accept + "\r\n";
 #endif
-  _request_header += "\r\nAccept: */*\r\n\
-                      Accept-Encoding: gzip,deflate,sdch\r\n\
-                      Accept-Language: en-US,en;q=0.8\r\n\
-                      Connection: Keep-Alive\r\n\r\n";
+  _request_header += "\r\nAccept: */*\r\n";
+  _request_header += "Accept-Encoding: gzip,deflate,sdch\r\n";
+  _request_header += "Accept-Language: en-US,en;q=0.8\r\n";
+  _request_header += "Connection: keep-alive\r\n\r\n";
 
   return S_OK;
 }
@@ -500,52 +504,68 @@ RES_CODE Global::get_logger(Logger*& logger) {
 }
 
 int Global::get_to_be_shutdown() {
+  CHECK_HAS_INIT();
   return _to_be_shutdown;
 }
 
 RES_CODE Global::set_to_be_shutdown(int v) {
+  CHECK_HAS_INIT();
   _to_be_shutdown = v;
   return S_OK;
 }
 
 RES_CODE Global::get_request_header(String& request_header) {
-  request_header = _request_header;
+  CHECK_HAS_INIT();
+  request_header += _request_header;
 
   return S_OK;
 }
 
 RES_CODE Global::set_create_connection_timeout(String& timeout) {
+  CHECK_HAS_INIT();
   _create_connection_timeout = atoi(timeout.c_str());
 
   return S_OK;
 }
 
 RES_CODE Global::set_send_timeout(String& timeout) {
+  CHECK_HAS_INIT();
   _send_timeout = atoi(timeout.c_str());
 
   return S_OK;
 }
 
 RES_CODE Global::set_recv_timeout(String& timeout) {
+  CHECK_HAS_INIT();
   _recv_timeout = atoi(timeout.c_str());
 
   return S_OK;
 }
 
 RES_CODE Global::get_create_connection_timeout(int& timeout) {
+  CHECK_HAS_INIT();
   timeout = _create_connection_timeout;
 
   return S_OK;
 }
 
 RES_CODE Global::get_send_timeout(int& timeout) {
+  CHECK_HAS_INIT();
   timeout = _send_timeout;
 
   return S_OK;
 }
 
 RES_CODE Global::get_recv_timeout(int& timeout) {
+  CHECK_HAS_INIT();
   timeout = _recv_timeout;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_dns_cache(SharedPointer<DnsCache>& dns_cache) {
+  CHECK_HAS_INIT();
+  dns_cache = _dns_cache;
 
   return S_OK;
 }

@@ -20,7 +20,8 @@
 _START_MYJFM_NAMESPACE_
 
 #define MAX_NUM_OF_RETRIES 3
-#define MAX_PAGE_SIZE 10 * 1024 * 1024
+#define MAX_PAGE_SIZE (1024 << 13) // (8M)
+#define MAX_HEADER_SIZE (1024 << 2) // (4K)
 
 // when some socket can be read, then executes the read callback functor
 class ReadCallback : public Callback {
@@ -73,13 +74,17 @@ private:
   RES_CODE init_event_loop();
 
   RES_CODE create_connection(String&, short&, int&);
+  RES_CODE generate_http_request(String&, String&, String&);
+  RES_CODE set_timeout(int);
+  RES_CODE send_http_request(int, String&);
+  RES_CODE recv_http_response_header(int, String&, char*, int&);
+  RES_CODE recv_http_response_body(int);
 
   int _id;
   SharedPointer<DnsCache> _dns_cache;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
   SharedPointer<EventLoop> _event_loop;
   Map<String, int> _sock_fd_map;
-  char _page_buffer[MAX_PAGE_SIZE];
   int _create_connection_timeout;
   int _send_timeout;
   int _recv_timeout;

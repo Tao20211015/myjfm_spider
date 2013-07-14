@@ -41,7 +41,7 @@
 
 #define Ofstream std::ofstream
 
-#define MAX_LOG_LEN 1024
+#define MAX_LOG_LEN (1024 * 16)
 
 enum LOG_LEVEL {
   LOG_DUMMY = 0x0, 

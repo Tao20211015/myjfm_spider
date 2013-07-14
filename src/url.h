@@ -1,7 +1,7 @@
 /*******************************************************************************
  * url.h - the url class
  * it includes the protocol(HTTP), the site's name, the port, the requested file
- * name, the arguments, etc.
+ * name, etc.
  *
  * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
  * All rights reserved.
@@ -12,7 +12,6 @@
 
 #include "config.h"
 #include "shared.h"
-//#include "site.h"
 #include "md5.h"
 #include "shared_pointer.h"
 
@@ -26,20 +25,12 @@ public:
   RES_CODE is_valid(int&);
 
   RES_CODE get_protocol(Protocol&);
-  //void set_protocol(Protocol);
 
   RES_CODE get_site(String&);
-  //RES_CODE get_site(SharedPointer<Site>&);
-  //void set_site(Site&);
 
   RES_CODE get_port(String&);
-  //void set_port(String&);
 
   RES_CODE get_file(String&);
-  //void set_file(String&);
-
-  RES_CODE get_args(String&);
-  //void set_args(String&);
 
   RES_CODE get_md5(MD5&);
 
@@ -53,9 +44,7 @@ private:
   Protocol _protocol;
   String _site;
   String _port;
-  //SharedPointer<Site> _site;
   String _file;
-  String _args;
 
   int has_get_md5;
   MD5 _md5;

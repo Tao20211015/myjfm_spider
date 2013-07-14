@@ -24,6 +24,7 @@
 #include "event_loop.h"
 #include "shared_pointer.h"
 #include "downloader_task.h"
+#include "memory_pool.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -56,7 +57,6 @@ DownloaderTask::DownloaderTask(int id) :
   _send_timeout(0), 
   _recv_timeout(0) {
   _sock_fd_map.clear();
-  memset(_page_buffer, 0, MAX_PAGE_SIZE);
 }
 
 DownloaderTask::~DownloaderTask() {
@@ -107,13 +107,18 @@ RES_CODE DownloaderTask::init_url_queue() {
 }
 
 RES_CODE DownloaderTask::init_dns_cache() {
-  //return glob->get_dns_cache(_dns_cache);
+  glob->get_dns_cache(_dns_cache);
+  if (_dns_cache.is_null()) {
+    return S_FAIL;
+  }
+  /*
   SharedPointer<DnsCache> tmp_cache(new DnsCache());
   _dns_cache = tmp_cache;
 
   if (_dns_cache.is_null()) {
     return S_FAIL;
   }
+  */
 
   return S_OK;
 }
@@ -142,7 +147,6 @@ RES_CODE DownloaderTask::main_loop() {
     String str_port;
     short port = 0;
     String file;
-    String args;
     int retries = 0;
 
     int valid = 0;
@@ -172,7 +176,6 @@ RES_CODE DownloaderTask::main_loop() {
     }
 
     url_p->get_file(file);
-    url_p->get_args(args);
 
     // if the retry times are more than MAX_NUM_OF_RETRIES, 
     // then drop it
@@ -246,6 +249,34 @@ RES_CODE DownloaderTask::main_loop() {
     } else { // connected
       fd = itr->second;
     }
+
+    String request = "";
+    if (generate_http_request(site, file, request) != S_OK) {
+      continue;
+    }
+
+    LOG(WARNING, "[%d] %s", _id, request.c_str());
+
+    if (set_timeout(fd) != S_OK) {
+      continue;
+    }
+
+    if (send_http_request(fd, request) != S_OK) {
+      LOG(WARNING, "[%d]: send_http_request() error", _id);
+      // do not retry
+      continue;
+    }
+
+    MemoryPool* memory_pool = MemoryPool::get_instance();
+    char *header = (char*)(memory_pool->get_memory(MAX_HEADER_SIZE));
+
+    int header_len = 0;
+    if (recv_http_response_header(fd, site, header, header_len) != S_OK) {
+      // do not retry
+      continue;
+    }
+
+    LOG(WARNING, "[%d] %s", _id, header);
 
 #if 0
     String request = "GET ";
@@ -393,6 +424,102 @@ RES_CODE DownloaderTask::create_connection(String& ip, short& port, int& fd) {
 
     return S_OK;
   }
+}
+
+RES_CODE DownloaderTask::generate_http_request(String& site, 
+    String& file, String& request) {
+  if (site.length() <= 0) {
+    return S_FAIL;
+  }
+
+  request = "GET /";
+  request += file + " HTTP/1.1\r\nHost: " + site + "\r\n";
+
+  return glob->get_request_header(request);
+}
+
+RES_CODE DownloaderTask::set_timeout(int fd) {
+  int timeout = 0;
+  struct timeval tm = {(time_t)0, (suseconds_t)0};
+
+  if (glob->get_send_timeout(timeout) != S_OK) {
+    return S_FAIL;
+  }
+
+  tm.tv_sec = (time_t)timeout;
+
+  if (setsockopt(fd, SOL_SOCKET, SO_SNDTIMEO, &tm, sizeof(tm))) {
+    return S_FAIL;
+  }
+
+  if (glob->get_recv_timeout(timeout) != S_OK) {
+    return S_FAIL;
+  }
+
+  tm.tv_sec = (time_t)timeout;
+
+  if (setsockopt(fd, SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(tm))) {
+    return S_FAIL;
+  }
+
+  return S_OK;
+}
+
+RES_CODE DownloaderTask::send_http_request(int fd, String& request) {
+  if (write(fd, request.c_str(), request.length()) != request.length()) {
+    return S_FAIL;
+  }
+
+  return S_OK;
+}
+
+RES_CODE DownloaderTask::recv_http_response_header(int fd, 
+    String&site, char* header, int& len) {
+  if (fd < 0 || !header) {
+    return S_FAIL;
+  }
+
+  len = 0;
+  int ret = 0;
+  int is_end = 0;
+
+  LOG(WARNING, "[%d] begin read header***********************", _id);
+  while (is_end != 4 && len < MAX_HEADER_SIZE) {
+    ret = read(fd, header, 1);
+    if (ret <= 0) {
+      LOG(WARNING, "[%d] timeout*****************************", _id);
+      close(fd);
+      _sock_fd_map.erase(site);
+      return S_FAIL;
+    }
+
+    if (*header == '\r') {
+      ++is_end;
+    } else if (*header == '\n') {
+      ++is_end;
+      ++header;
+      ++len;
+    } else {
+      is_end = 0;
+      ++header;
+      ++len;
+    }
+  }
+
+  if (is_end == 4 && len < MAX_HEADER_SIZE) {
+    header -= 2;
+    *header = '\0';
+    len -= 2;
+    LOG(WARNING, "[%d] after read header***********************", _id);
+    return S_OK;
+  } else {
+    len = 0;
+    return S_FAIL;
+  }
+}
+
+RES_CODE DownloaderTask::recv_http_response_body(int fd) {
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

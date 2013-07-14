@@ -10,6 +10,7 @@
 
 #include "config.h"
 #include "url.h"
+#include "dns_cache.h"
 #include "squeue.h"
 #include "shared_pointer.h"
 #include "thread_pool.h"
@@ -41,6 +42,8 @@ public:
 
   RES_CODE get_downloader_queue(int, 
       SharedPointer<SQueue<SharedPointer<Url> > >&);
+
+  RES_CODE get_dns_cache(SharedPointer<DnsCache>&);
 
   RES_CODE set_downloader_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE set_extractor_threadpool(SharedPointer<ThreadPool>&);
@@ -139,6 +142,7 @@ private:
 #if 0
   static Map<String, String> _MIME;
 #endif
+  SharedPointer<DnsCache> _dns_cache;
 };
 
 _END_MYJFM_NAMESPACE_

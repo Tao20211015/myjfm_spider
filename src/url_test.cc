@@ -25,17 +25,15 @@ void url_test() {
   assert(valid == 1);
 
   Protocol proto;
-  String site, port, file, args;
+  String site, port, file;
   url.get_protocol(proto);
   url.get_site(site);
   url.get_port(port);
   url.get_file(file);
-  url.get_args(args);
   assert(proto == HTTP);
   assert(site == "www.baidu.com");
   assert(port == "80");
-  assert(file == "s");
-  assert(args == "wd=hehe&rsv_spt=1&issp=1&rsv_bp=0&ie=utf-8&tn=baiduhome_pg&rsv_sug3=1");
+  assert(file == "s?wd=hehe&rsv_spt=1&issp=1&rsv_bp=0&ie=utf-8&tn=baiduhome_pg&rsv_sug3=1");
 }
 
 int main() {

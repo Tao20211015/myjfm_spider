@@ -7,7 +7,7 @@ LDFLAGS	= -lpthread
 OBJS		= myjfm_spider.o utility.o log.o global.o shared.o thread_pool.o \
 					thread.o thread_task.o logger.o site.o url.o md5.o dns_cache.o \
 					downloader_task.o extractor_task.o scheduler_task.o logger_task.o \
-					event_loop.o
+					event_loop.o memory_pool.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -16,25 +16,25 @@ UTILITY_UT_BIN	= utility_ut
 THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 THREAD_TEST_BIN	= thread_test
 
 HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 HASH_TEST_BIN	= hash_test
 
 MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 MD5_TEST_BIN	= md5_test
 
 URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 URL_TEST_BIN	= url_test
 
 SCHEDULER_TASK_SHUFFLE_TEST_OBJS	= scheduler_task_shuffle_test.o utility.o \
@@ -42,7 +42,7 @@ SCHEDULER_TASK_SHUFFLE_TEST_OBJS	= scheduler_task_shuffle_test.o utility.o \
 																		thread.o thread_task.o logger.o site.o \
 																		md5.o dns_cache.o downloader_task.o \
 																		extractor_task.o scheduler_task.o \
-																		logger_task.o event_loop.o
+																		logger_task.o event_loop.o memory_pool.o
 SCHEDULER_TASK_SHUFFLE_TEST_BIN	= scheduler_task_shuffle_test
 
 export OUTPUT_PATH=../output
@@ -175,5 +175,8 @@ logger_task.o : logger_task.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 event_loop.o : event_loop.cc
+	$(CC) $(CFLAGS) -o $@ $<
+
+memory_pool.o : memory_pool.cc
 	$(CC) $(CFLAGS) -o $@ $<
 

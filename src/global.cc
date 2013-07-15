@@ -181,36 +181,6 @@ RES_CODE Global::assemble_request_header() {
 
   _request_header = "User-Agent: ";
   _request_header += _user_agent + " " + _sender;
-
-#if 0
-  _request_header += "\r\nAccept: ";
-  String accept = "";
-
-  Map<String, int> unique;
-  Map<String, String>::iterator itr_mime = _MIME.end();
-
-  for (i = 0; i < _file_types.size(); ++i) {
-    itr_mime = _MIME.find(_file_types[i]);
-    if (itr_mime == _MIME.end()) {
-      continue;
-    }
-
-    unique[_MIME[_file_types[i]]] = 1;
-  }
-
-  Map<String, int>::iterator itr_unique = unique.begin();
-  for (; itr_unique != unique.end(); ++itr_unique) {
-    accept += itr_unique->first + ", ";
-  }
-  
-  if (accept.length()) {
-    accept = accept.substr(0, accept.length() - 2);
-  } else {
-    accept = "*/*";
-  }
-
-  _request_header += accept + "\r\n";
-#endif
   _request_header += "\r\nAccept: */*\r\n";
   _request_header += "Accept-Encoding: gzip,deflate,sdch\r\n";
   _request_header += "Accept-Language: en-US,en;q=0.8\r\n";

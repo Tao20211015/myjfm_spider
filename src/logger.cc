@@ -38,23 +38,35 @@ Logger::Logger(int threshold) :
 Logger::~Logger() {
   int i;
   for (i = 0; i < 5; ++i) {
-    if (_secondary.size() <= 0) {
+    _secondary_mutex.lock();
+    int size = _secondary.size();
+    _secondary_mutex.unlock();
+
+    if (size <= 0) {
       break;
     }
-
+    
     sleep(2);
-  }
-
-  // write the log in the _primary buffer onto the disk
-  if (i < 5) {
-    _primary.swap(_secondary);
-    _semaphore.post();
   }
 
   // we assume that writing all the remaining logs in the _primary buffer onto 
   // the disk will take less than 10 seconds
+  // otherwise
+  // it may cause core dump
+
+  // write the log in the _primary buffer onto the disk
+  if (i < 5) {
+    // no need to lock _secondary_mutex
+    _primary.swap(_secondary);
+    _semaphore.post();
+  }
+
   for (i = 0; i < 5; ++i) {
-    if (_secondary.size() <= 0) {
+    _secondary_mutex.lock();
+    int size = _secondary.size();
+    _secondary_mutex.unlock();
+
+    if (size <= 0) {
       break;
     }
 
@@ -176,22 +188,25 @@ RES_CODE Logger::log(Message& msg) {
       return S_INVALID_LOG;
   }
   
-  _mutex.lock();
+  _primary_mutex.lock();
   _primary.push_back(msg);
 
   if (_primary.size() > _threshold) {
     // the Writer thread is writing the log on the disk
     // so write it later
+    _secondary_mutex.lock();
     if (_secondary.size() > 0) {
-      _mutex.unlock();
+      _secondary_mutex.unlock();
+      _primary_mutex.unlock();
       return S_IS_LOGGING;
     }
     
     _primary.swap(_secondary);
+    _secondary_mutex.unlock();
     _semaphore.post();
   }
 
-  _mutex.unlock();
+  _primary_mutex.unlock();
 
   return S_OK;
 }

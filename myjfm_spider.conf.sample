@@ -33,8 +33,7 @@ ERRFILEPATH /home/myjfm/work/myjfm_spider/output
 CREATE_CONNECTION_TIMEOUT 5
 
 # send TCP packet timeout
-SEND_TIMEOUT 20
+SEND_TIMEOUT 10
 
 # recv TCP packet timeout
-RECV_TIMEOUT 60
-
+RECV_TIMEOUT 30

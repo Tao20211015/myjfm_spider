@@ -1,11 +1,31 @@
+/*******************************************************************************
+ * page.h - the HttpResponseHeader and Page class implementation
+ * The HttpResponseHeader class is used for recording the http 
+ * response information. If and only if the status_code is 200, 
+ * the response is valid
+ * The Page class uses memory pool to get memory to cache the page content.
+ * Downloaders put the page content into it, and then transfer it to the
+ * extractors. And, extractors extract urls from it, then save the page onto
+ * disk, then transfer the urls to schedulers
+ *
+ * Copyright (c) 2013, myjfm <mwxjmmyjfm at gmail dot com>
+ * All rights reserved.
+ ******************************************************************************/
+
 #ifndef _PAGE_H_
 #define _PAGE_H_
 
-#include "config.h"
 #include <string.h>
+#include <stdlib.h>
+
+#include "config.h"
+#include "memory_pool.h"
 
 _START_MYJFM_NAMESPACE_
 
+// Http response header class
+// This class is used for recording the http response information
+// if and only if the status_code is 200, the response is valid
 class HttpResponseHeader {
 public:
   HttpResponseHeader() : 
@@ -155,7 +175,63 @@ private:
   int _content_length;
 };
 
-class Page {
+// This is the page class
+// It use memory pool to get memory to cache the page content
+// downloaders put the page content into it, and then transfer it to the
+// extractors, and, extractors extract urls from it, then save the page onto
+// disk, then transfer the urls to schedulers
+class Page : public Shared {
+public:
+  Page(int length = 0) {
+    if (length <= 0) {
+      _page_content = NULL;
+      _page_size = 0;
+    } else {
+      MemoryPool* memory_pool = MemoryPool::get_instance();
+      if (memory_pool) {
+       _page_content = (char*)(memory_pool->get_memory(length));
+       if (_page_content) {
+         _page_size = length;
+       } else {
+         _page_size = -1;
+       }
+      } else {
+        _page_content = (char*)malloc(length);
+        if (_page_content) {
+          _page_size = length;
+        } else {
+          _page_size = -1;
+        }
+      }
+    }
+  }
+
+  ~Page() {
+    if (_page_content) {
+      MemoryPool* memory_pool = MemoryPool::get_instance();
+      if (memory_pool) {
+        memory_pool->put_memory(_page_content);
+      } else {
+        free(_page_content);
+      }
+    }
+  }
+
+  RES_CODE get_page_size(int& page_size) {
+    page_size = _page_size;
+
+    return S_OK;
+  }
+
+  RES_CODE get_page_content(char*& page_content) {
+    page_content = _page_content;
+
+    return S_OK;
+  }
+
+private:
+  char* _page_content;
+  int _page_size;
 };
 
 _END_MYJFM_NAMESPACE_

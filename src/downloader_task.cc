@@ -136,6 +136,8 @@ RES_CODE DownloaderTask::init_event_loop() {
 }
 
 RES_CODE DownloaderTask::main_loop() {
+  RES_CODE res_code = S_OK;
+
   for (;;) {
     LOG(WARNING, "[%d] fetch one url", _id);
 
@@ -198,13 +200,15 @@ RES_CODE DownloaderTask::main_loop() {
     Map<String, int>::iterator itr = _sock_fd_map.find(site);
     if (itr == _sock_fd_map.end()) { // not connected
       Vector<String> ips;
-      if (_dns_cache->find(site, ips) == S_OK) { // dns cached
+      res_code = _dns_cache->find(site, ips);
+      if (res_code == S_OK) { // dns cached
         if (ips.size() <= 0) { // can't find the site's ip
           //we should not retry
           continue;
         }
 
-        if (create_connection(ips[0], port, fd) == S_OK) {
+        res_code = create_connection(ips, port, fd);
+        if (res_code == S_OK) {
           _sock_fd_map[site] = fd;
         } else { // can not create the TCP connection
           // retry
@@ -215,7 +219,8 @@ RES_CODE DownloaderTask::main_loop() {
       } else {
         LOG(WARNING, "[%d] query dns for %s", _id, site.c_str());
         IPTYPE iptype = IP_DUMMY;
-        if (DnsCache::dns_query(site, ips, iptype) != S_OK) { //dns query failed
+        res_code = DnsCache::dns_query(site, ips, iptype);
+        if (res_code != S_OK) { //dns query failed
           LOG(WARNING, "[%d] query dns for %s failed", _id, site.c_str());
           // retry
           url_p->inc_retries();
@@ -238,7 +243,8 @@ RES_CODE DownloaderTask::main_loop() {
         _dns_cache->insert(site, ips);
 
         // pick up the first ip
-        if (create_connection(ips[0], port, fd) == S_OK) {
+        res_code = create_connection(ips, port, fd);
+        if (res_code == S_OK) {
           _sock_fd_map[site] = fd;
         } else { // cannot create the TCP connection
           // retry
@@ -252,19 +258,33 @@ RES_CODE DownloaderTask::main_loop() {
     }
 
     String request = "";
-    if (generate_http_request(site, file, request) != S_OK) {
+    res_code = generate_http_request(site, file, request);
+    if (res_code != S_OK) {
       continue;
     }
 
     LOG(WARNING, "[%d] %s", _id, request.c_str());
 
-    if (set_timeout(fd) != S_OK) {
+    res_code = set_timeout(fd);
+    if (res_code != S_OK) {
+      // retry
+      url_p->inc_retries();
+      _url_queue->push(url_p);
       continue;
     }
 
-    if (send_http_request(fd, request) != S_OK) {
+    res_code = send_http_request(fd, request);
+    if (res_code == S_FAIL) {
       LOG(WARNING, "[%d]: send_http_request() error", _id);
       // do not retry
+      continue;
+    } else if (res_code == S_SHOULD_CLOSE_CONNECTION) { // the socket is broken
+      // close the socket and retry
+      LOG(WARNING, "[%d]: send_http_request() error close connection", _id);
+      close(fd);
+      _sock_fd_map.erase(site);
+      url_p->inc_retries();
+      _url_queue->push(url_p);
       continue;
     }
 
@@ -272,16 +292,27 @@ RES_CODE DownloaderTask::main_loop() {
     char *header = (char*)(memory_pool->get_memory(MAX_HEADER_SIZE));
 
     int header_len = 0;
-    if (recv_http_response_header(fd, site, header, header_len) != S_OK) {
+    res_code = recv_http_response_header(fd, header, header_len);
+    if (res_code == S_FAIL) {
       // do not retry
       memory_pool->put_memory(header);
+      continue;
+    } else if (res_code == S_SHOULD_CLOSE_CONNECTION) { // the socket is broken
+      memory_pool->put_memory(header);
+      // close the socket and retry
+      close(fd);
+      _sock_fd_map.erase(site);
+      url_p->inc_retries();
+      _url_queue->push(url_p);
       continue;
     }
 
     LOG(WARNING, "[%d] %s", _id, header);
 
     HttpResponseHeader http_response_header;
-    if (analysis_http_response_header(header, http_response_header) != S_OK) {
+    res_code = analysis_http_response_header(header, http_response_header);
+    if (res_code != S_OK) {
+      // do not retry
       memory_pool->put_memory(header);
       continue;
     }
@@ -295,16 +326,49 @@ RES_CODE DownloaderTask::main_loop() {
     http_response_header.get_status_code(status_code);
     http_response_header.get_content_length(content_length);
     http_response_header.get_content_type(content_type);
-    LOG(WARNING, "[%d] http version %d", _id, http_version);
     LOG(WARNING, "[%d] status code %d", _id, status_code);
     LOG(WARNING, "[%d] content length %d", _id, content_length);
-    LOG(WARNING, "[%d] content type %s", _id, content_type.c_str());
+    memory_pool->put_memory(header);
+    
+    SharedPointer<Page> page(NULL);
+    res_code = recv_http_response_body(fd, status_code, content_length, page);
+    if (res_code == S_SHOULD_CLOSE_CONNECTION) {
+      LOG(WARNING, "[%d] ******read() error******", _id);
+      close(fd);
+      _sock_fd_map.erase(site);
+      url_p->inc_retries();
+      _url_queue->push(url_p);
+      continue;
+    } else if (res_code == S_FAIL) {
+      LOG(WARNING, "[%d] ******recv body error******", _id);
+      continue;
+    } else if (res_code == S_OK) {
+      char* content = NULL;
+      page->get_page_content(content);
+      if (content) {
+        LOG(WARNING, "[%d] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", _id);
+      }
+    }
   }
 
   return S_OK;
 }
 
-RES_CODE DownloaderTask::create_connection(String& ip, short& port, int& fd) {
+RES_CODE DownloaderTask::create_connection(Vector<String>& ips, 
+    short& port, int& fd) {
+  String ip = "";
+  int num_of_ips = ips.size();
+
+  if (num_of_ips <= 0) {
+    fd = -1;
+    return S_FAIL;
+  } else if (num_of_ips == 1) {
+    ip = ips[0];
+  } else {
+    srand((unsigned)time(NULL));
+    ip = ips[rand() % num_of_ips];
+  }
+
   fd_set fdset;
   int mask;
   struct sockaddr_in stat_addr;
@@ -401,15 +465,31 @@ RES_CODE DownloaderTask::set_timeout(int fd) {
 }
 
 RES_CODE DownloaderTask::send_http_request(int fd, String& request) {
-  if (write(fd, request.c_str(), request.length()) != request.length()) {
+  if (fd < 0 || request.length() <= 0) {
+    LOG(WARNING, "[%d] fd < 0 or request.length() <= 0", _id);
     return S_FAIL;
+  }
+
+  int length = request.length();
+  const char* buffer = request.c_str();
+
+  while (1) {
+    int write_len = write(fd, buffer, length);
+    if (write_len == -1) {
+      return S_SHOULD_CLOSE_CONNECTION;
+    } else if (write_len == length) {
+      return S_OK;
+    } else {
+      length -= write_len;
+      buffer += write_len;
+    }
   }
 
   return S_OK;
 }
 
 RES_CODE DownloaderTask::recv_http_response_header(int fd, 
-    String&site, char* header, int& len) {
+    char* header, int& len) {
   if (fd < 0 || !header) {
     return S_FAIL;
   }
@@ -421,9 +501,7 @@ RES_CODE DownloaderTask::recv_http_response_header(int fd,
   while (is_end != 4 && len < MAX_HEADER_SIZE) {
     ret = read(fd, header, 1);
     if (ret <= 0) {
-      close(fd);
-      _sock_fd_map.erase(site);
-      return S_FAIL;
+      return S_SHOULD_CLOSE_CONNECTION;
     }
 
     if (*header == '\r') {
@@ -450,13 +528,154 @@ RES_CODE DownloaderTask::recv_http_response_header(int fd,
   }
 }
 
-RES_CODE DownloaderTask::analysis_http_response_header(
-    char* header, HttpResponseHeader& http_response_header) {
+RES_CODE DownloaderTask::analysis_http_response_header(char* header, 
+    HttpResponseHeader& http_response_header) {
   return http_response_header.analysis(header);
 }
 
-RES_CODE DownloaderTask::recv_http_response_body(int fd) {
+RES_CODE DownloaderTask::recv_http_response_body(int fd, 
+    int status_code, int content_length, SharedPointer<Page>& page) {
+  if (fd < 0) {
+    return S_FAIL;
+  }
+
+  // do not process other status temporarily
+  if (status_code != 200) {
+    return S_FAIL;
+  }
+
+  if (content_length == -1) {
+    return recv_transfer_encoding_trunked(fd, page);
+  } else if (content_length > 0) {
+    return recv_content_length(fd, content_length, page);
+  } else {
+    return S_FAIL;
+  }
+}
+
+RES_CODE DownloaderTask::recv_transfer_encoding_trunked(int fd, 
+    SharedPointer<Page>& page) {
+  SharedPointer<Page> buffer(new Page(0));
+  if (buffer.is_null()) {
+    return S_SHOULD_CLOSE_CONNECTION;
+  }
+
+  while (1) {
+    char block_size_buffer[17];
+    char* p = block_size_buffer;
+    int block_size;
+    int flag = 0;
+
+    while (1) {
+      if (p >= block_size_buffer + 17) {// the body is to huge!!!
+        return S_SHOULD_CLOSE_CONNECTION;
+      }
+
+      int ret = read(fd, p, 1);
+      if (ret <= 0) {
+        return S_SHOULD_CLOSE_CONNECTION;
+      }
+
+      if (*p == '\r') {
+        flag = 1;
+        p++;
+      } else if (*p == '\n') {
+        if (flag == 1) {
+          break;
+        } else {
+          return S_SHOULD_CLOSE_CONNECTION;
+        }
+      } else {
+        flag = 0;
+        p++;
+      }
+    }
+
+    *(p - 1) = '\0';
+    if (Utility::str2hex(block_size_buffer, block_size) != S_OK) {
+      return S_SHOULD_CLOSE_CONNECTION;
+    }
+
+    if (block_size <= 0) {
+      break;
+    }
+
+    SharedPointer<Page> tmp_page(new Page(block_size));
+    if (tmp_page.is_null()) {
+      return S_SHOULD_CLOSE_CONNECTION;
+    }
+
+    char* tmp_page_content = NULL;
+    tmp_page->get_page_content(tmp_page_content);
+    if (!tmp_page_content) {
+      return S_SHOULD_CLOSE_CONNECTION;
+    }
+
+    p = tmp_page_content;
+    int length = block_size;
+
+    while (1) {
+      int read_len = read(fd, p, length);
+      if (read_len <= 0) { // some error occured
+        return S_SHOULD_CLOSE_CONNECTION;
+      } else if (read_len == length) {
+        break;
+      } else {
+        length -= read_len;
+        p += read_len;
+      }
+    }
+
+    int old_size = 0;
+    buffer->get_page_size(old_size);
+    SharedPointer<Page> tmp_page2(new Page(old_size + block_size));
+    if (tmp_page2.is_null()) {
+      return S_SHOULD_CLOSE_CONNECTION;
+    }
+
+    char* old_content = NULL;
+    buffer->get_page_content(old_content);
+    char* tmp_page2_content = NULL;
+    tmp_page2->get_page_content(tmp_page2_content);
+    if (old_content) {
+      memcpy(tmp_page2_content, old_content, old_size);
+    }
+    memcpy(tmp_page2_content + old_size, tmp_page_content, block_size);
+    buffer = tmp_page2;
+  }
+
+  page = buffer;
+
   return S_OK;
+}
+
+RES_CODE DownloaderTask::recv_content_length(int fd, 
+    int content_length, SharedPointer<Page>& page) {
+  char* buffer = NULL;
+  page = SharedPointer<Page>(new Page(content_length));
+  if (page.is_null()) {
+    LOG(WARNING, "[%d] page.is_null()", _id);
+    return S_SHOULD_CLOSE_CONNECTION;
+  }
+
+  page->get_page_content(buffer);
+  if (!buffer) {
+    LOG(WARNING, "[%d] get_page_content()", _id);
+    return S_SHOULD_CLOSE_CONNECTION;
+  }
+
+  int length = content_length;
+  while (1) {
+    int read_len = read(fd, buffer, length);
+    if (read_len <= 0) { // some error occured
+      return S_SHOULD_CLOSE_CONNECTION;
+    } else if (read_len == length) {
+      return S_OK;
+    } else {
+      length -= read_len;
+      buffer += read_len;
+    }
+  }
 }
 
 _END_MYJFM_NAMESPACE_

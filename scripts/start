@@ -1,5 +1,7 @@
 #!/bin/sh
 
+ulimit -c unlimited
+
 echo
 echo 'Starting the server...'
 sleep 1

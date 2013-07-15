@@ -239,5 +239,46 @@ String Utility::get_file_full_path(String path) {
 #undef MAX_BUF_LEN
 }
 
+int Utility::is_hex_digit(char p) {
+  if ((p >= '0' && p <= '9') || 
+      (p >= 'a' && p <= 'z') || 
+      (p >= 'A' && p <= 'Z')) {
+    return 1;
+  }
+
+  return 0;
+}
+
+RES_CODE Utility::str2hex(const char* str, int& number) {
+  if (!str) {
+    return S_FAIL;
+  }
+
+  const char* p = str;
+  number = 0;
+
+  while (*p) {
+    if (!is_hex_digit(*p)) {
+      return S_FAIL;
+    }
+
+    if (*p >= '0' && *p <= '9') {
+      number = number * 16 + *p - '0';
+    } else if (*p >= 'a' && *p <= 'z') {
+      number = number * 16 + *p - 'a';
+    } else {
+      number = number * 16 + *p - 'A';
+    }
+
+    p++;
+  }
+
+  return S_OK;
+}
+
+RES_CODE Utility::str2hex(String& str, int number) {
+  return Utility::str2hex(str.c_str(), number);
+}
+
 _END_MYJFM_NAMESPACE_
 

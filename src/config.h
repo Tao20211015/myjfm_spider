@@ -114,7 +114,10 @@ enum RES_CODE {
   S_FAILED_TO_LOG_ON_DISK = 0x10, 
 
   // EventLoop member functions use these
-  S_EPOLL_CREATE_FAILED = 0x4
+  S_EPOLL_CREATE_FAILED = 0x4, 
+
+  // downloader member functions use these
+  S_SHOULD_CLOSE_CONNECTION = 0x4
 };
 
 #endif

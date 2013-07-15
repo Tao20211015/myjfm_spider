@@ -21,6 +21,9 @@ MemoryPool* MemoryPool::get_instance() {
 }
 
 MemoryPool::MemoryPool() {
+  _memories[1024 >> 3] = Vector<void*>();
+  _memories[1024 >> 2] = Vector<void*>();
+  _memories[1024 >> 1] = Vector<void*>();
   _memories[1024] = Vector<void*>();
   _memories[1024 << 1] = Vector<void*>();
   _memories[1024 << 2] = Vector<void*>();
@@ -38,6 +41,9 @@ MemoryPool::MemoryPool() {
 }
 
 MemoryPool::~MemoryPool() {
+  free_memory(1024 >> 3);
+  free_memory(1024 >> 2);
+  free_memory(1024 >> 1);
   free_memory(1024);
   free_memory(1024 << 1);
   free_memory(1024 << 2);
@@ -115,7 +121,13 @@ RES_CODE MemoryPool::put_memory(void* memory) {
 }
 
 RES_CODE MemoryPool::adjust_size(int size, int& new_size) {
-  if (size <= 1024) {
+  if (size <= (1024 >> 3)) {
+    new_size = 1024 >> 3;
+  } else if (size <= (1024 >> 2)) {
+    new_size = 1024 >> 2;
+  } else if (size <= (1024 >> 1)) {
+    new_size = 1024 >> 1;
+  } else if (size <= 1024) {
     new_size = 1024;
   } else if (size <= (1024 << 1)) {
     new_size = 1024 << 1;

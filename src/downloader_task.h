@@ -74,13 +74,15 @@ private:
   RES_CODE init_dns_cache();
   RES_CODE init_event_loop();
 
-  RES_CODE create_connection(String&, short&, int&);
+  RES_CODE create_connection(Vector<String>&, short&, int&);
   RES_CODE generate_http_request(String&, String&, String&);
   RES_CODE set_timeout(int);
   RES_CODE send_http_request(int, String&);
-  RES_CODE recv_http_response_header(int, String&, char*, int&);
+  RES_CODE recv_http_response_header(int, char*, int&);
   RES_CODE analysis_http_response_header(char*, HttpResponseHeader&);
-  RES_CODE recv_http_response_body(int);
+  RES_CODE recv_http_response_body(int, int, int, SharedPointer<Page>&);
+  RES_CODE recv_transfer_encoding_trunked(int, SharedPointer<Page>&);
+  RES_CODE recv_content_length(int, int, SharedPointer<Page>&);
 
   int _id;
   SharedPointer<DnsCache> _dns_cache;

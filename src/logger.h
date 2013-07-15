@@ -29,7 +29,7 @@ struct Message {
 class Logger {
   friend class LoggerTask;
 
-#define DEFAULT_THRESHOLD 10000
+#define DEFAULT_THRESHOLD 5000
 
 public:
   Logger(int threshold = DEFAULT_THRESHOLD);
@@ -47,7 +47,8 @@ private:
   int _threshold;
   Vector<Message> _primary;
   Vector<Message> _secondary;
-  Mutex _mutex;
+  Mutex _primary_mutex;
+  Mutex _secondary_mutex;
   Semaphore _semaphore;
   SharedPointer<Thread> _thread;
 };

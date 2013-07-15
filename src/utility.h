@@ -73,6 +73,10 @@ public:
   static RES_CODE str2integer(String& str, T& number) {
     return Utility::str2integer(str.c_str(), number);
   }
+
+  static int is_hex_digit(char p);
+  static RES_CODE str2hex(const char* str, int& number);
+  static RES_CODE str2hex(String& str, int number);
 };
 
 _END_MYJFM_NAMESPACE_

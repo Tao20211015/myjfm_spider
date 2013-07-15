@@ -38,9 +38,9 @@ Logger::Logger(int threshold) :
 Logger::~Logger() {
   int i;
   for (i = 0; i < 5; ++i) {
-    _secondary_mutex.lock();
+    //_secondary_mutex.lock();
     int size = _secondary.size();
-    _secondary_mutex.unlock();
+    //_secondary_mutex.unlock();
 
     if (size <= 0) {
       break;
@@ -62,9 +62,9 @@ Logger::~Logger() {
   }
 
   for (i = 0; i < 5; ++i) {
-    _secondary_mutex.lock();
+    //_secondary_mutex.lock();
     int size = _secondary.size();
-    _secondary_mutex.unlock();
+    //_secondary_mutex.unlock();
 
     if (size <= 0) {
       break;
@@ -194,15 +194,15 @@ RES_CODE Logger::log(Message& msg) {
   if (_primary.size() > _threshold) {
     // the Writer thread is writing the log on the disk
     // so write it later
-    _secondary_mutex.lock();
+    //_secondary_mutex.lock();
     if (_secondary.size() > 0) {
-      _secondary_mutex.unlock();
+      //_secondary_mutex.unlock();
       _primary_mutex.unlock();
       return S_IS_LOGGING;
     }
     
     _primary.swap(_secondary);
-    _secondary_mutex.unlock();
+    //_secondary_mutex.unlock();
     _semaphore.post();
   }
 

@@ -257,11 +257,12 @@ RES_CODE Utility::str2hex(const char* str, int& number) {
   const char* p = str;
   number = 0;
 
-  while (*p) {
-    if (!is_hex_digit(*p)) {
-      return S_FAIL;
-    }
+  if (*p == '0') {
+    number = 0;
+    return S_OK;
+  }
 
+  while (is_hex_digit(*p)) {
     if (*p >= '0' && *p <= '9') {
       number = number * 16 + *p - '0';
     } else if (*p >= 'a' && *p <= 'z') {

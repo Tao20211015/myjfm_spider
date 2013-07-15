@@ -55,55 +55,6 @@ Global::Global() :
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
-
-#if 0
-  String default_mime = 
-    "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8";
-  String all_mime = "*/*";
-  _MIME[CHARS2STR("")] = default_mime;
-  _MIME[CHARS2STR(".html")] = default_mime;
-  _MIME[CHARS2STR(".htm")] = default_mime;
-  _MIME[CHARS2STR(".gif")] = all_mime;
-  _MIME[CHARS2STR(".jpg")] = all_mime;
-  _MIME[CHARS2STR(".js")] = all_mime;
-  _MIME[CHARS2STR(".css")] = CHARS2STR("text/css,*/*;q=0.1");
-  _MIME[CHARS2STR(".aspx")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".aspx")] = CHARS2STR("*/*");
-
-  _MIME[CHARS2STR(".html")] = CHARS2STR("text/html");
-  _MIME[CHARS2STR(".htm")] = CHARS2STR("text/html");
-  _MIME[CHARS2STR(".txt")] = CHARS2STR("text/plain");
-  _MIME[CHARS2STR(".rtf")] = CHARS2STR("application/rtf");
-  _MIME[CHARS2STR(".gif")] = CHARS2STR("image/gif");
-  _MIME[CHARS2STR(".jpeg")] = CHARS2STR("image/jpeg");
-  _MIME[CHARS2STR(".jpg")] = CHARS2STR("image/jpeg");
-  _MIME[CHARS2STR(".au")] = CHARS2STR("audio/basic");
-  _MIME[CHARS2STR(".mid")] = CHARS2STR("audio/midi");
-  _MIME[CHARS2STR(".midi")] = CHARS2STR("audio/midi");
-  _MIME[CHARS2STR(".ra")] = CHARS2STR("audio/x-pn-realaudio");
-  _MIME[CHARS2STR(".mpg")] = CHARS2STR("video/mpeg");
-  _MIME[CHARS2STR(".mpeg")] = CHARS2STR("video/mpeg");
-  _MIME[CHARS2STR(".avi")] = CHARS2STR("video/x-msvideo");
-  _MIME[CHARS2STR(".gz")] = CHARS2STR("application/x-gzip");
-  _MIME[CHARS2STR(".tar")] = CHARS2STR("application/x-tar");
-  // ...
-  _MIME[CHARS2STR(".html")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".htm")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".txt")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".rtf")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".gif")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".jpeg")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".jpg")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".au")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".mid")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".midi")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".ra")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".mpg")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".mpeg")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".avi")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".gz")] = CHARS2STR("*/*");
-  _MIME[CHARS2STR(".tar")] = CHARS2STR("*/*");
-#endif
 }
 
 Global::~Global() {

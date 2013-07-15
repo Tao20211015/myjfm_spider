@@ -48,7 +48,7 @@ private:
   Vector<Message> _primary;
   Vector<Message> _secondary;
   Mutex _primary_mutex;
-  Mutex _secondary_mutex;
+  //Mutex _secondary_mutex;
   Semaphore _semaphore;
   SharedPointer<Thread> _thread;
 };

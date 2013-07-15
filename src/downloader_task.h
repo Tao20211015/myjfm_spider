@@ -81,8 +81,11 @@ private:
   RES_CODE recv_http_response_header(int, char*, int&);
   RES_CODE analysis_http_response_header(char*, HttpResponseHeader&);
   RES_CODE recv_http_response_body(int, int, int, SharedPointer<Page>&);
-  RES_CODE recv_transfer_encoding_trunked(int, SharedPointer<Page>&);
-  RES_CODE recv_content_length(int, int, SharedPointer<Page>&);
+  RES_CODE recv_by_chunk(int, SharedPointer<Page>&);
+  RES_CODE recv_by_content_length(int, int, SharedPointer<Page>&);
+  RES_CODE recv_chunk_size(int, int&);
+  RES_CODE recv_and_discard(int);
+  RES_CODE recvn(int, int, char*);
 
   int _id;
   SharedPointer<DnsCache> _dns_cache;

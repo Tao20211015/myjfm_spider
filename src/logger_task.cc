@@ -47,9 +47,9 @@ RES_CODE LoggerTask::operator()(void* arg) {
       }
     }
     
-    (_logger->_secondary_mutex).lock();
+    //(_logger->_secondary_mutex).lock();
     (_logger->_secondary).clear();
-    (_logger->_secondary_mutex).unlock();
+    //(_logger->_secondary_mutex).unlock();
   }
 
   return S_OK;

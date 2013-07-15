@@ -545,15 +545,16 @@ RES_CODE DownloaderTask::recv_http_response_body(int fd,
   }
 
   if (content_length == -1) {
-    return recv_transfer_encoding_trunked(fd, page);
+    return recv_by_chunk(fd, page);
   } else if (content_length > 0) {
-    return recv_content_length(fd, content_length, page);
+    page = SharedPointer<Page>(new Page(content_length));
+    return recv_by_content_length(fd, content_length, page);
   } else {
     return S_FAIL;
   }
 }
 
-RES_CODE DownloaderTask::recv_transfer_encoding_trunked(int fd, 
+RES_CODE DownloaderTask::recv_by_chunk(int fd, 
     SharedPointer<Page>& page) {
   SharedPointer<Page> buffer(new Page(0));
   if (buffer.is_null()) {
@@ -561,87 +562,46 @@ RES_CODE DownloaderTask::recv_transfer_encoding_trunked(int fd,
   }
 
   while (1) {
-    char block_size_buffer[17];
-    char* p = block_size_buffer;
-    int block_size;
-    int flag = 0;
-
-    while (1) {
-      if (p >= block_size_buffer + 17) {// the body is to huge!!!
-        return S_SHOULD_CLOSE_CONNECTION;
-      }
-
-      int ret = read(fd, p, 1);
-      if (ret <= 0) {
-        return S_SHOULD_CLOSE_CONNECTION;
-      }
-
-      if (*p == '\r') {
-        flag = 1;
-        p++;
-      } else if (*p == '\n') {
-        if (flag == 1) {
-          break;
-        } else {
-          return S_SHOULD_CLOSE_CONNECTION;
-        }
-      } else {
-        flag = 0;
-        p++;
-      }
-    }
-
-    *(p - 1) = '\0';
-    if (Utility::str2hex(block_size_buffer, block_size) != S_OK) {
+    int chunk_size = 0;
+    if (recv_chunk_size(fd, chunk_size) != S_OK) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
-    if (block_size <= 0) {
+    if (chunk_size == 0) {
+      if (recv_and_discard(fd) != S_OK) {
+        return S_SHOULD_CLOSE_CONNECTION;
+      }
+
       break;
     }
 
-    SharedPointer<Page> tmp_page(new Page(block_size));
-    if (tmp_page.is_null()) {
+    SharedPointer<Page> chunk(new Page(chunk_size + 2));
+    char* chunk_content = NULL;
+    chunk->get_page_content(chunk_content);
+    if (recvn(fd, chunk_size + 2, chunk_content) != S_OK) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
-    char* tmp_page_content = NULL;
-    tmp_page->get_page_content(tmp_page_content);
-    if (!tmp_page_content) {
+    int buffer_size = 0;
+    buffer->get_page_size(buffer_size);
+
+    char* buffer_content = NULL;
+    buffer->get_page_content(buffer_content);
+
+    SharedPointer<Page> tmp_buffer(new Page(buffer_size + chunk_size));
+    if (tmp_buffer.is_null()) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
-    p = tmp_page_content;
-    int length = block_size;
+    char* tmp_buffer_content = NULL;
+    tmp_buffer->get_page_content(tmp_buffer_content);
 
-    while (1) {
-      int read_len = read(fd, p, length);
-      if (read_len <= 0) { // some error occured
-        return S_SHOULD_CLOSE_CONNECTION;
-      } else if (read_len == length) {
-        break;
-      } else {
-        length -= read_len;
-        p += read_len;
-      }
+    if (buffer_content) {
+      memcpy(tmp_buffer_content, buffer_content, buffer_size);
     }
 
-    int old_size = 0;
-    buffer->get_page_size(old_size);
-    SharedPointer<Page> tmp_page2(new Page(old_size + block_size));
-    if (tmp_page2.is_null()) {
-      return S_SHOULD_CLOSE_CONNECTION;
-    }
-
-    char* old_content = NULL;
-    buffer->get_page_content(old_content);
-    char* tmp_page2_content = NULL;
-    tmp_page2->get_page_content(tmp_page2_content);
-    if (old_content) {
-      memcpy(tmp_page2_content, old_content, old_size);
-    }
-    memcpy(tmp_page2_content + old_size, tmp_page_content, block_size);
-    buffer = tmp_page2;
+    memcpy(tmp_buffer_content + buffer_size, chunk_content, chunk_size);
+    buffer = tmp_buffer;
   }
 
   page = buffer;
@@ -649,30 +609,113 @@ RES_CODE DownloaderTask::recv_transfer_encoding_trunked(int fd,
   return S_OK;
 }
 
-RES_CODE DownloaderTask::recv_content_length(int fd, 
+RES_CODE DownloaderTask::recv_by_content_length(int fd, 
     int content_length, SharedPointer<Page>& page) {
-  char* buffer = NULL;
-  page = SharedPointer<Page>(new Page(content_length));
-  if (page.is_null()) {
-    LOG(WARNING, "[%d] page.is_null()", _id);
+  if (fd <= 0 || content_length < 0 || page.is_null()) {
     return S_SHOULD_CLOSE_CONNECTION;
   }
 
+  char* buffer = NULL;
   page->get_page_content(buffer);
   if (!buffer) {
-    LOG(WARNING, "[%d] get_page_content()", _id);
     return S_SHOULD_CLOSE_CONNECTION;
   }
 
-  int length = content_length;
+  if (recvn(fd, content_length, buffer) != S_OK) {
+    return S_SHOULD_CLOSE_CONNECTION;
+  }
+
+  return S_OK;
+}
+
+RES_CODE DownloaderTask::recv_chunk_size(int fd, int& size) {
+  if (fd <= 0) {
+    return S_FAIL;
+  }
+
+  int ret = 0;
+  char buffer;
+  size = 0;
+  int flag = 0;
+
   while (1) {
-    int read_len = read(fd, buffer, length);
-    if (read_len <= 0) { // some error occured
-      return S_SHOULD_CLOSE_CONNECTION;
-    } else if (read_len == length) {
+    ret = read(fd, &buffer, 1);
+    if (ret <= 0) {
+      return S_FAIL;
+    }
+
+    if (Utility::is_hex_digit(buffer)) {
+      if (buffer >= '0' && buffer <= '9') {
+        size = size * 16 + buffer - '0';
+      } else if (buffer >= 'a' && buffer <= 'z') {
+        size = size * 16 + buffer - 'a';
+      } else {
+        size = size * 16 + buffer - 'A';
+      }
+    } else {
+      break;
+    }
+  }
+
+  if (buffer == '\r') {
+    flag = 1;
+  }
+
+  while (1) {
+    ret = read(fd, &buffer, 1);
+    if (ret <= 0) {
+      return S_FAIL;
+    }
+
+    if (buffer == '\r') {
+      flag = 1;
+    } else if (buffer == '\n' && flag == 1) {
       return S_OK;
     } else {
-      length -= read_len;
+      flag = 0;
+    }
+  }
+}
+
+RES_CODE DownloaderTask::recv_and_discard(int fd) {
+  if (fd <= 0) {
+    return S_FAIL;
+  }
+
+  char buffer;
+  int flag = 0;
+
+  while (1) {
+    int ret = read(fd, &buffer, 1);
+    if (ret <= 0) {
+      return S_FAIL;
+    }
+
+    if (buffer == '\r') {
+      flag = 1;
+    } else if (buffer == '\n' && flag == 1) {
+      return S_OK;
+    } else {
+      flag = 0;
+    }
+  }
+}
+
+RES_CODE DownloaderTask::recvn(int fd, int n, char* buffer) {
+  if (fd < 0 || n <= 0 || !buffer) {
+    return S_FAIL;
+  }
+
+  int remain_n = n;
+
+  while (1) {
+    int read_len = read(fd, buffer, remain_n);
+    if (read_len <= 0) { // some error occured
+      return S_FAIL;
+    } else if (read_len == remain_n) {
+      return S_OK;
+    } else {
+      remain_n -= read_len;
       buffer += read_len;
     }
   }

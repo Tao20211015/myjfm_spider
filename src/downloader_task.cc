@@ -25,6 +25,7 @@
 #include "shared_pointer.h"
 #include "downloader_task.h"
 #include "memory_pool.h"
+#include "page.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -273,97 +274,31 @@ RES_CODE DownloaderTask::main_loop() {
     int header_len = 0;
     if (recv_http_response_header(fd, site, header, header_len) != S_OK) {
       // do not retry
+      memory_pool->put_memory(header);
       continue;
     }
 
     LOG(WARNING, "[%d] %s", _id, header);
 
-#if 0
-    String request = "GET ";
-
-    if (file.length() <= 0) {
-      request += "/index.html";
-    } else {
-      request += "/" + file;
-
-      if (args.length() > 0) {
-        request += "?" + args;
-      }
-    }
-    request += " HTTP/1.1\r\nHost: ";
-    request += site;
-
-    if (port != 80) {
-      request += str_port;
-    }
-
-    String request_header = "";
-    glob->get_request_header(request_header);
-    request += request_header;
-    LOG(WARNING, "[%d] %s", _id, request.c_str());
-
-    int send_timeout = 0;
-    int recv_timeout = 0;
-    glob->get_send_timeout(send_timeout);
-    glob->get_recv_timeout(recv_timeout);
-    struct timeval send_tm = {(time_t)send_timeout, (suseconds_t)0};
-    struct timeval recv_tm = {(time_t)recv_timeout, (suseconds_t)0};
-    setsockopt(fd, SOL_SOCKET, 
-        SO_SNDTIMEO, &send_tm, sizeof(send_tm));
-    setsockopt(fd, SOL_SOCKET, 
-        SO_RCVTIMEO, &recv_tm, sizeof(recv_tm));
-
-    if (write(fd, request.c_str(), request.length()) < -1) {
-      LOG(WARNING, "[%d]: write error", _id);
-      url_p->inc_retries();
-      _url_queue->push(url_p);
+    HttpResponseHeader http_response_header;
+    if (analysis_http_response_header(header, http_response_header) != S_OK) {
+      memory_pool->put_memory(header);
       continue;
     }
 
-    int error_flag = 0;
-    int page_len = 0;
-    char *buffer = _page_buffer;
-
-    page_len = read(fd, buffer, MAX_PAGE_SIZE);
-    if (page_len < 0) {
-      LOG(WARNING, "[%d]: read error", _id);
-      url_p->inc_retries();
-      _url_queue->push(url_p);
-      continue;
-    }
-
-      /*
-    while (1) {
-      int len = read(fd, buffer, MAX_PAGE_SIZE - page_len);
-
-      if (len < 0) {
-        LOG(WARNING, "[%d]: read error", _id);
-        error_flag = 1;
-        break;
-      } else if (len > 0) {
-        buffer += len;
-
-        if ((page_len += len) >= MAX_PAGE_SIZE) {
-          error_flag = 1;
-          break;
-        }
-
-        continue;
-      } else {
-        break;
-      }
-    }
-
-    if (error_flag) {
-      url_p->inc_retries();
-      _url_queue->push(url_p);
-      continue;
-    }
-    */
-
-    _page_buffer[page_len] = '\0';
-    LOG(WARNING, "[%d] %s:%d %s", _id, site.c_str(), port, _page_buffer);
-#endif
+    LOG(WARNING, "[%d] Analysis http response header successfully!", _id);
+    int http_version = 0;
+    int status_code = 0;
+    int content_length = -1;
+    String content_type = "";
+    http_response_header.get_http_version(http_version);
+    http_response_header.get_status_code(status_code);
+    http_response_header.get_content_length(content_length);
+    http_response_header.get_content_type(content_type);
+    LOG(WARNING, "[%d] http version %d", _id, http_version);
+    LOG(WARNING, "[%d] status code %d", _id, status_code);
+    LOG(WARNING, "[%d] content length %d", _id, content_length);
+    LOG(WARNING, "[%d] content type %s", _id, content_type.c_str());
   }
 
   return S_OK;
@@ -483,11 +418,9 @@ RES_CODE DownloaderTask::recv_http_response_header(int fd,
   int ret = 0;
   int is_end = 0;
 
-  LOG(WARNING, "[%d] begin read header***********************", _id);
   while (is_end != 4 && len < MAX_HEADER_SIZE) {
     ret = read(fd, header, 1);
     if (ret <= 0) {
-      LOG(WARNING, "[%d] timeout*****************************", _id);
       close(fd);
       _sock_fd_map.erase(site);
       return S_FAIL;
@@ -510,12 +443,16 @@ RES_CODE DownloaderTask::recv_http_response_header(int fd,
     header -= 2;
     *header = '\0';
     len -= 2;
-    LOG(WARNING, "[%d] after read header***********************", _id);
     return S_OK;
   } else {
     len = 0;
     return S_FAIL;
   }
+}
+
+RES_CODE DownloaderTask::analysis_http_response_header(
+    char* header, HttpResponseHeader& http_response_header) {
+  return http_response_header.analysis(header);
 }
 
 RES_CODE DownloaderTask::recv_http_response_body(int fd) {

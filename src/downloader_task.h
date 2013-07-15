@@ -16,6 +16,7 @@
 #include "shared_pointer.h"
 #include "event_loop.h"
 #include "callback.h"
+#include "page.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -78,6 +79,7 @@ private:
   RES_CODE set_timeout(int);
   RES_CODE send_http_request(int, String&);
   RES_CODE recv_http_response_header(int, String&, char*, int&);
+  RES_CODE analysis_http_response_header(char*, HttpResponseHeader&);
   RES_CODE recv_http_response_body(int);
 
   int _id;

@@ -110,6 +110,8 @@ RES_CODE MemoryPool::put_memory(void* memory) {
     Mutex::ScopeGuard guard(&_mutex);
     _memories[*pi].push_back(memory);
   }
+
+  return S_OK;
 }
 
 RES_CODE MemoryPool::adjust_size(int size, int& new_size) {

@@ -37,3 +37,6 @@ SEND_TIMEOUT 10
 
 # recv TCP packet timeout
 RECV_TIMEOUT 60
+
+# dns server
+NAME_SERVER 8.8.8.8

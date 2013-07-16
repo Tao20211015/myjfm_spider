@@ -26,6 +26,7 @@
 #include "downloader_task.h"
 #include "memory_pool.h"
 #include "page.h"
+#include "dns.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -54,6 +55,7 @@ DownloaderTask::DownloaderTask(int id) :
   _dns_cache(NULL), 
   _url_queue(NULL), 
   _event_loop(NULL), 
+  _dns(NULL), 
   _create_connection_timeout(0), 
   _send_timeout(0), 
   _recv_timeout(0) {
@@ -96,6 +98,10 @@ RES_CODE DownloaderTask::init() {
   }
   */
 
+  if (init_dns() != S_OK) {
+    return S_FAIL;
+  }
+
   glob->get_create_connection_timeout(_create_connection_timeout);
   glob->get_send_timeout(_send_timeout);
   glob->get_recv_timeout(_recv_timeout);
@@ -112,14 +118,6 @@ RES_CODE DownloaderTask::init_dns_cache() {
   if (_dns_cache.is_null()) {
     return S_FAIL;
   }
-  /*
-  SharedPointer<DnsCache> tmp_cache(new DnsCache());
-  _dns_cache = tmp_cache;
-
-  if (_dns_cache.is_null()) {
-    return S_FAIL;
-  }
-  */
 
   return S_OK;
 }
@@ -133,6 +131,24 @@ RES_CODE DownloaderTask::init_event_loop() {
   }
 
   return _event_loop->init();
+}
+
+RES_CODE DownloaderTask::init_dns() {
+  _dns = SharedPointer<Dns>(new Dns());
+  if (_dns.is_null()) {
+    return S_FAIL;
+  }
+
+  String name_server = "";
+  if (glob->get_name_server(name_server) != S_OK) {
+    return S_FAIL;
+  }
+
+  if (_dns->init(name_server) != S_OK) {
+    return S_FAIL;
+  }
+
+  return S_OK;
 }
 
 RES_CODE DownloaderTask::main_loop() {
@@ -466,7 +482,6 @@ RES_CODE DownloaderTask::set_timeout(int fd) {
 
 RES_CODE DownloaderTask::send_http_request(int fd, String& request) {
   if (fd < 0 || request.length() <= 0) {
-    LOG(WARNING, "[%d] fd < 0 or request.length() <= 0", _id);
     return S_FAIL;
   }
 

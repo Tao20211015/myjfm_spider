@@ -45,13 +45,15 @@ Global::Global() :
   _downloader_threadpool(NULL), 
   _extractor_threadpool(NULL), 
   _scheduler_threadpool(NULL), 
+  _dns_timeout(10), 
   _create_connection_timeout(2), 
   _send_timeout(5), 
   _recv_timeout(30), 
   _request_header(""), 
   _user_agent("myjfm_spider"), 
   _sender("myjfm_spider@xxx.com"), 
-  _dns_cache(NULL) {
+  _dns_cache(NULL), 
+  _name_server("") {
   _file_types.clear();
   _seed_urls.clear();
   _downloader_queues.clear();
@@ -90,6 +92,11 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
 
   parse_config();
 
+  if (check_name_server() != S_OK) {
+    Cerr << "[FATAL] init() failed. name server is empty" << Endl;
+    abort();
+  }
+
   assemble_request_header();
 
   // initialize the url queue
@@ -121,9 +128,12 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
 }
 
 RES_CODE Global::load_default_file_types() {
+  CHECK_HAS_INIT();
+
   _file_types.clear();
   _file_types.push_back(".htm");
   _file_types.push_back(".html");
+
   return S_OK;
 }
 
@@ -191,12 +201,16 @@ RES_CODE Global::parse_config() {
         set_file_types(key_and_value);
       } else if (key_and_value[0] == "SEEDURLS") {
         set_seed_urls(key_and_value);
+      } else if (key_and_value[0] == "DNS_TIMEOUT") {
+        set_dns_timeout(key_and_value[1]);
       } else if (key_and_value[0] == "CREATE_CONNECTION_TIMEOUT") {
         set_create_connection_timeout(key_and_value[1]);
       } else if (key_and_value[0] == "SEND_TIMEOUT") {
         set_send_timeout(key_and_value[1]);
       } else if (key_and_value[0] == "RECV_TIMEOUT") {
         set_recv_timeout(key_and_value[1]);
+      } else if (key_and_value[0] == "NAME_SERVER") {
+        set_name_server(key_and_value[1]);
       } else {
         continue;
       }
@@ -209,6 +223,14 @@ RES_CODE Global::parse_config() {
     }
 
     fclose(config_file_p);
+  }
+
+  return S_OK;
+}
+
+RES_CODE Global::check_name_server() {
+  if (_name_server.length() <= 0) {
+    return S_FAIL;
   }
 
   return S_OK;
@@ -442,6 +464,13 @@ RES_CODE Global::get_request_header(String& request_header) {
   return S_OK;
 }
 
+RES_CODE Global::set_dns_timeout(String& timeout) {
+  CHECK_HAS_INIT();
+  _dns_timeout = atoi(timeout.c_str());
+
+  return S_OK;
+}
+
 RES_CODE Global::set_create_connection_timeout(String& timeout) {
   CHECK_HAS_INIT();
   _create_connection_timeout = atoi(timeout.c_str());
@@ -459,6 +488,20 @@ RES_CODE Global::set_send_timeout(String& timeout) {
 RES_CODE Global::set_recv_timeout(String& timeout) {
   CHECK_HAS_INIT();
   _recv_timeout = atoi(timeout.c_str());
+
+  return S_OK;
+}
+
+RES_CODE Global::set_name_server(String& name_server) {
+  CHECK_HAS_INIT();
+  _name_server = name_server;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_dns_timeout(int& timeout) {
+  CHECK_HAS_INIT();
+  timeout = _dns_timeout;
 
   return S_OK;
 }
@@ -487,6 +530,13 @@ RES_CODE Global::get_recv_timeout(int& timeout) {
 RES_CODE Global::get_dns_cache(SharedPointer<DnsCache>& dns_cache) {
   CHECK_HAS_INIT();
   dns_cache = _dns_cache;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_name_server(String& name_server) {
+  CHECK_HAS_INIT();
+  name_server = _name_server;
 
   return S_OK;
 }

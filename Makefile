@@ -21,5 +21,6 @@ clean :
 
 realclean :
 	@$(MAKE) realclean -C src
+	@$(MAKE) realclean -C deps
 	rm $(OUTPUT_PATH) -rf
 

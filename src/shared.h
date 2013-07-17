@@ -8,6 +8,8 @@
 #ifndef _SHARED_H_
 #define _SHARED_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "mutex.h"
 
@@ -18,13 +20,13 @@ class Shared {
 public:
   virtual ~Shared() {};
   RES_CODE add_ref();
-  unsigned int dec_ref(bool* flag = NULL);
+  uint32_t dec_ref(bool* flag = NULL);
 
 protected:
   Shared();
 
 private:
-  unsigned int _count;
+  uint32_t _count;
   Mutex _mutex;
   // only can be inherited
   Shared(const Shared&);

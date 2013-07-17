@@ -7,10 +7,11 @@
  * All rights reserved.
  ******************************************************************************/
 
-#include <string.h>
-#include <sys/epoll.h>
+#include <stdint.h>
 #include <stdlib.h>
+#include <string.h>
 #include <unistd.h>
+#include <sys/epoll.h>
 
 #include "config.h"
 #include "event_loop.h"
@@ -19,7 +20,7 @@ _START_MYJFM_NAMESPACE_
 
 EventLoop::EventLoop() : 
   _state(CONSTRUCTED), 
-  _stop(1), 
+  _stop(true), 
   _epoll_fd(-1), 
   _events(NULL), 
   _epoll_events(NULL) {
@@ -55,7 +56,7 @@ RES_CODE EventLoop::destroy() {
 
   close(_epoll_fd);
   _state = DESTROYED;
-  _stop = 1;
+  _stop = true;
 
   return S_OK;
 }
@@ -70,7 +71,7 @@ RES_CODE EventLoop::add_event(Event* event) {
   }
   
   int fd = event->_event_fd;
-  unsigned int mask = event->_mask;
+  uint32_t mask = event->_mask;
   int op;
   
   if (_events[fd]._mask == EVENT_DUMMY) {
@@ -140,7 +141,7 @@ RES_CODE EventLoop::del_event(Event* event) {
   }
 
   int fd = event->_event_fd;
-  unsigned int mask = _events[fd]._mask & (~(event->_mask));
+  uint32_t mask = _events[fd]._mask & (~(event->_mask));
   _events[fd]._mask = mask;
   struct epoll_event tmp_event;
   tmp_event.data.fd = fd;
@@ -178,9 +179,9 @@ RES_CODE EventLoop::loop() {
   _stop = false;
 
   while (!_stop) {
-    int j;
     int num_events = epoll_wait(_epoll_fd, _epoll_events, MAX_EPOLL_FD, 5);
 
+    int j;
     for (j = 0; j < num_events; j++) {
       struct epoll_event* event = _epoll_events + j;
       int fd = event->data.fd;
@@ -216,11 +217,11 @@ RES_CODE EventLoop::loop() {
 }
 
 RES_CODE EventLoop::stop() {
-  _stop = 1;
+  _stop = true;
   return S_OK;
 }
 
-int EventLoop::is_stopped() {
+bool EventLoop::is_stopped() {
   return _stop;
 }
 

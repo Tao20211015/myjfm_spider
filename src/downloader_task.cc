@@ -7,6 +7,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 #include <sys/socket.h>
@@ -50,7 +51,7 @@ RES_CODE ErrorCallback::operator()(void* arg) {
   return S_OK;
 }
 
-DownloaderTask::DownloaderTask(int id) : 
+DownloaderTask::DownloaderTask(uint32_t id) : 
   _id(id), 
   _dns_cache(NULL), 
   _url_queue(NULL), 
@@ -73,14 +74,6 @@ RES_CODE DownloaderTask::operator()(void* arg) {
   }
 
   return main_loop();
-  /*
-  for (;;) {
-    LOG(WARNING, "[%d]", _id);
-    usleep(10000);
-  }
-
-  return S_OK;
-  */
 }
 
 RES_CODE DownloaderTask::init() {
@@ -168,14 +161,14 @@ RES_CODE DownloaderTask::main_loop() {
     Protocol proto;
     String site;
     String str_port;
-    short port = 0;
+    uint16_t port = 0;
     String file;
-    int retries = 0;
+    uint32_t retries = 0;
 
-    int valid = 0;
+    bool valid = false;
     int fd = -1;
 
-    // if the url is not valid, then drop it
+    // if the url is invalid, drop it
     url_p->is_valid(valid);
     if (!valid) {
       continue;
@@ -187,14 +180,14 @@ RES_CODE DownloaderTask::main_loop() {
     }
 
     url_p->get_site(site);
-    if (site.length() <= 0) {
+    if (site.length() == 0) {
       continue;
     }
 
     url_p->get_port(str_port);
-    if (str_port.length() <= 0 || 
+    if (str_port.length() == 0 || 
         Utility::str2integer(str_port, port) != S_OK || 
-        port <= 0) {
+        port == 0) {
       continue;
     }
 
@@ -222,7 +215,7 @@ RES_CODE DownloaderTask::main_loop() {
       Vector<String> ips;
       res_code = _dns_cache->find(site, ips);
       if (res_code == S_OK) { // dns cached
-        if (ips.size() <= 0) { // can't find the site's ip
+        if (ips.size() == 0) { // can't find the site's ip
           //we should not retry
           continue;
         }
@@ -255,7 +248,7 @@ RES_CODE DownloaderTask::main_loop() {
           continue;
         }
 
-        if (ips.size() <= 0) { // can't find the site's ip
+        if (ips.size() == 0) { // can't find the site's ip
           // should not retry
           continue;
         }
@@ -311,7 +304,7 @@ RES_CODE DownloaderTask::main_loop() {
     MemoryPool* memory_pool = MemoryPool::get_instance();
     char *header = (char*)(memory_pool->get_memory(MAX_HEADER_SIZE));
 
-    int header_len = 0;
+    uint32_t header_len = 0;
     res_code = recv_http_response_header(fd, header, header_len);
     if (res_code == S_FAIL) {
       // do not retry
@@ -375,11 +368,11 @@ RES_CODE DownloaderTask::main_loop() {
 }
 
 RES_CODE DownloaderTask::create_connection(Vector<String>& ips, 
-    short& port, int& fd) {
+    uint16_t& port, int& fd) {
   String ip = "";
-  int num_of_ips = ips.size();
+  uint32_t num_of_ips = ips.size();
 
-  if (num_of_ips <= 0) {
+  if (num_of_ips == 0) {
     fd = -1;
     return S_FAIL;
   } else if (num_of_ips == 1) {
@@ -389,11 +382,7 @@ RES_CODE DownloaderTask::create_connection(Vector<String>& ips,
     ip = ips[rand() % num_of_ips];
   }
 
-  fd_set fdset;
-  int mask;
   struct sockaddr_in stat_addr;
-  struct timeval tm = {(time_t)_create_connection_timeout, (suseconds_t)0};
-
   bzero((char*)&stat_addr, sizeof(stat_addr));
   stat_addr.sin_family = AF_INET;
   stat_addr.sin_port = htons(port);
@@ -404,7 +393,7 @@ RES_CODE DownloaderTask::create_connection(Vector<String>& ips,
     return S_FAIL;
   }
 
-  mask = fcntl(fd, F_GETFL, 0);
+  int mask = fcntl(fd, F_GETFL, 0);
   if (mask < 0) {
     fd = -1;
     return S_FAIL;
@@ -425,8 +414,10 @@ RES_CODE DownloaderTask::create_connection(Vector<String>& ips,
     return S_OK;
   }
 
+  fd_set fdset;
   FD_ZERO(&fdset);
   FD_SET(fd, &fdset);
+  struct timeval tm = {(time_t)_create_connection_timeout, (suseconds_t)0};
 
   int ret = select(fd + 1, NULL, &fdset, NULL, &tm);
   if (ret <= 0) { // timeout(0) or select error(<0)
@@ -447,7 +438,7 @@ RES_CODE DownloaderTask::create_connection(Vector<String>& ips,
 
 RES_CODE DownloaderTask::generate_http_request(String& site, 
     String& file, String& request) {
-  if (site.length() <= 0) {
+  if (site.length() == 0) {
     return S_FAIL;
   }
 
@@ -458,7 +449,11 @@ RES_CODE DownloaderTask::generate_http_request(String& site,
 }
 
 RES_CODE DownloaderTask::set_timeout(int fd) {
-  int timeout = 0;
+  if (fd < 0) {
+    return S_FAIL;
+  }
+
+  uint32_t timeout = 0;
   struct timeval tm = {(time_t)0, (suseconds_t)0};
 
   if (glob->get_send_timeout(timeout) != S_OK) {
@@ -485,18 +480,18 @@ RES_CODE DownloaderTask::set_timeout(int fd) {
 }
 
 RES_CODE DownloaderTask::send_http_request(int fd, String& request) {
-  if (fd < 0 || request.length() <= 0) {
+  if (fd < 0 || request.length() == 0) {
     return S_FAIL;
   }
 
-  int length = request.length();
+  uint32_t length = request.length();
   const char* buffer = request.c_str();
 
   while (1) {
     int write_len = write(fd, buffer, length);
-    if (write_len == -1) {
+    if (write_len <= 0) {
       return S_SHOULD_CLOSE_CONNECTION;
-    } else if (write_len == length) {
+    } else if (write_len == (int)length) {
       return S_OK;
     } else {
       length -= write_len;
@@ -508,7 +503,7 @@ RES_CODE DownloaderTask::send_http_request(int fd, String& request) {
 }
 
 RES_CODE DownloaderTask::recv_http_response_header(int fd, 
-    char* header, int& len) {
+    char* header, uint32_t& len) {
   if (fd < 0 || !header) {
     return S_FAIL;
   }
@@ -524,9 +519,17 @@ RES_CODE DownloaderTask::recv_http_response_header(int fd,
     }
 
     if (*header == '\r') {
-      ++is_end;
+      if (is_end == 0 || is_end == 2) {
+        ++is_end;
+      } else {
+        is_end = 1;
+      }
     } else if (*header == '\n') {
-      ++is_end;
+      if (is_end == 1 || is_end == 3) {
+        ++is_end;
+      } else {
+        is_end = 0;
+      }
       ++header;
       ++len;
     } else {
@@ -553,7 +556,7 @@ RES_CODE DownloaderTask::analysis_http_response_header(char* header,
 }
 
 RES_CODE DownloaderTask::recv_http_response_body(int fd, 
-    int status_code, int content_length, SharedPointer<Page>& page) {
+    uint32_t status_code, int32_t content_length, SharedPointer<Page>& page) {
   if (fd < 0) {
     return S_FAIL;
   }
@@ -581,7 +584,7 @@ RES_CODE DownloaderTask::recv_by_chunk(int fd,
   }
 
   while (1) {
-    int chunk_size = 0;
+    uint32_t chunk_size = 0;
     if (recv_chunk_size(fd, chunk_size) != S_OK) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
@@ -601,7 +604,7 @@ RES_CODE DownloaderTask::recv_by_chunk(int fd,
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
-    int buffer_size = 0;
+    uint32_t buffer_size = 0;
     buffer->get_page_size(buffer_size);
 
     char* buffer_content = NULL;
@@ -629,7 +632,7 @@ RES_CODE DownloaderTask::recv_by_chunk(int fd,
 }
 
 RES_CODE DownloaderTask::recv_by_content_length(int fd, 
-    int content_length, SharedPointer<Page>& page) {
+    uint32_t content_length, SharedPointer<Page>& page) {
   if (fd <= 0 || content_length < 0 || page.is_null()) {
     return S_SHOULD_CLOSE_CONNECTION;
   }
@@ -647,15 +650,15 @@ RES_CODE DownloaderTask::recv_by_content_length(int fd,
   return S_OK;
 }
 
-RES_CODE DownloaderTask::recv_chunk_size(int fd, int& size) {
-  if (fd <= 0) {
+RES_CODE DownloaderTask::recv_chunk_size(int fd, uint32_t& size) {
+  if (fd < 0) {
     return S_FAIL;
   }
 
   int ret = 0;
   char buffer;
   size = 0;
-  int flag = 0;
+  bool flag = false;
 
   while (1) {
     ret = read(fd, &buffer, 1);
@@ -677,7 +680,7 @@ RES_CODE DownloaderTask::recv_chunk_size(int fd, int& size) {
   }
 
   if (buffer == '\r') {
-    flag = 1;
+    flag = true;
   }
 
   while (1) {
@@ -687,11 +690,11 @@ RES_CODE DownloaderTask::recv_chunk_size(int fd, int& size) {
     }
 
     if (buffer == '\r') {
-      flag = 1;
+      flag = true;
     } else if (buffer == '\n' && flag == 1) {
       return S_OK;
     } else {
-      flag = 0;
+      flag = false;
     }
   }
 }
@@ -702,7 +705,7 @@ RES_CODE DownloaderTask::recv_and_discard(int fd) {
   }
 
   char buffer;
-  int flag = 0;
+  bool flag = false;
 
   while (1) {
     int ret = read(fd, &buffer, 1);
@@ -711,27 +714,27 @@ RES_CODE DownloaderTask::recv_and_discard(int fd) {
     }
 
     if (buffer == '\r') {
-      flag = 1;
+      flag = true;
     } else if (buffer == '\n' && flag == 1) {
       return S_OK;
     } else {
-      flag = 0;
+      flag = false;
     }
   }
 }
 
-RES_CODE DownloaderTask::recvn(int fd, int n, char* buffer) {
-  if (fd < 0 || n <= 0 || !buffer) {
+RES_CODE DownloaderTask::recvn(int fd, uint32_t n, char* buffer) {
+  if (fd < 0 || n == 0 || !buffer) {
     return S_FAIL;
   }
 
-  int remain_n = n;
+  uint32_t remain_n = n;
 
   while (1) {
     int read_len = read(fd, buffer, remain_n);
     if (read_len <= 0) { // some error occured
       return S_FAIL;
-    } else if (read_len == remain_n) {
+    } else if (read_len == (int)remain_n) {
       return S_OK;
     } else {
       remain_n -= read_len;

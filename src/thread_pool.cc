@@ -5,6 +5,8 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
+
 #include "config.h"
 #include "task.h"
 #include "thread.h"
@@ -14,7 +16,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-ThreadPool::ThreadPool(int n) : 
+ThreadPool::ThreadPool(uint32_t n) : 
   _n(n), 
   _state(CONSTRUCTED) {
 }
@@ -24,10 +26,10 @@ ThreadPool::~ThreadPool() {
 }
 
 RES_CODE ThreadPool::init() {
-  int retry = 0;
+  uint32_t retry = 0;
 
   if (_state == CONSTRUCTED) {
-    int i;
+    uint32_t i;
     for (i = 0; i < _n; ++i) {
       if (add_worker() != S_OK) {
         if (retry >= MAX_RETRY) {
@@ -38,6 +40,7 @@ RES_CODE ThreadPool::init() {
         }
       }
     }
+
     return S_OK;
   }
 
@@ -45,7 +48,7 @@ RES_CODE ThreadPool::init() {
 }
 
 RES_CODE ThreadPool::stop() {
-  int i;
+  uint32_t i;
   for (i = 0; i < _threads.size(); ++i) {
     _threads[i]->stop_blocking();
   }
@@ -53,7 +56,7 @@ RES_CODE ThreadPool::stop() {
   return S_OK;
 }
 
-RES_CODE ThreadPool::size(int& s) {
+RES_CODE ThreadPool::size(uint32_t& s) {
   s = _n;
   return S_OK;
 }

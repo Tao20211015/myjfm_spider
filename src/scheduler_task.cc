@@ -7,6 +7,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -22,7 +23,7 @@ extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-SchedulerTask::SchedulerTask(int id) : 
+SchedulerTask::SchedulerTask(uint32_t id) : 
   _id(id), 
   _downloader_num(0), 
   _url_queue(NULL) {
@@ -51,11 +52,11 @@ RES_CODE SchedulerTask::operator()(void* arg) {
     // ((md5[0-31] % _downloader_num) + (md5[32-63] % _downloader_num) + 
     // (md5[64-95] % _downloader_num) + (md5[96-127] % _downloader_num)) % 
     // _downloader_num
-    int i;
-    unsigned int index = 0;
+    uint32_t i;
+    uint32_t index = 0;
 
     for (i = 0; i < 4; ++i) {
-      int tmp = (unsigned int)(md5._value[i << 2]);
+      uint32_t tmp = (uint32_t)(md5._value[i << 2]);
       tmp %= _downloader_num;
       index += tmp;
     }
@@ -74,7 +75,7 @@ RES_CODE SchedulerTask::init() {
 
   glob->get_url_queue(_url_queue);
 
-  int i;
+  uint32_t i;
   for (i = 0; i < _downloader_num; ++i) {
     SharedPointer<SQueue<SharedPointer<Url> > > tmp_q;
     glob->get_downloader_queue(i, tmp_q);

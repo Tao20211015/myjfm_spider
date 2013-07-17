@@ -33,7 +33,7 @@ public:
   RES_CODE dns();
 
 private:
-  int _has_get_ips;
+  bool _has_get_ips;
   String _site_name;
   Vector<String> _ips;
   IPTYPE _ip_type;

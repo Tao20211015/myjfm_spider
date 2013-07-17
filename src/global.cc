@@ -5,6 +5,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <unistd.h>
@@ -40,7 +41,7 @@ Global::Global() :
   _downloader_num(5), 
   _extractor_num(5), 
   _scheduler_num(1), 
-  _to_be_shutdown(0), 
+  _to_be_shutdown(false), 
   _url_queue(NULL), 
   _downloader_threadpool(NULL), 
   _extractor_threadpool(NULL), 
@@ -106,7 +107,7 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
     SharedPointer<SQueue<SharedPointer<Url> > >
     (new SQueue<SharedPointer<Url> >());
 
-  int i = 0;
+  uint32_t i = 0;
   for (i = 0; i < _seed_urls.size(); ++i) {
     SharedPointer<Url> url_p(new Url(_seed_urls[i]));
     _url_queue->push(url_p);
@@ -167,10 +168,8 @@ RES_CODE Global::parse_config() {
       abort();
     }
 
-#define MAX_BUF_LEN 1024
-    char buffer[MAX_BUF_LEN];
-    while (fgets(buffer, MAX_BUF_LEN - 1, config_file_p)) { 
-#undef MAX_BUF_LEN
+    char buffer[1024];
+    while (fgets(buffer, 1023, config_file_p)) { 
       Utility::trim(buffer);
       if (buffer[0] == '\0' || buffer[0] == '#') {
         continue;
@@ -247,7 +246,7 @@ RES_CODE Global::check_name_server() {
 RES_CODE Global::set_seed_urls(Vector<String>& seed_urls) {
   _seed_urls.clear();
 
-  int i;
+  uint32_t i;
   for (i = 1; i < seed_urls.size(); ++i) {
     _seed_urls.push_back(seed_urls[i]);
   }
@@ -258,7 +257,7 @@ RES_CODE Global::set_seed_urls(Vector<String>& seed_urls) {
 RES_CODE Global::set_file_types(Vector<String>& file_types) {
   _file_types.clear();
 
-  int i;
+  uint32_t i;
   for (i = 1; i < file_types.size(); ++i) {
     _file_types.push_back(file_types[i]);
   }
@@ -273,7 +272,7 @@ RES_CODE Global::set_downloader_num(String& downloader_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_downloader_num(int& num) {
+RES_CODE Global::get_downloader_num(uint32_t& num) {
   CHECK_HAS_INIT();
   num = _downloader_num;
 
@@ -287,7 +286,7 @@ RES_CODE Global::set_extractor_num(String& extractor_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_extractor_num(int& num) {
+RES_CODE Global::get_extractor_num(uint32_t& num) {
   CHECK_HAS_INIT();
   num = _extractor_num;
 
@@ -301,7 +300,7 @@ RES_CODE Global::set_scheduler_num(String& scheduler_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_scheduler_num(int& num) {
+RES_CODE Global::get_scheduler_num(uint32_t& num) {
   CHECK_HAS_INIT();
   num = _scheduler_num;
 
@@ -409,7 +408,7 @@ RES_CODE Global::set_err_path(String& path) {
   return S_OK;
 }
 
-RES_CODE Global::get_depth(int& dep) {
+RES_CODE Global::get_depth(uint32_t& dep) {
   CHECK_HAS_INIT();
   dep = _depth;
 
@@ -423,14 +422,14 @@ RES_CODE Global::set_depth(String& dep) {
   return S_OK;
 }
 
-RES_CODE Global::get_downloader_queue(int id, 
+RES_CODE Global::get_downloader_queue(uint32_t id, 
     SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
   CHECK_HAS_INIT();
 
-  int downloader_num = 0;
+  uint32_t downloader_num = 0;
   get_downloader_num(downloader_num);
 
-  if (id >= downloader_num || id < 0) {
+  if (id >= downloader_num) {
     queue = SharedPointer<SQueue<SharedPointer<Url> > >(NULL);
     return S_OUT_RANGE;
   }
@@ -454,14 +453,14 @@ RES_CODE Global::get_logger(Logger*& logger) {
   return S_OK;
 }
 
-int Global::get_to_be_shutdown() {
+bool Global::get_to_be_shutdown() {
   CHECK_HAS_INIT();
   return _to_be_shutdown;
 }
 
-RES_CODE Global::set_to_be_shutdown(int v) {
+RES_CODE Global::set_to_be_shutdown(bool to_be_shutdown) {
   CHECK_HAS_INIT();
-  _to_be_shutdown = v;
+  _to_be_shutdown = to_be_shutdown;
   return S_OK;
 }
 
@@ -520,21 +519,21 @@ RES_CODE Global::get_dns_timeout(int& timeout) {
 }
 */
 
-RES_CODE Global::get_create_connection_timeout(int& timeout) {
+RES_CODE Global::get_create_connection_timeout(uint32_t& timeout) {
   CHECK_HAS_INIT();
   timeout = _create_connection_timeout;
 
   return S_OK;
 }
 
-RES_CODE Global::get_send_timeout(int& timeout) {
+RES_CODE Global::get_send_timeout(uint32_t& timeout) {
   CHECK_HAS_INIT();
   timeout = _send_timeout;
 
   return S_OK;
 }
 
-RES_CODE Global::get_recv_timeout(int& timeout) {
+RES_CODE Global::get_recv_timeout(uint32_t& timeout) {
   CHECK_HAS_INIT();
   timeout = _recv_timeout;
 

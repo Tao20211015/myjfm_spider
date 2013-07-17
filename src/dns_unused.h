@@ -8,6 +8,7 @@
 #ifndef _DNS_H_
 #define _DNS_H_
 
+#include <stdint.h>
 #include <netinet/in.h>
 
 #include "config.h"
@@ -16,12 +17,12 @@
 _START_MYJFM_NAMESPACE_
 
 struct dns_request_header {
-  unsigned short id;
-  unsigned short flag;
-  unsigned short query_num;
-  unsigned short record_num;
-  unsigned short auth_record_num;
-  unsigned short extra_record_num;
+  uint16_t id;
+  uint16_t flag;
+  uint16_t query_num;
+  uint16_t record_num;
+  uint16_t auth_record_num;
+  uint16_t extra_record_num;
 };
 
 class Dns : public Shared {
@@ -46,9 +47,9 @@ public:
 private:
   RES_CODE create_connection();
   RES_CODE close_connection();
-  RES_CODE generate_request(String&, char*, int&);
+  RES_CODE generate_request(String&, char*, uint32_t&);
   RES_CODE create_question(String&, String&);
-  RES_CODE send_request(char*, int);
+  RES_CODE send_request(char*, uint32_t);
   RES_CODE extract_response(Vector<String>&);
 
   // the udp socket fd

@@ -1,6 +1,7 @@
+#include <assert.h>
+
 #include "config.h"
 #include "md5.h"
-#include <assert.h>
 
 int main() {
   String str;

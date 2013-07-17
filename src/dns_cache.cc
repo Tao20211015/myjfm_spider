@@ -27,7 +27,7 @@ DnsCache::~DnsCache() {
 }
 
 RES_CODE DnsCache::find(String& site, Vector<String>& ips) {
-  if (site.length() <= 0 || ips.size() > 0) {
+  if (site.length() == 0 || ips.size() > 0) {
     return S_FAIL;
   }
 
@@ -45,7 +45,7 @@ RES_CODE DnsCache::find(String& site, Vector<String>& ips) {
 }
 
 RES_CODE DnsCache::insert(String& site, Vector<String>& ips) {
-  if (site.length() <= 0 || ips.size() <= 0) {
+  if (site.length() == 0 || ips.size() == 0) {
     return S_FAIL;
   }
 

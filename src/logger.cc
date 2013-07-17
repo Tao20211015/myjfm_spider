@@ -9,6 +9,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "config.h"
@@ -23,7 +24,7 @@ extern _MYJFM_NAMESPACE_::Global *glob;
 
 _START_MYJFM_NAMESPACE_
 
-Logger::Logger(int threshold) : 
+Logger::Logger(uint32_t threshold) : 
   _log(NULL), 
   _err(NULL), 
   _threshold(threshold), 
@@ -36,13 +37,15 @@ Logger::Logger(int threshold) :
 // the extractors and the schedulers) have stopped.
 // So only the main thread and the logger thread are living.
 Logger::~Logger() {
-  int i;
+  uint32_t i;
+  uint32_t size;
+
   for (i = 0; i < 5; ++i) {
     //_secondary_mutex.lock();
-    int size = _secondary.size();
+    size = _secondary.size();
     //_secondary_mutex.unlock();
 
-    if (size <= 0) {
+    if (size == 0) {
       break;
     }
     
@@ -63,10 +66,10 @@ Logger::~Logger() {
 
   for (i = 0; i < 5; ++i) {
     //_secondary_mutex.lock();
-    int size = _secondary.size();
+    size = _secondary.size();
     //_secondary_mutex.unlock();
 
-    if (size <= 0) {
+    if (size == 0) {
       break;
     }
 

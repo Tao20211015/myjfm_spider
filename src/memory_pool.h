@@ -10,6 +10,8 @@
 #ifndef _MEMORY_POOL_H_
 #define _MEMORY_POOL_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "mutex.h"
 
@@ -20,18 +22,18 @@ public:
   static MemoryPool* get_instance();
   ~MemoryPool();
   
-  void* get_memory(int);
+  void* get_memory(uint32_t);
   RES_CODE put_memory(void*);
   
-  RES_CODE get_size(int, int&);
+  RES_CODE get_size(uint32_t, uint32_t&);
 
 private:
   MemoryPool();
   MemoryPool& operator=(const MemoryPool&);
   
-  RES_CODE adjust_size(int, int&);
-  RES_CODE free_memory(int size);
-  Map<int, Vector<void*> > _memories;
+  RES_CODE adjust_size(uint32_t, uint32_t&);
+  RES_CODE free_memory(uint32_t size);
+  Map<uint32_t, Vector<void*> > _memories;
   
   mutable Mutex _mutex;
 };

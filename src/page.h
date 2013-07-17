@@ -15,6 +15,7 @@
 #ifndef _PAGE_H_
 #define _PAGE_H_
 
+#include <stdint.h>
 #include <string.h>
 #include <stdlib.h>
 
@@ -29,18 +30,18 @@ _START_MYJFM_NAMESPACE_
 class HttpResponseHeader {
 public:
   HttpResponseHeader() : 
-    _is_valid(0), 
+    _is_valid(false), 
     _http_version(1), 
     _status_code(0), 
     _content_type(""), 
     _content_length(-1) {
   }
 
-  inline int is_valid() {
+  inline bool is_valid() {
     return _is_valid;
   }
 
-  inline RES_CODE get_http_version(int& http_version) {
+  inline RES_CODE get_http_version(int32_t& http_version) {
     if (_is_valid) {
       http_version = _http_version;
       return S_OK;
@@ -50,7 +51,7 @@ public:
     return S_FAIL;
   }
 
-  inline RES_CODE get_status_code(int& status_code) {
+  inline RES_CODE get_status_code(int32_t& status_code) {
     if (_is_valid) {
       status_code = _status_code;
       return S_OK;
@@ -70,7 +71,7 @@ public:
     return S_FAIL;
   }
 
-  inline RES_CODE get_content_length(int& content_length) {
+  inline RES_CODE get_content_length(int32_t& content_length) {
     if (_is_valid) {
       content_length = _content_length;
       return S_OK;
@@ -82,13 +83,13 @@ public:
 
   inline RES_CODE analysis(char* header) {
     if (!header) {
-      _is_valid = 0;
+      _is_valid = false;
       return S_FAIL;
     }
 
-    int header_len = strlen(header);
+    int32_t header_len = strlen(header);
     if (header_len < 16) { // is not HTTP/1.1 200 xx
-      _is_valid = 0;
+      _is_valid = false;
       return S_FAIL;
     }
 
@@ -99,11 +100,11 @@ public:
     } else if (!strcmp(header, "HTTP/1.0")) {
       _http_version = 0;
     } else {
-      _is_valid = 0;
+      _is_valid = false;
       return S_FAIL;
     }
 
-    header = header + 9;
+    header += 9;
     header_len -= 9;
 
     if (isdigit(header[0]) && 
@@ -112,17 +113,17 @@ public:
         header[3] == ' ') {
       _status_code = 100 * header[0] + 10 * header[1] + header[2] - 111 * '0';
     } else {
-      _is_valid = 0;
+      _is_valid = false;
       return S_FAIL;
     }
 
-    int i = 0;
+    int32_t i = 0;
     while (header[i] != '\0' && header[i] != '\n') {
       i++;
     }
 
     if (header[i] == '\0') {
-      _is_valid = 0;
+      _is_valid = false;
       return S_FAIL;
     }
 
@@ -136,7 +137,7 @@ public:
       }
       
       header[i] = '\0';
-      int j;
+      int32_t j;
       for (j = 0; j < i; ++j) {
         if (header[j] == ':') {
           break;
@@ -148,7 +149,7 @@ public:
         char* key = header;
         char* value = header + j + 2;
         if (!strcmp(key, "Content-Length")) {
-          int length = -1;
+          uint32_t length = 0;
           if (Utility::str2integer(value, length) == S_OK) {
             _content_length = length;
           }
@@ -163,16 +164,16 @@ public:
       }
     }
 
-    _is_valid = 1;
+    _is_valid = true;
     return S_OK;
   }
 
 private:
-  int _is_valid;
-  int _http_version;
-  int _status_code;
+  bool _is_valid;
+  int32_t _http_version;
+  int32_t _status_code;
   String _content_type;
-  int _content_length;
+  int32_t _content_length;
 };
 
 // This is the page class
@@ -182,8 +183,8 @@ private:
 // disk, then transfer the urls to schedulers
 class Page : public Shared {
 public:
-  Page(int length = 0) {
-    if (length <= 0) {
+  Page(uint32_t length = 0) {
+    if (length == 0) {
       _page_content = NULL;
       _page_size = 0;
     } else {
@@ -193,14 +194,14 @@ public:
        if (_page_content) {
          _page_size = length;
        } else {
-         _page_size = -1;
+         _page_size = 0;
        }
       } else {
         _page_content = (char*)malloc(length);
         if (_page_content) {
           _page_size = length;
         } else {
-          _page_size = -1;
+          _page_size = 0;
         }
       }
     }
@@ -217,7 +218,7 @@ public:
     }
   }
 
-  RES_CODE get_page_size(int& page_size) {
+  RES_CODE get_page_size(uint32_t& page_size) {
     page_size = _page_size;
 
     return S_OK;
@@ -231,7 +232,7 @@ public:
 
 private:
   char* _page_content;
-  int _page_size;
+  uint32_t _page_size;
 };
 
 _END_MYJFM_NAMESPACE_

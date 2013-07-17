@@ -5,6 +5,7 @@
  * All rights reserved.
 *******************************************************************************/
 
+#include <stdint.h>
 #include <stdio.h>
 #include <stdlib.h>
 #include <assert.h>
@@ -15,8 +16,8 @@
 #include "md5.h"
 #include "url.h"
 
-const int shuffle_size = 10;
-const int random_times = 1000000;
+const uint32_t shuffle_size = 10;
+const uint32_t random_times = 1000000;
 const double avg_rate = 1.0 / double(shuffle_size);
 const double avg_delta = 0.001; // 0.1%
 
@@ -26,8 +27,8 @@ String dict[62] = {"0", "1", "2", "3", "4", "5", "6", "7", "8", "9",
   "A", "B", "C", "D", "E", "F", "G", "H", "I", "J", "K", "L", "M", 
   "N", "O", "P", "Q", "R", "S", "T", "U", "V", "W", "X", "Y", "Z"};
 
-String random_string(int len) {
-  int i;
+String random_string(uint32_t len) {
+  uint32_t i;
   String res = "";
   for (i = 0; i < len; ++i) {
     res += dict[rand() % 62];
@@ -35,23 +36,23 @@ String random_string(int len) {
   return res;
 }
 
-String random_site(int site_len) {
+String random_site(uint32_t site_len) {
   return random_string(site_len);
 }
 
-String random_file(int file_len) {
+String random_file(uint32_t file_len) {
   return random_string(file_len);
 }
 
-String random_args(int args_len) {
+String random_args(uint32_t args_len) {
   return random_string(args_len);
 }
 
 int main() {
-  int i;
+  uint32_t i;
   srand((unsigned)time(NULL));
-  int *count = new int[shuffle_size];
-  memset(count, 0, sizeof(int) * shuffle_size);
+  uint32_t *count = new uint32_t[shuffle_size];
+  memset(count, 0, sizeof(uint32_t) * shuffle_size);
 
   double *rate = new double[shuffle_size];
   memset(rate, 0, sizeof(double) * shuffle_size);
@@ -60,13 +61,13 @@ int main() {
   memset(delta, 0, sizeof(double) * shuffle_size);
 
   for (i = 0; i < random_times; ++i) {
-    int site_len = (rand() % 50) + 1;
+    uint32_t site_len = (rand() % 50) + 1;
     String site = random_site(site_len);
 
-    int file_len = (rand() % 50) + 1;
+    uint32_t file_len = (rand() % 50) + 1;
     String file = random_file(file_len);
 
-    int args_len = (rand() % 100) + 1;
+    uint32_t args_len = (rand() % 100) + 1;
     String args = random_args(args_len);
 
     String str_url = "http://www.";
@@ -74,10 +75,10 @@ int main() {
     _MYJFM_NAMESPACE_::Url url(str_url);
     _MYJFM_NAMESPACE_::MD5 md5;
     url.get_md5(md5);
-    int j;
-    unsigned int index = 0;
+    uint32_t j;
+    uint32_t index = 0;
     for (j = 0; j < 4; ++j) {
-      int tmp = (unsigned int)(md5._value[j << 2]);
+      uint32_t tmp = (uint32_t)(md5._value[j << 2]);
       tmp %= shuffle_size;
       index += tmp;
     }

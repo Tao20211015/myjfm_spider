@@ -12,10 +12,7 @@
 
 _START_MYJFM_NAMESPACE_
 
-#define Byte MD5Caculator::Byte
-#define Ulong MD5Caculator::Ulong
-
-const Byte MD5Caculator::PADDING[64] = { 0x80 };
+const uint8_t MD5Caculator::PADDING[64] = { 0x80 };
 const char MD5Caculator::HEX[16] = {
 	'0', '1', '2', '3',
 	'4', '5', '6', '7',
@@ -82,7 +79,7 @@ MD5Caculator::MD5Caculator() {
 }
 
 // Construct a MD5Caculator object with a input buffer.
-MD5Caculator::MD5Caculator(const void* input, size_t length) {
+MD5Caculator::MD5Caculator(const void* input, uint32_t length) {
 	reset();
 	update(input, length);
 }
@@ -110,7 +107,7 @@ RES_CODE MD5Caculator::digest(MD5& md5) {
   return S_OK;
 }
 
-const Byte* MD5Caculator::digest() {
+const uint8_t* MD5Caculator::digest() {
 	if (!_finished) {
 		_finished = true;
 		final();
@@ -134,13 +131,13 @@ RES_CODE MD5Caculator::reset() {
 }
 
 // Updating the context with a input buffer.
-RES_CODE MD5Caculator::update(const void* input, size_t length) {
-	return update((const Byte*)input, length);
+RES_CODE MD5Caculator::update(const void* input, uint32_t length) {
+	return update((const uint8_t*)input, length);
 }
 
 // Updating the context with a string.
 RES_CODE MD5Caculator::update(const String& str) {
-	return update((const Byte*)str.c_str(), str.length());
+	return update((const uint8_t*)str.c_str(), str.length());
 }
 
 // Updating the context with a file.
@@ -150,12 +147,10 @@ RES_CODE MD5Caculator::update(Ifstream& in) {
   }
 
 	Stream_size length;
-#define MAX_BUF_LEN 1024
-	char buffer[MAX_BUF_LEN];
+	char buffer[1024];
 
 	while (!in.eof()) {
-		in.read(buffer, MAX_BUF_LEN);
-#undef MAX_BUF_LEN
+		in.read(buffer, 1024);
 		length = in.gcount();
 
 		if (length > 0) {
@@ -175,26 +170,26 @@ RES_CODE MD5Caculator::update(Ifstream& in) {
 
 // MD5 block update operation. Continues an MD5 message-digest operation, 
 // processing another message block, and updating the context.
-RES_CODE MD5Caculator::update(const Byte* input, size_t length) {
-  if (!input || length <= 0) {
+RES_CODE MD5Caculator::update(const uint8_t* input, uint32_t length) {
+  if (!input || length == 0) {
     return S_NO_INPUT;
   }
 
-	Ulong i;
-  Ulong index;
-  Ulong part_len;
+	uint32_t i;
+  uint32_t index;
+  uint32_t part_len;
 
 	_finished = false;
 
 	// Compute number of bytes mod 64
-	index = (Ulong)((_count[0] >> 3) & 0x3f);
+	index = (uint32_t)((_count[0] >> 3) & 0x3f);
 
 	// update number of bits
-	if ((_count[0] += ((Ulong)length << 3)) < ((Ulong)length << 3)) {
+	if ((_count[0] += ((uint32_t)length << 3)) < ((uint32_t)length << 3)) {
 		_count[1]++;
   }
 
-	_count[1] += ((Ulong)length >> 29);
+	_count[1] += ((uint32_t)length >> 29);
 
 	part_len = 64 - index;
 
@@ -221,11 +216,11 @@ RES_CODE MD5Caculator::update(const Byte* input, size_t length) {
 // MD5 finalization. Ends an MD5 message-_digest operation, writing the
 // the message _digest and zeroizing the context.
 RES_CODE MD5Caculator::final() {
-	Byte bits[8];
-	Ulong old_state[4];
-	Ulong old_count[2];
-	Ulong index;
-  Ulong pad_len;
+	uint8_t bits[8];
+	uint32_t old_state[4];
+	uint32_t old_count[2];
+	uint32_t index;
+  uint32_t pad_len;
 
 	// Save current state and count.
 	memcpy(old_state, _state, 16);
@@ -235,7 +230,7 @@ RES_CODE MD5Caculator::final() {
 	encode(_count, bits, 8);
 
 	// Pad out to 56 mod 64.
-	index = (Ulong)((_count[0] >> 3) & 0x3f);
+	index = (uint32_t)((_count[0] >> 3) & 0x3f);
 	pad_len = (index < 56) ? (56 - index) : (120 - index);
 	update(PADDING, pad_len);
 
@@ -253,12 +248,12 @@ RES_CODE MD5Caculator::final() {
 }
 
 // MD5 basic transformation. Transforms _state based on block.
-RES_CODE MD5Caculator::transform(const Byte block[64]) {
-	Ulong a = _state[0];
-  Ulong b = _state[1];
-  Ulong c = _state[2];
-  Ulong d= _state[3];
-  Ulong x[16];
+RES_CODE MD5Caculator::transform(const uint8_t block[64]) {
+	uint32_t a = _state[0];
+  uint32_t b = _state[1];
+  uint32_t c = _state[2];
+  uint32_t d= _state[3];
+  uint32_t x[16];
 
 	decode(block, x, 64);
 
@@ -342,42 +337,42 @@ RES_CODE MD5Caculator::transform(const Byte block[64]) {
   return S_OK;
 }
 
-// Encode input (Ulong) into output (Byte).
+// Encode input (uint32_t) into output (uint8_t).
 // Assume length is a multiple of 4.
-RES_CODE MD5Caculator::encode(const Ulong* input, 
-    Byte* output, size_t length) {
-	for (size_t i = 0, j = 0; j < length; ++i, j += 4) {
-		output[j] = (Byte)(input[i] & 0xff);
-		output[j + 1] = (Byte)((input[i] >> 8) & 0xff);
-		output[j + 2] = (Byte)((input[i] >> 16) & 0xff);
-		output[j + 3] = (Byte)((input[i] >> 24) & 0xff);
+RES_CODE MD5Caculator::encode(const uint32_t* input, 
+    uint8_t* output, uint32_t length) {
+	for (uint32_t i = 0, j = 0; j < length; ++i, j += 4) {
+		output[j] = (uint8_t)(input[i] & 0xff);
+		output[j + 1] = (uint8_t)((input[i] >> 8) & 0xff);
+		output[j + 2] = (uint8_t)((input[i] >> 16) & 0xff);
+		output[j + 3] = (uint8_t)((input[i] >> 24) & 0xff);
 	}
 
   return S_OK;
 }
 
-// Decodes input (Byte) into output (Ulong).
+// Decodes input (uint8_t) into output (uint32_t).
 // Assumes length is a multiple of 4.
-RES_CODE MD5Caculator::decode(const Byte* input, 
-    Ulong* output, size_t length) {
-	for (size_t i = 0, j = 0; j < length; ++i, j += 4) {	
-		output[i] = ((Ulong)input[j]) | (((Ulong)input[j + 1]) << 8) | 
-      (((Ulong)input[j + 2]) << 16) | (((Ulong)input[j + 3]) << 24);
+RES_CODE MD5Caculator::decode(const uint8_t* input, 
+    uint32_t* output, uint32_t length) {
+	for (uint32_t i = 0, j = 0; j < length; ++i, j += 4) {	
+		output[i] = ((uint32_t)input[j]) | (((uint32_t)input[j + 1]) << 8) | 
+      (((uint32_t)input[j + 2]) << 16) | (((uint32_t)input[j + 3]) << 24);
 	}
 
   return S_OK;
 }
 
 // Convert byte array to hex string.
-RES_CODE MD5Caculator::bytes_to_hexstring(const Byte* input, 
-    size_t length, String& str) {
+RES_CODE MD5Caculator::bytes_to_hexstring(const uint8_t* input, 
+    uint32_t length, String& str) {
   str = "";
 	str.reserve(length << 1);
 
-	for(size_t i = 0; i < length; ++i) {
-		int t = input[i];
-		int a = t / 16;
-		int b = t % 16;
+	for(uint32_t i = 0; i < length; ++i) {
+		uint8_t t = input[i];
+		uint8_t a = t / 16;
+		uint8_t b = t % 16;
 		str.append(1, HEX[a]);
 		str.append(1, HEX[b]);
 	}

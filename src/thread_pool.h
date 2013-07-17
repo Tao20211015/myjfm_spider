@@ -8,6 +8,8 @@
 #ifndef _THREADPOOL_H_
 #define _THREADPOOL_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "shared.h"
 #include "task.h"
@@ -26,22 +28,22 @@ class ThreadPool : public Shared {
   };
 
 public:
-  ThreadPool(int n);
+  ThreadPool(uint32_t n);
   ~ThreadPool();
 
   RES_CODE init();
 
   RES_CODE stop();
 
-  RES_CODE size(int&);
+  RES_CODE size(uint32_t&);
 
   RES_CODE add_task(SharedPointer<Task> task);
 
   RES_CODE get_task(SharedPointer<Task>& task);
 
 private:
-  int _n;
-  int _state;
+  uint32_t _n;
+  _enum_state _state;
   Vector<SharedPointer<Thread> > _threads;
   SQueue<SharedPointer<Task> > _tasks;
 

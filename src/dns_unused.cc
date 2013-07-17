@@ -6,6 +6,7 @@
  ******************************************************************************/
 
 #include <arpa/inet.h>
+#include <stdint.h>
 
 #include "config.h"
 #include "global.h"
@@ -22,7 +23,7 @@ Dns::~Dns() {
 }
 
 RES_CODE Dns::init(String& nameserver_ip) {
-  if (nameserver_ip.length() <= 0) {
+  if (nameserver_ip.length() == 0) {
     _fd = -1;
     return S_FAIL;
   }
@@ -86,8 +87,8 @@ RES_CODE Dns::close_connection() {
   return S_OK;
 }
 
-RES_CODE Dns::generate_request(String& site, char* buffer, int& len) {
-  if (site.length() <= 0 || !buffer) {
+RES_CODE Dns::generate_request(String& site, char* buffer, uint32_t& len) {
+  if (site.length() == 0 || !buffer) {
     return S_FAIL;
   }
 
@@ -102,9 +103,9 @@ RES_CODE Dns::generate_request(String& site, char* buffer, int& len) {
   memcpy(p, question.c_str(), question.length());
   p += question.length() + 2;
   *(p - 1) = 0;
-  *(unsigned short*)p = ntohs(QUERY_TYPE);
+  *(uint16_t*)p = ntohs(QUERY_TYPE);
   p += 2;
-  *(unsigned short*)p = ntohs(QUERY_CLASS);
+  *(uint16_t*)p = ntohs(QUERY_CLASS);
   p += 2;
   len = p - buffer;
 
@@ -146,8 +147,8 @@ RES_CODE Dns::create_question(String& site, String& question) {
   return S_OK;
 }
 
-RES_CODE Dns::send_request(char* buffer, int len) {
-  if (_fd <= 0 || !buffer || len < 0) {
+RES_CODE Dns::send_request(char* buffer, uint32_t len) {
+  if (_fd < 0 || !buffer) {
     return S_FAIL;
   }
 
@@ -174,7 +175,7 @@ RES_CODE Dns::send_request(char* buffer, int len) {
 }
 
 RES_CODE Dns::extract_response(Vector<String>& ips) {
-  if (_fd <= 0) {
+  if (_fd < 0) {
     return S_FAIL;
   }
 
@@ -195,13 +196,13 @@ RES_CODE Dns::extract_response(Vector<String>& ips) {
     }
   }
 
-  unsigned short id = ntohs((unsigned short)(*p));
+  uint16_t id = ntohs((uint16_t)(*p));
   if (id != ID) {
     return S_FAIL;
   }
 
   p += 2;
-  unsigned short flag = ntohs((unsigned short)(*p));
+  uint16_t flag = ntohs((uint16_t)(*p));
   if (!IS_RESPONSE(flag)) {
     return S_FAIL;
   }
@@ -216,14 +217,14 @@ RES_CODE Dns::query(String& site, Vector<String>& ips) {
     return S_FAIL;
   }
 
-  if (_fd <= 0) {
+  if (_fd < 0) {
     if (create_connection() != S_OK) {
       close_connection();
       return S_FAIL;
     }
   }
 
-  int len = 0;
+  uint32_t len = 0;
   char buffer[MAX_BUFFER];
 
   if (generate_request(site, buffer, len) != S_OK) {

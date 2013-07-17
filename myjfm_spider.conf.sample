@@ -21,7 +21,7 @@ SCHEDULERS 1
 FILETYPES .html .htm .jpg .jpeg
 
 # the start urls
-SEEDURLS http://www.google.com.hk http://www.github.com http://www.sogou.com http://www.sina.com.cn http://www.sohu.com http://www.qq.com http://www.cnblogs.com http://www.cppblog.com http://www.baidu.com/s?wd=myjfm_spider&rsv_spt=1&issp=1&rsv_bp=0&ie=utf-8&tn=baiduhome_pg&rsv_sug3=3&rsv_sug=0&rsv_sug1=3&rsv_sug4=29
+SEEDURLS http://www.google.com.hk http://github.com http://www.sogou.com http://www.sina.com.cn http://www.sohu.com http://www.qq.com http://www.cnblogs.com http://www.cppblog.com http://www.baidu.com/s?wd=myjfm_spider&rsv_spt=1&issp=1&rsv_bp=0&ie=utf-8&tn=baiduhome_pg&rsv_sug3=3&rsv_sug=0&rsv_sug1=3&rsv_sug4=29
 
 # save info log here
 LOGFILEPATH /home/myjfm/work/myjfm_spider/output

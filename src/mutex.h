@@ -52,7 +52,7 @@ public:
   };
 
   Mutex() {
-    _has_init = 1;
+    _has_init = true;
     pthread_mutex_init(&_mutex, NULL);
   }
 
@@ -86,7 +86,7 @@ public:
   }
 
 private:
-  volatile int _has_init;
+  volatile bool _has_init;
   // disallow copy constructor
   Mutex(const Mutex&);
   Mutex& operator=(const Mutex&);

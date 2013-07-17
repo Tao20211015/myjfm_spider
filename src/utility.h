@@ -8,6 +8,7 @@
 #ifndef _UTILITY_H_
 #define _UTILITY_H_
 
+#include <stdint.h>
 #include <assert.h>
 
 #include "config.h"
@@ -49,13 +50,13 @@ public:
     
     Stringstream ss;
     T tmp;
-    int ret = 0;
+    bool ret = false;
     ss << str;
     if (ss.str().length() > 0) {
       try {
         ss >> tmp;
         if (ss.eof() && !ss.fail()) {
-          ret = 1;
+          ret = true;
           number = tmp;
         }
       } catch (std::ios_base::failure&) {
@@ -74,9 +75,9 @@ public:
     return Utility::str2integer(str.c_str(), number);
   }
 
-  static int is_hex_digit(char p);
-  static RES_CODE str2hex(const char* str, int& number);
-  static RES_CODE str2hex(String& str, int number);
+  static bool is_hex_digit(char p);
+  static RES_CODE str2hex(const char* str, uint32_t& number);
+  static RES_CODE str2hex(String& str, uint32_t number);
 };
 
 _END_MYJFM_NAMESPACE_

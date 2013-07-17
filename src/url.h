@@ -10,6 +10,8 @@
 #ifndef _URL_H_
 #define _URL_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "shared.h"
 #include "md5.h"
@@ -22,9 +24,11 @@ public:
   Url(const String& url = "");
   ~Url() {}
 
-  RES_CODE is_valid(int&);
+  RES_CODE is_valid(bool&);
 
   RES_CODE get_protocol(Protocol&);
+
+  RES_CODE get_ip(uint32_t&);
 
   RES_CODE get_site(String&);
 
@@ -34,22 +38,23 @@ public:
 
   RES_CODE get_md5(MD5&);
 
-  RES_CODE get_retries(int&);
+  RES_CODE get_retries(uint32_t&);
 
   RES_CODE inc_retries();
 
 private:
   String _raw_url;
-  volatile int _is_valid;
+  volatile bool _is_valid;
   Protocol _protocol;
+  uint32_t _ip;
   String _site;
   String _port;
   String _file;
 
-  int has_get_md5;
+  bool has_get_md5;
   MD5 _md5;
 
-  int _retries;
+  uint32_t _retries;
 };
 
 _END_MYJFM_NAMESPACE_

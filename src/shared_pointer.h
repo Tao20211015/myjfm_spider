@@ -64,8 +64,8 @@ public:
     }
   }
 
-  int is_null() const {
-    return _p ? 0 : 1;
+  bool is_null() const {
+    return _p ? false : true;
   }
 
   T* getp() const {

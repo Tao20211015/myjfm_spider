@@ -20,9 +20,9 @@ void url_test() {
 
   _MYJFM_NAMESPACE_::Url url(seedurl);
 
-  int valid = 0;
+  bool valid = 0;
   url.is_valid(valid);
-  assert(valid == 1);
+  assert(valid);
 
   Protocol proto;
   String site, port, file;

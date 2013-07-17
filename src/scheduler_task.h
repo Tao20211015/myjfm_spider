@@ -10,6 +10,8 @@
 #ifndef _SCHEDULER_TASK_H_
 #define _SCHEDULER_TASK_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "task.h"
 
@@ -17,13 +19,13 @@ _START_MYJFM_NAMESPACE_
 
 class SchedulerTask : public Task {
 public:
-  SchedulerTask(int);
+  SchedulerTask(uint32_t);
   ~SchedulerTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:
-  int _id;
-  int _downloader_num;
+  uint32_t _id;
+  uint32_t _downloader_num;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queue;
 

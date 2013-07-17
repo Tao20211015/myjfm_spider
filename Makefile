@@ -5,7 +5,7 @@ export OUTPUT_PATH=./output
 all :
 	mkdir -p $(OUTPUT_PATH)
 	cp myjfm_spider.conf.sample $(OUTPUT_PATH)/myjfm_spider.conf
-	cp scripts/start scripts/stop $(OUTPUT_PATH)
+	cp scripts/start scripts/stop scripts/run_test.sh $(OUTPUT_PATH)
 	@echo
 	@echo "make deps..."
 	@$(MAKE) -C deps

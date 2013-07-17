@@ -10,8 +10,8 @@
 
 _START_MYJFM_NAMESPACE_
 
-Thread::Thread(const SharedPointer<Task>& task, int detached) : 
-  _use_task(1), 
+Thread::Thread(const SharedPointer<Task>& task, bool detached) : 
+  _use_task(true), 
   _task(task), 
   _task_func(NULL), 
   _func_arg(NULL), 
@@ -20,8 +20,8 @@ Thread::Thread(const SharedPointer<Task>& task, int detached) :
   _detached(detached) {
 }
 
-Thread::Thread(thread_task_func func, void* arg, int detached) : 
-  _use_task(0), 
+Thread::Thread(thread_task_func func, void* arg, bool detached) : 
+  _use_task(false), 
   _task(NULL), 
   _task_func(func), 
   _func_arg(arg), 
@@ -138,7 +138,7 @@ RES_CODE Thread::gettid(pthread_t& tid) const {
 void* Thread::thread_core_shell(void* arg) {
   Thread* tthis = (Thread*)arg;
 
-  int use_task = tthis->_use_task;
+  bool use_task = tthis->_use_task;
   SharedPointer<Task> task = tthis->_task;
   thread_task_func task_func = tthis->_task_func;
   void* func_arg = tthis->_func_arg;

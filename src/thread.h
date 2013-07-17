@@ -30,10 +30,10 @@ class Thread : public Shared {
 
 public:
   // run the task
-  Thread(const SharedPointer<Task>& task, int detached = 0);
+  Thread(const SharedPointer<Task>& task, bool detached = false);
 
   // run the task routine body
-  Thread(thread_task_func, void* arg, int detached = 0);
+  Thread(thread_task_func, void* arg, bool detached = false);
 
   ~Thread();
 
@@ -59,7 +59,7 @@ public:
 private:
   static void* thread_core_shell(void*);
 
-  int _use_task;
+  bool _use_task;
   SharedPointer<Task> _task;
 
   thread_task_func _task_func;
@@ -69,7 +69,7 @@ private:
 
   _enum_state _state;
 
-  int _detached;
+  bool _detached;
 
   // syncronize between main thread and child thread
   Semaphore _semaphore;

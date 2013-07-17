@@ -7,6 +7,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <unistd.h>
 
@@ -19,7 +20,7 @@ extern _MYJFM_NAMESPACE_::Global* glob;
 
 _START_MYJFM_NAMESPACE_
 
-ExtractorTask::ExtractorTask(int id) : _id(id) {}
+ExtractorTask::ExtractorTask(uint32_t id) : _id(id) {}
 
 ExtractorTask::~ExtractorTask() {}
 

@@ -5,6 +5,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
 
@@ -52,7 +53,7 @@ void Utility::rtrim(char* str) {
 }
 
 String Utility::rtrim(const String& str) {
-  if (str.length() <= 0) {
+  if (str.length() == 0) {
     return CHARS2STR("");
   }
   const char* head = str.c_str();
@@ -88,7 +89,7 @@ void Utility::toupper(char* str) {
 
 String Utility::toupper(const String& str) {
   String res = str;
-  int i;
+  uint32_t i;
   for (i = 0; i < res.length(); ++i) {
     res[i] = ::toupper(res[i]);
   }
@@ -96,7 +97,7 @@ String Utility::toupper(const String& str) {
 }
 
 void Utility::toupper_inplace(String& str) {
-  int i;
+  uint32_t i;
   for (i = 0; i < str.length(); ++i) {
     str[i] = ::toupper(str[i]);
   }
@@ -115,15 +116,16 @@ void Utility::tolower(char* str) {
 
 String Utility::tolower(const String& str) {
   String res = str;
-  int i;
+  uint32_t i;
   for (i = 0; i < res.length(); ++i) {
     res[i] = ::tolower(res[i]);
   }
+
   return res;
 }
 
 void Utility::tolower_inplace(String& str) {
-  int i;
+  uint32_t i;
   for (i = 0; i < str.length(); ++i) {
     str[i] = ::tolower(str[i]);
   }
@@ -135,7 +137,7 @@ void Utility::split(const String& str,
 
   container.clear();
 
-  if (separator.length() <= 0) {
+  if (separator.length() == 0) {
     container.push_back(str);
     return;
   }
@@ -166,11 +168,11 @@ void Utility::split(const String& str,
 // please do not give the invalid path name, otherwise, 
 // the result will be confused
 String Utility::get_file_full_path(String path) {
-#define MAX_BUF_LEN 512
-  char buffer[MAX_BUF_LEN];
-  int i, j;
+  char buffer[512];
+  uint32_t i;
+  uint32_t j;
 
-  if (!path.length()) {
+  if (path.length() == 0) {
     return CHARS2STR("");
   }
 
@@ -179,12 +181,12 @@ String Utility::get_file_full_path(String path) {
   }
 
   if (path == "." || path == "./") {
-    getcwd(buffer, MAX_BUF_LEN);
+    getcwd(buffer, 512);
     return CHARS2STR(buffer);
   }
 
   if (path[0] == '.' && path[1] == '/') {
-    getcwd(buffer, MAX_BUF_LEN);
+    getcwd(buffer, 512);
     for (i = strlen(buffer) - 1, j = 1; path[j]; ++j, ++i) {
       buffer[i] = path[j];
     }
@@ -195,7 +197,7 @@ String Utility::get_file_full_path(String path) {
   if (path == ".." || 
       (path.length() > 2 && path[0] == '.' && 
        path[1] == '.' && path[2] == '/')) {
-    getcwd(buffer, MAX_BUF_LEN);
+    getcwd(buffer, 512);
     i = strlen(buffer) - 1;
     while (buffer[i] != '/') {
       i--;
@@ -234,22 +236,21 @@ String Utility::get_file_full_path(String path) {
     buffer[i] = '\0';
     return CHARS2STR(buffer);
   }
-  getcwd(buffer, MAX_BUF_LEN);
+  getcwd(buffer, 512);
   return CHARS2STR(buffer) + "/" + path;
-#undef MAX_BUF_LEN
 }
 
-int Utility::is_hex_digit(char p) {
+bool Utility::is_hex_digit(char p) {
   if ((p >= '0' && p <= '9') || 
       (p >= 'a' && p <= 'z') || 
       (p >= 'A' && p <= 'Z')) {
-    return 1;
+    return true;
   }
 
-  return 0;
+  return false;
 }
 
-RES_CODE Utility::str2hex(const char* str, int& number) {
+RES_CODE Utility::str2hex(const char* str, uint32_t& number) {
   if (!str) {
     return S_FAIL;
   }
@@ -277,7 +278,7 @@ RES_CODE Utility::str2hex(const char* str, int& number) {
   return S_OK;
 }
 
-RES_CODE Utility::str2hex(String& str, int number) {
+RES_CODE Utility::str2hex(String& str, uint32_t number) {
   return Utility::str2hex(str.c_str(), number);
 }
 

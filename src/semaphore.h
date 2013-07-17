@@ -33,7 +33,7 @@ class Semaphore {
 public:
   // initv: the init value of the semaphore
   Semaphore(int initv = 0) {
-    _has_init = 1;
+    _has_init = true;
     initv = initv < 0 ? 0 : initv;
     // the value of the second argument is 0 which means that this is an
     // inter-thread shared semaphore
@@ -59,7 +59,7 @@ public:
   }
 
 private:
-  volatile int _has_init;
+  volatile bool _has_init;
   Semaphore(const Semaphore&);
   Semaphore& operator=(const Semaphore&);
   sem_t _semaphore;

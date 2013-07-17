@@ -5,6 +5,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <unistd.h>
 #include <stdlib.h>
 #include <string.h>
@@ -57,10 +58,8 @@ static RES_CODE load_config(String cur_path, String config_file_name) {
 }
 
 RES_CODE parse_args(int argc, char *argv[]) {
-#define MAX_BUF_LEN 1024
-  char buffer[MAX_BUF_LEN];
-  getcwd(buffer, MAX_BUF_LEN);
-#undef MAX_BUF_LEN
+  char buffer[1024];
+  getcwd(buffer, 1024);
   String cur_path(buffer);
 
   if (argc == 1) {
@@ -83,7 +82,7 @@ RES_CODE parse_args(int argc, char *argv[]) {
 
 void sig_handler(int sig) {
   LOG(INFO, "SIGTERM received, scheduling shutting down...");
-  glob->set_to_be_shutdown(1);
+  glob->set_to_be_shutdown(true);
 }
 
 void set_sigaction() {
@@ -100,10 +99,10 @@ void set_sigaction() {
 }
 
 void init_modules() {
-  int i = 0;
-  int downloader_num = 0;
-  int extractor_num = 0;
-  int scheduler_num = 0;
+  uint32_t i = 0;
+  uint32_t downloader_num = 0;
+  uint32_t extractor_num = 0;
+  uint32_t scheduler_num = 0;
 
   glob->get_downloader_num(downloader_num);
   glob->get_extractor_num(extractor_num);
@@ -179,7 +178,7 @@ failed:
   LOG(FATAL, 
       "Failed to start %s threadpool. Server is shutting down...", 
       flag.c_str());
-  glob->set_to_be_shutdown(1);
+  glob->set_to_be_shutdown(true);
 }
 
 // create the myjfm_spider.pid file in the current directory
@@ -265,7 +264,7 @@ int main(int argc, char *argv[]) {
   init();
 
   // the main thread will sleep until the SIGTERM or SIGINT signal happenes
-  while (glob->get_to_be_shutdown() == 0) {
+  while (!glob->get_to_be_shutdown()) {
     pause();
   }
 

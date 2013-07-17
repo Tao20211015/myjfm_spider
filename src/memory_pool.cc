@@ -7,6 +7,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 
 #include "config.h"
@@ -61,7 +62,7 @@ MemoryPool::~MemoryPool() {
   _memories.clear();
 }
 
-RES_CODE MemoryPool::free_memory(int size) {
+RES_CODE MemoryPool::free_memory(uint32_t size) {
   Vector<void*>& v = _memories[size];
   Vector<void*>::iterator itr;
 
@@ -75,9 +76,9 @@ RES_CODE MemoryPool::free_memory(int size) {
   return S_OK;
 }
 
-void* MemoryPool::get_memory(int size) {
+void* MemoryPool::get_memory(uint32_t size) {
   void* ret = NULL;
-  int new_size;
+  uint32_t new_size;
   adjust_size(size, new_size);
 
   if (new_size <= (1024 << 13)) {
@@ -94,7 +95,7 @@ void* MemoryPool::get_memory(int size) {
     ret = malloc(new_size + 4);
 
     if (ret) {
-      int* pi = (int*)ret;
+      uint32_t* pi = (uint32_t*)ret;
       *pi = new_size;
       ret = (char*)ret + 4;
     }
@@ -108,7 +109,7 @@ RES_CODE MemoryPool::put_memory(void* memory) {
     return S_FAIL;
   }
 
-  int* pi = (int*)((char*)memory - 4);
+  uint32_t* pi = (uint32_t*)((char*)memory - 4);
 
   if (*pi > (1024 << 13)) {
     free(pi);
@@ -120,7 +121,7 @@ RES_CODE MemoryPool::put_memory(void* memory) {
   return S_OK;
 }
 
-RES_CODE MemoryPool::adjust_size(int size, int& new_size) {
+RES_CODE MemoryPool::adjust_size(uint32_t size, uint32_t& new_size) {
   if (size <= (1024 >> 3)) {
     new_size = 1024 >> 3;
   } else if (size <= (1024 >> 2)) {
@@ -162,7 +163,7 @@ RES_CODE MemoryPool::adjust_size(int size, int& new_size) {
   return S_OK;
 }
 
-RES_CODE MemoryPool::get_size(int size, int& new_size) {
+RES_CODE MemoryPool::get_size(uint32_t size, uint32_t& new_size) {
   Mutex::ScopeGuard guard(&_mutex);
 
   new_size = _memories[size].size();

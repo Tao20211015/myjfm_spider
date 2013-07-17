@@ -10,6 +10,8 @@
 #ifndef _EXTRACTOR_TASK_H_
 #define _EXTRACTOR_TASK_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "task.h"
 
@@ -17,12 +19,12 @@ _START_MYJFM_NAMESPACE_
 
 class ExtractorTask : public Task {
 public:
-  ExtractorTask(int id);
+  ExtractorTask(uint32_t id);
   ~ExtractorTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
 private:
-  int _id;
+  uint32_t _id;
 };
 
 _END_MYJFM_NAMESPACE_

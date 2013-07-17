@@ -12,6 +12,8 @@
 #ifndef _LOGGER_H_
 #define _LOGGER_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "mutex.h"
 #include "semaphore.h"
@@ -29,10 +31,10 @@ struct Message {
 class Logger {
   friend class LoggerTask;
 
-#define DEFAULT_THRESHOLD 5000
+#define DEFAULT_THRESHOLD 10000
 
 public:
-  Logger(int threshold = DEFAULT_THRESHOLD);
+  Logger(uint32_t threshold = DEFAULT_THRESHOLD);
   ~Logger();
   RES_CODE init();
   RES_CODE log(Message&);
@@ -44,7 +46,7 @@ private:
   Ofstream* _log;
   Ofstream* _err;
 
-  int _threshold;
+  uint32_t _threshold;
   Vector<Message> _primary;
   Vector<Message> _secondary;
   Mutex _primary_mutex;

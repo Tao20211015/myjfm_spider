@@ -8,6 +8,8 @@
 #ifndef _SQUEUE_H_
 #define _SQUEUE_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "mutex.h"
 #include "shared.h"
@@ -46,7 +48,7 @@ public:
     return S_OK;
   }
 
-  RES_CODE size(int& s) {
+  RES_CODE size(uint32_t& s) {
     Mutex::ScopeGuard guard(&_mutex);
     s = _queue.size();
 

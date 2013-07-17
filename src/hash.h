@@ -9,16 +9,18 @@
 #ifndef _HASH_H_
 #define _HASH_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "shared.h"
 #include "rwlock.h"
 
 _START_MYJFM_NAMESPACE_
 
-typedef unsigned long hash_size_type;
+typedef uint64_t hash_size_type;
 
-static const int _num_primes = 28;
-static const unsigned long  _prime_list[_num_primes] = {
+static const uint32_t _num_primes = 28;
+static const uint64_t  _prime_list[_num_primes] = {
   53,         97,           193,          389,        769, 
   1543,       3079,         6151,         12289,      24593, 
   49157,      98317,        196613,       393241,     786433, 
@@ -59,7 +61,7 @@ public:
   hash_size_type operator()(String& s) {
     hash_size_type h = 0;
 
-    int i = 0;
+    uint32_t i = 0;
     for (; i < s.length(); ++i) {
       h = 5 * h + s[i];
     }
@@ -172,7 +174,7 @@ class Hash : public Shared {
 
 public:
   Hash(hash_size_type n) {
-    int i = 0;
+    uint32_t i = 0;
     for (i = 0; i < _num_primes; ++i) {
       if (_prime_list[i] > n) {
         _buckets_size = _prime_list[i];
@@ -189,7 +191,7 @@ public:
   }
 
   ~Hash() {
-    int i;
+    uint32_t i;
     for (i = 0; i < _buckets_size; ++i) {
       _rwlocks[i].wrlock();
       HashNode* p = _buckets[i];

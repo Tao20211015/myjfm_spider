@@ -10,6 +10,8 @@
 #ifndef _EVENT_LOOP_H_
 #define _EVENT_LOOP_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "shared_pointer.h"
 #include "callback.h"
@@ -32,19 +34,19 @@ enum _event_mask {
 class Event {
 public:
   int _event_fd;
-  unsigned int _mask;
+  uint32_t _mask;
 
-  int _use_read_callback;
+  bool _use_read_callback;
   SharedPointer<Callback> _read_callback;
   callback_func _read_callback_func;
   void* _read_arg;
 
-  int _use_write_callback;
+  bool _use_write_callback;
   SharedPointer<Callback> _write_callback;
   callback_func _write_callback_func;
   void* _write_arg;
 
-  int _use_error_callback;
+  bool _use_error_callback;
   SharedPointer<Callback> _error_callback;
   callback_func _error_callback_func;
   void* _error_arg;
@@ -52,15 +54,15 @@ public:
   Event() : 
     _event_fd(-1), 
     _mask(EVENT_DUMMY), 
-    _use_read_callback(0), 
+    _use_read_callback(false), 
     _read_callback(NULL), 
     _read_callback_func(NULL), 
     _read_arg(NULL), 
-    _use_write_callback(0), 
+    _use_write_callback(false), 
     _write_callback(NULL), 
     _write_callback_func(NULL), 
     _write_arg(NULL), 
-    _use_error_callback(0), 
+    _use_error_callback(false), 
     _error_callback(NULL), 
     _error_callback_func(NULL), 
     _error_arg(NULL) {
@@ -86,11 +88,11 @@ public:
   RES_CODE del_event(Event*);
   RES_CODE loop();
   RES_CODE stop();
-  int is_stopped();
+  bool is_stopped();
 
 private:
   volatile _enum_state _state;
-  volatile int _stop;
+  volatile bool _stop;
   int _epoll_fd;
   Event* _events;
   struct epoll_event* _epoll_events;

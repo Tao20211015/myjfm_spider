@@ -6,6 +6,7 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
 #include <stdlib.h>
 #include <sys/types.h>
 #include <sys/socket.h>
@@ -44,7 +45,7 @@ RES_CODE Site::get_all_ips(Vector<String>& ips) {
 }
 
 RES_CODE Site::get_one_ip(String& ip) {
-  if (!_has_get_ips || _ips.size() <= 0) {
+  if (!_has_get_ips || _ips.size() == 0) {
     ip = "";
     return S_NO_IP;
   }
@@ -56,7 +57,7 @@ RES_CODE Site::get_one_ip(String& ip) {
 }
 
 RES_CODE Site::get_first_ip(String& ip) {
-  if (!_has_get_ips || _ips.size() <= 0) {
+  if (!_has_get_ips || _ips.size() == 0) {
     ip = "";
     return S_NO_IP;
   } else {
@@ -81,13 +82,13 @@ RES_CODE Site::set_ips(Vector<String>& ips) {
     return S_HAS_SET;
   }
   
-  if (ips.size() <= 0) { 
+  if (ips.size() == 0) { 
     return S_NO_INPUT;
   }
 
   _ips.clear();
 
-  int i;
+  uint32_t i;
   for (i = 0; i < ips.size(); ++i) {
     _ips.push_back(ips[i]);
   }
@@ -133,7 +134,7 @@ RES_CODE Site::dns() {
     _ip_type = IPv6;
   }
 
-  _has_get_ips = 1;
+  _has_get_ips = true;
 
   return S_OK;
 }

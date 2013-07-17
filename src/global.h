@@ -8,6 +8,8 @@
 #ifndef _GLOBAL_H_
 #define _GLOBAL_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "url.h"
 #include "dns_cache.h"
@@ -34,13 +36,13 @@ public:
   RES_CODE set_log_path(String& path);
   RES_CODE set_err_path(String& path);
   RES_CODE get_save_path(String&);
-  RES_CODE get_depth(int&);
+  RES_CODE get_depth(uint32_t&);
 
-  RES_CODE get_downloader_num(int&);
-  RES_CODE get_extractor_num(int&);
-  RES_CODE get_scheduler_num(int&);
+  RES_CODE get_downloader_num(uint32_t&);
+  RES_CODE get_extractor_num(uint32_t&);
+  RES_CODE get_scheduler_num(uint32_t&);
 
-  RES_CODE get_downloader_queue(int, 
+  RES_CODE get_downloader_queue(uint32_t, 
       SharedPointer<SQueue<SharedPointer<Url> > >&);
 
   RES_CODE get_dns_cache(SharedPointer<DnsCache>&);
@@ -57,15 +59,15 @@ public:
 
   RES_CODE get_logger(Logger*&);
 
-  int get_to_be_shutdown();
-  RES_CODE set_to_be_shutdown(int);
+  bool get_to_be_shutdown();
+  RES_CODE set_to_be_shutdown(bool);
 
   RES_CODE get_request_header(String&);
 
-  //RES_CODE get_dns_timeout(int&);
-  RES_CODE get_create_connection_timeout(int&);
-  RES_CODE get_send_timeout(int&);
-  RES_CODE get_recv_timeout(int&);
+  //RES_CODE get_dns_timeout(uint32_t&);
+  RES_CODE get_create_connection_timeout(uint32_t&);
+  RES_CODE get_send_timeout(uint32_t&);
+  RES_CODE get_recv_timeout(uint32_t&);
 
   //RES_CODE get_name_server(String&);
 
@@ -110,15 +112,15 @@ private:
   String _err_path;
 
   // the depth of downloading recursively
-  int _depth;
+  uint32_t _depth;
 
   Logger *_logger;
 
-  int _downloader_num;
-  int _extractor_num;
-  int _scheduler_num;
+  uint32_t _downloader_num;
+  uint32_t _extractor_num;
+  uint32_t _scheduler_num;
 
-  int _to_be_shutdown;
+  bool _to_be_shutdown;
 
   // the types of file which downloader can download
   Vector<String> _file_types;
@@ -139,10 +141,10 @@ private:
   SharedPointer<ThreadPool> _extractor_threadpool;
   SharedPointer<ThreadPool> _scheduler_threadpool;
 
-  //int _dns_timeout;
-  int _create_connection_timeout;
-  int _send_timeout;
-  int _recv_timeout;
+  //uint32_t _dns_timeout;
+  uint32_t _create_connection_timeout;
+  uint32_t _send_timeout;
+  uint32_t _recv_timeout;
 
   String _request_header;
   String _user_agent;

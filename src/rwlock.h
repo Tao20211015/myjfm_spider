@@ -67,7 +67,7 @@ public:
   };
 
   RWlock() {
-    _has_init = 1;
+    _has_init = true;
     pthread_rwlock_init(&_rwlock, NULL);
   }
 
@@ -120,7 +120,7 @@ public:
   }
 
 private:
-  volatile int _has_init;
+  volatile bool _has_init;
   // disallow copy constructor
   RWlock(const RWlock&);
   RWlock& operator=(const RWlock&);

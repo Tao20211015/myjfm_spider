@@ -7,6 +7,8 @@
  * All rights reserved.
  ******************************************************************************/
 
+#include <stdint.h>
+
 #include "config.h"
 #include "url.h"
 #include "shared_pointer.h"
@@ -15,12 +17,12 @@ _START_MYJFM_NAMESPACE_
 
 Url::Url(const String& url) : 
   _raw_url(""), 
-  _is_valid(0), 
+  _is_valid(false), 
   _protocol(PRO_DUMMY), 
   _site(""), 
   _port(""), 
   _file(""), 
-  has_get_md5(0), 
+  has_get_md5(false), 
   _retries(0) {
   if (url.length() <= 0) {
     return;
@@ -65,12 +67,12 @@ Url::Url(const String& url) :
     _file = no_proto_url.substr(site_pos + 1);
   }
 
-  _is_valid = 1;
+  _is_valid = true;
   _raw_url = url;
   return;
 }
 
-RES_CODE Url::is_valid(int& valid) {
+RES_CODE Url::is_valid(bool& valid) {
   valid = _is_valid;
   return S_OK;
 }
@@ -134,12 +136,12 @@ RES_CODE Url::get_md5(MD5& md5) {
   MD5Caculator md5caculator(url);
   md5caculator.digest(_md5);
   md5 = _md5;
-  has_get_md5 = 1;
+  has_get_md5 = true;
 
   return S_OK;
 }
 
-RES_CODE Url::get_retries(int& retries) {
+RES_CODE Url::get_retries(uint32_t& retries) {
   retries = _retries;
 
   return S_OK;

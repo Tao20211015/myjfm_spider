@@ -10,6 +10,8 @@
 #ifndef _DOWNLOADER_TASK_H_
 #define _DOWNLOADER_TASK_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "task.h"
 #include "dns_cache.h"
@@ -63,7 +65,7 @@ private:
 
 class DownloaderTask : public Task {
 public:
-  DownloaderTask(int id);
+  DownloaderTask(uint32_t id);
   ~DownloaderTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
@@ -76,28 +78,28 @@ private:
   RES_CODE init_event_loop();
   //RES_CODE init_dns();
 
-  RES_CODE create_connection(Vector<String>&, short&, int&);
+  RES_CODE create_connection(Vector<String>&, uint16_t&, int&);
   RES_CODE generate_http_request(String&, String&, String&);
   RES_CODE set_timeout(int);
   RES_CODE send_http_request(int, String&);
-  RES_CODE recv_http_response_header(int, char*, int&);
+  RES_CODE recv_http_response_header(int, char*, uint32_t&);
   RES_CODE analysis_http_response_header(char*, HttpResponseHeader&);
-  RES_CODE recv_http_response_body(int, int, int, SharedPointer<Page>&);
+  RES_CODE recv_http_response_body(int, uint32_t, int32_t, SharedPointer<Page>&);
   RES_CODE recv_by_chunk(int, SharedPointer<Page>&);
-  RES_CODE recv_by_content_length(int, int, SharedPointer<Page>&);
-  RES_CODE recv_chunk_size(int, int&);
+  RES_CODE recv_by_content_length(int, uint32_t, SharedPointer<Page>&);
+  RES_CODE recv_chunk_size(int, uint32_t&);
   RES_CODE recv_and_discard(int);
-  RES_CODE recvn(int, int, char*);
+  RES_CODE recvn(int, uint32_t, char*);
 
-  int _id;
+  uint32_t _id;
   SharedPointer<DnsCache> _dns_cache;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
   SharedPointer<EventLoop> _event_loop;
   //SharedPointer<Dns> _dns;
   Map<String, int> _sock_fd_map;
-  int _create_connection_timeout;
-  int _send_timeout;
-  int _recv_timeout;
+  uint32_t _create_connection_timeout;
+  uint32_t _send_timeout;
+  uint32_t _recv_timeout;
 };
 
 _END_MYJFM_NAMESPACE_

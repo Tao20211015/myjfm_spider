@@ -62,19 +62,19 @@ public:
 
   RES_CODE get_request_header(String&);
 
-  RES_CODE get_dns_timeout(int&);
+  //RES_CODE get_dns_timeout(int&);
   RES_CODE get_create_connection_timeout(int&);
   RES_CODE get_send_timeout(int&);
   RES_CODE get_recv_timeout(int&);
 
-  RES_CODE get_name_server(String&);
+  //RES_CODE get_name_server(String&);
 
 private:
   RES_CODE load_default_file_types();
 
   RES_CODE assemble_request_header();
 
-  RES_CODE check_name_server();
+  //RES_CODE check_name_server();
 
   RES_CODE set_cur_path(String&);
   RES_CODE set_seed_urls(Vector<String>&);
@@ -86,12 +86,12 @@ private:
   RES_CODE set_extractor_num(String&);
   RES_CODE set_scheduler_num(String&);
 
-  RES_CODE set_dns_timeout(String&);
+  //RES_CODE set_dns_timeout(String&);
   RES_CODE set_create_connection_timeout(String&);
   RES_CODE set_send_timeout(String&);
   RES_CODE set_recv_timeout(String&);
 
-  RES_CODE set_name_server(String&);
+  //RES_CODE set_name_server(String&);
 
   //Mutex _mutex;
   // if there exists multi-threads, should guarantee consistency by mutex
@@ -139,7 +139,7 @@ private:
   SharedPointer<ThreadPool> _extractor_threadpool;
   SharedPointer<ThreadPool> _scheduler_threadpool;
 
-  int _dns_timeout;
+  //int _dns_timeout;
   int _create_connection_timeout;
   int _send_timeout;
   int _recv_timeout;
@@ -153,7 +153,7 @@ private:
 #endif
   SharedPointer<DnsCache> _dns_cache;
 
-  String _name_server;
+  //String _name_server;
 };
 
 _END_MYJFM_NAMESPACE_

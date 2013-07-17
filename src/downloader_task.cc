@@ -26,7 +26,7 @@
 #include "downloader_task.h"
 #include "memory_pool.h"
 #include "page.h"
-#include "dns.h"
+//#include "dns.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -55,7 +55,7 @@ DownloaderTask::DownloaderTask(int id) :
   _dns_cache(NULL), 
   _url_queue(NULL), 
   _event_loop(NULL), 
-  _dns(NULL), 
+  //_dns(NULL), 
   _create_connection_timeout(0), 
   _send_timeout(0), 
   _recv_timeout(0) {
@@ -98,9 +98,11 @@ RES_CODE DownloaderTask::init() {
   }
   */
 
+  /*
   if (init_dns() != S_OK) {
     return S_FAIL;
   }
+  */
 
   glob->get_create_connection_timeout(_create_connection_timeout);
   glob->get_send_timeout(_send_timeout);
@@ -133,6 +135,7 @@ RES_CODE DownloaderTask::init_event_loop() {
   return _event_loop->init();
 }
 
+/*
 RES_CODE DownloaderTask::init_dns() {
   _dns = SharedPointer<Dns>(new Dns());
   if (_dns.is_null()) {
@@ -150,6 +153,7 @@ RES_CODE DownloaderTask::init_dns() {
 
   return S_OK;
 }
+*/
 
 RES_CODE DownloaderTask::main_loop() {
   RES_CODE res_code = S_OK;

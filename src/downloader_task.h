@@ -13,7 +13,7 @@
 #include "config.h"
 #include "task.h"
 #include "dns_cache.h"
-#include "dns.h"
+//#include "dns.h"
 #include "shared_pointer.h"
 #include "event_loop.h"
 #include "callback.h"
@@ -74,7 +74,7 @@ private:
   RES_CODE init_url_queue();
   RES_CODE init_dns_cache();
   RES_CODE init_event_loop();
-  RES_CODE init_dns();
+  //RES_CODE init_dns();
 
   RES_CODE create_connection(Vector<String>&, short&, int&);
   RES_CODE generate_http_request(String&, String&, String&);
@@ -93,7 +93,7 @@ private:
   SharedPointer<DnsCache> _dns_cache;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
   SharedPointer<EventLoop> _event_loop;
-  SharedPointer<Dns> _dns;
+  //SharedPointer<Dns> _dns;
   Map<String, int> _sock_fd_map;
   int _create_connection_timeout;
   int _send_timeout;

@@ -57,6 +57,7 @@ RES_CODE Dns::create_connection() {
     return S_FAIL;
   }
 
+  // set the send and receive timeout
   int timeout = 0;
   if (glob->get_dns_timeout(timeout) != S_OK) {
     return S_FAIL;
@@ -65,6 +66,10 @@ RES_CODE Dns::create_connection() {
   struct timeval tm = {(time_t)timeout, (suseconds_t)0};
 
   if (setsockopt(_fd, SOL_SOCKET, SO_SNDTIMEO, &tm, sizeof(tm)) != 0) {
+    return S_FAIL;
+  }
+
+  if (setsockopt(_fd, SOL_SOCKET, SO_RCVTIMEO, &tm, sizeof(tm)) != 0) {
     return S_FAIL;
   }
 
@@ -150,13 +155,60 @@ RES_CODE Dns::send_request(char* buffer, int len) {
     return S_OK;
   }
 
-  int ret = sendto(_fd, buffer, len, 0, 
-      (struct sockaddr*)&_addr_info, sizeof(struct sockaddr));
-  if (ret != len) {
-    return S_FAIL;
-  } else {
-    return S_OK;
+  char* p = buffer;
+
+  while (1) {
+    int ret = sendto(_fd, p, len, 0, 
+        (struct sockaddr*)&_addr_info, sizeof(struct sockaddr));
+    if (ret <= 0) {
+      return S_FAIL;
+    } else if (ret == len) {
+      return S_OK;
+    } else {
+      len -= ret;
+      p += ret;
+    }
   }
+
+  return S_OK;
+}
+
+RES_CODE Dns::extract_response(Vector<String>& ips) {
+  if (_fd <= 0) {
+    return S_FAIL;
+  }
+
+  int ret;
+  char buffer[MAX_BUFFER];
+  char* p = buffer;
+  int len = 12; // dns packet header's length
+
+  while (1) {
+    ret = recvfrom(_fd, p, len, 0, NULL, NULL);
+    if (ret <= 0) {
+      return S_FAIL;
+    } else if (ret == len) {
+      break;
+    } else {
+      len -= ret;
+      p += ret;
+    }
+  }
+
+  unsigned short id = ntohs((unsigned short)(*p));
+  if (id != ID) {
+    return S_FAIL;
+  }
+
+  p += 2;
+  unsigned short flag = ntohs((unsigned short)(*p));
+  if (!IS_RESPONSE(flag)) {
+    return S_FAIL;
+  }
+
+  p += 2;
+
+  return S_OK;
 }
 
 RES_CODE Dns::query(String& site, Vector<String>& ips) {
@@ -171,14 +223,19 @@ RES_CODE Dns::query(String& site, Vector<String>& ips) {
     }
   }
 
-  int request_len = 0;
-  char request[MAX_REQUEST];
+  int len = 0;
+  char buffer[MAX_BUFFER];
 
-  if (generate_request(site, request, request_len) != S_OK) {
+  if (generate_request(site, buffer, len) != S_OK) {
     return S_FAIL;
   }
 
-  if (send_request(request, request_len) != S_OK) {
+  if (send_request(buffer, len) != S_OK) {
+    close_connection();
+    return S_FAIL;
+  }
+
+  if (extract_response(ips) != S_OK) {
     close_connection();
     return S_FAIL;
   }

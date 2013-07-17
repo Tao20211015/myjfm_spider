@@ -25,13 +25,16 @@ struct dns_request_header {
 };
 
 class Dns : public Shared {
-#define MAX_REQUEST 512
+#define MAX_BUFFER 513
 #define MAX_NAME 128
 #define MAX_LABEL 63
 #define PORT 53
 #define ID 0x4a46
 #define QUERY_TYPE 1
 #define QUERY_CLASS 1
+#define GET_QR(a) ((a & 0x8000) >> 15)
+#define IS_REQUEST(a) ((GET_QR(a)) & 0x01)
+#define IS_RESPONSE(a) !IS_REQUEST(a)
 
 public:
   Dns();
@@ -46,6 +49,7 @@ private:
   RES_CODE generate_request(String&, char*, int&);
   RES_CODE create_question(String&, String&);
   RES_CODE send_request(char*, int);
+  RES_CODE extract_response(Vector<String>&);
 
   // the udp socket fd
   int _fd;

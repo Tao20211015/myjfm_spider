@@ -1,13 +1,13 @@
 #Program, flags, etc.
 CC			= g++
-CFLAGS	= -Wall -c -g
+CFLAGS	= -Wall -c -g -I../deps/adns/include
 LD			= g++
-LDFLAGS	= -lpthread
+LDFLAGS	= -lpthread ../deps/adns/lib/libadns.a
 
 OBJS		= myjfm_spider.o utility.o log.o global.o shared.o thread_pool.o \
 					thread.o thread_task.o logger.o site.o url.o md5.o dns_cache.o \
 					downloader_task.o extractor_task.o scheduler_task.o logger_task.o \
-					event_loop.o memory_pool.o dns.o
+					event_loop.o memory_pool.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -16,29 +16,25 @@ UTILITY_UT_BIN	= utility_ut
 THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o memory_pool.o \
-										dns.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 THREAD_TEST_BIN	= thread_test
 
 HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o memory_pool.o \
-										dns.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 HASH_TEST_BIN	= hash_test
 
 MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o memory_pool.o \
-										dns.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 MD5_TEST_BIN	= md5_test
 
 URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o site.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
-										scheduler_task.o logger_task.o event_loop.o memory_pool.o \
-										dns.o
+										scheduler_task.o logger_task.o event_loop.o memory_pool.o
 URL_TEST_BIN	= url_test
 
 SCHEDULER_TASK_SHUFFLE_TEST_OBJS	= scheduler_task_shuffle_test.o utility.o \
@@ -46,8 +42,7 @@ SCHEDULER_TASK_SHUFFLE_TEST_OBJS	= scheduler_task_shuffle_test.o utility.o \
 																		thread.o thread_task.o logger.o site.o \
 																		md5.o dns_cache.o downloader_task.o \
 																		extractor_task.o scheduler_task.o \
-																		logger_task.o event_loop.o memory_pool.o \
-																		dns.o
+																		logger_task.o event_loop.o memory_pool.o
 SCHEDULER_TASK_SHUFFLE_TEST_BIN	= scheduler_task_shuffle_test
 
 export OUTPUT_PATH=../output
@@ -79,25 +74,25 @@ realclean :
 	rm -rf $(SCHEDULER_TASK_SHUFFLE_TEST_OBJS) $(SCHEDULER_TASK_SHUFFLE_TEST_BIN)
 
 $(BIN) : $(OBJS)
-	$(LD) $(LDFLAGS) -o $(BIN) $(OBJS)
+	$(LD) -o $(BIN) $(LDFLAGS) $(OBJS)
 
 $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)
-	$(LD) $(LDFLAGS) -o $(UTILITY_UT_BIN) $(UTILITY_UT_OBJS)
+	$(LD) -o $(UTILITY_UT_BIN) $(LDFLAGS) $(UTILITY_UT_OBJS)
 
 $(THREAD_TEST_BIN) : $(THREAD_TEST_OBJS)
-	$(LD) $(LDFLAGS) -o $(THREAD_TEST_BIN) $(THREAD_TEST_OBJS)
+	$(LD) -o $(THREAD_TEST_BIN) $(LDFLAGS) $(THREAD_TEST_OBJS)
 
 $(HASH_TEST_BIN) : $(HASH_TEST_OBJS)
-	$(LD) $(LDFLAGS) -o $(HASH_TEST_BIN) $(HASH_TEST_OBJS)
+	$(LD) -o $(HASH_TEST_BIN) $(LDFLAGS) $(HASH_TEST_OBJS)
 
 $(MD5_TEST_BIN) : $(MD5_TEST_OBJS)
-	$(LD) $(LDFLAGS) -o $(MD5_TEST_BIN) $(MD5_TEST_OBJS)
+	$(LD) -o $(MD5_TEST_BIN) $(LDFLAGS) $(MD5_TEST_OBJS)
 
 $(URL_TEST_BIN) : $(URL_TEST_OBJS)
-	$(LD) $(LDFLAGS) -o $(URL_TEST_BIN) $(URL_TEST_OBJS)
+	$(LD) -o $(URL_TEST_BIN) $(LDFLAGS) $(URL_TEST_OBJS)
 
 $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) : $(SCHEDULER_TASK_SHUFFLE_TEST_OBJS)
-	$(LD) $(LDFLAGS) -o $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) \
+	$(LD) -o $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) $(LDFLAGS) \
 		$(SCHEDULER_TASK_SHUFFLE_TEST_OBJS)
 
 others : 
@@ -183,8 +178,5 @@ event_loop.o : event_loop.cc
 	$(CC) $(CFLAGS) -o $@ $<
 
 memory_pool.o : memory_pool.cc
-	$(CC) $(CFLAGS) -o $@ $<
-
-dns.o : dns.cc
 	$(CC) $(CFLAGS) -o $@ $<
 

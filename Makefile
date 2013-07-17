@@ -7,6 +7,10 @@ all :
 	cp myjfm_spider.conf.sample $(OUTPUT_PATH)/myjfm_spider.conf
 	cp scripts/start scripts/stop $(OUTPUT_PATH)
 	@echo
+	@echo "make deps..."
+	@$(MAKE) -C deps
+	@echo "make deps ok."
+	@echo
 	@echo "make src..."
 	@$(MAKE) -C src
 	@echo "make src ok."

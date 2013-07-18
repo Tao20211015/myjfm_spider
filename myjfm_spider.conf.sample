@@ -17,6 +17,9 @@ EXTRACTORS 5
 # the number of schedulers
 SCHEDULERS 1
 
+# the number of dnsers
+DNSERS 1
+
 # the number of threads
 FILETYPES .html .htm .jpg .jpeg
 
@@ -36,7 +39,7 @@ CREATE_CONNECTION_TIMEOUT 5
 SEND_TIMEOUT 10
 
 # recv TCP packet timeout
-RECV_TIMEOUT 60
+RECV_TIMEOUT 30
 
 # dns server
 # NAME_SERVER 8.8.8.8

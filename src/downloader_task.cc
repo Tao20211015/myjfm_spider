@@ -81,6 +81,10 @@ RES_CODE DownloaderTask::init() {
     return S_FAIL;
   }
 
+  if (init_extractor_queue() != S_OK) {
+    return S_FAIL;
+  }
+
   if (init_dns_cache() != S_OK) {
     return S_FAIL;
   }
@@ -106,6 +110,21 @@ RES_CODE DownloaderTask::init() {
 
 RES_CODE DownloaderTask::init_url_queue() {
   return glob->get_downloader_queue(_id, _url_queue);
+}
+
+RES_CODE DownloaderTask::init_extractor_queue() {
+  if (glob->get_extractor_num(_extractor_num) != S_OK) {
+    return S_FAIL;
+  }
+
+  uint32_t i;
+  for (i = 0; i < _extractor_num; ++i) {
+    SharedPointer<SQueue<SharedPointer<Page> > > tmp_q;
+    glob->get_extractor_queue(i, tmp_q);
+    _extractor_queues.push_back(tmp_q);
+  }
+
+  return S_OK;
 }
 
 RES_CODE DownloaderTask::init_dns_cache() {
@@ -154,48 +173,38 @@ RES_CODE DownloaderTask::main_loop() {
   for (;;) {
     LOG(WARNING, "[%d] fetch one url", _id);
 
-    // get the url from global synchronous url queue
+    // get the url from _url_queue
     SharedPointer<Url> url_p;
     _url_queue->pop(url_p);
 
+    if (url_p.is_null()) {
+      continue;
+    }
+
+    int fd = -1;
+
     Protocol proto;
     String site;
-    String str_port;
+    uint32_t ip = 0;
     uint16_t port = 0;
     String file;
     uint32_t retries = 0;
+    Url::EnumStatus status = Url::UNINITIALIZED;
 
-    bool valid = false;
-    int fd = -1;
-
-    // if the url is invalid, drop it
-    url_p->is_valid(valid);
-    if (!valid) {
+    // if the url has not been initialized, drop it
+    url_p->get_status(status);
+    if (status != Url::INITIALIZED) {
       continue;
     }
 
     url_p->get_protocol(proto);
-    if (proto != HTTP) {
-      continue;
-    }
-
     url_p->get_site(site);
-    if (site.length() == 0) {
-      continue;
-    }
-
-    url_p->get_port(str_port);
-    if (str_port.length() == 0 || 
-        Utility::str2integer(str_port, port) != S_OK || 
-        port == 0) {
-      continue;
-    }
-
+    //url_p->get_ip(ip);
+    url_p->get_port(port);
     url_p->get_file(file);
-
-    // if the retry times are more than MAX_NUM_OF_RETRIES, 
-    // then drop it
     url_p->get_retries(retries);
+
+    // if the retry times are more than MAX_NUM_OF_RETRIES, drop it
     if (retries >= MAX_NUM_OF_RETRIES) {
       Map<String, int>::iterator iter = _sock_fd_map.find(site);
       if (iter != _sock_fd_map.end()) {

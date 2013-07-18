@@ -21,18 +21,24 @@ _START_MYJFM_NAMESPACE_
 
 class Url : public Shared {
 public:
+  enum EnumStatus {
+    UNINITIALIZED = 0x0, 
+    INITIALIZED = 0x1, 
+    DNSED = 0x2
+  };
+
   Url(const String& url = "");
   ~Url() {}
 
-  RES_CODE is_valid(bool&);
+  RES_CODE get_status(EnumStatus&);
 
   RES_CODE get_protocol(Protocol&);
 
   RES_CODE get_ip(uint32_t&);
 
-  RES_CODE get_site(String&);
+  RES_CODE get_port(uint16_t&);
 
-  RES_CODE get_port(String&);
+  RES_CODE get_site(String&);
 
   RES_CODE get_file(String&);
 
@@ -44,11 +50,11 @@ public:
 
 private:
   String _raw_url;
-  volatile bool _is_valid;
+  volatile EnumStatus _status;
   Protocol _protocol;
   uint32_t _ip;
+  uint16_t _port;
   String _site;
-  String _port;
   String _file;
 
   bool has_get_md5;

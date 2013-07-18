@@ -11,25 +11,24 @@
 
 #include "config.h"
 #include "url.h"
+#include "utility.h"
 #include "shared_pointer.h"
 
 _START_MYJFM_NAMESPACE_
 
 Url::Url(const String& url) : 
   _raw_url(""), 
-  _is_valid(false), 
+  _status(UNINITIALIZED), 
   _protocol(PRO_DUMMY), 
+  _ip(0), 
+  _port(0), 
   _site(""), 
-  _port(""), 
   _file(""), 
   has_get_md5(false), 
   _retries(0) {
-  if (url.length() <= 0) {
+  if (url.length() == 0) {
     return;
   }
-
-  String_size_t site_pos = -1;
-  String_size_t port_pos = -1;
 
   if (url.length() <= 7) {
     return;
@@ -42,74 +41,115 @@ Url::Url(const String& url) :
 
   _protocol = HTTP;
 
-  String no_proto_url = url.substr(7);
+  String_size_t site_pos = -1;
+  String_size_t port_pos = -1;
 
-  site_pos = no_proto_url.find("/");
+  site_pos = url.find("/", 7);
   if (site_pos == String_tail) { // no requested file
-    port_pos = no_proto_url.find(":");
+    port_pos = url.find(":", 7);
     if (port_pos == String_tail) { // not specify port
-      _site = no_proto_url;
-      _port = "80"; // default port is 80
+      _site = url.substr(7);
+      _port = 80; // default port is 80
     } else {
-      _site = no_proto_url.substr(0, port_pos);
-      _port = no_proto_url.substr(port_pos + 1);
+      _site = url.substr(7, port_pos - 7);
+      if (Utility::str2integer((url.substr(port_pos + 1)).c_str(), 
+            _port) != S_OK) {
+        _site = "";
+        _port = 0;
+        _protocol = PRO_DUMMY;
+        return;
+      }
     }
   } else { // have file parameter in the url
-    port_pos = no_proto_url.find(":");
+    port_pos = url.find(":", 7);
     if (port_pos == String_tail || port_pos > site_pos) { // not specify port
-      _site = no_proto_url.substr(0, site_pos);
-      _port = "80";
+      _site = url.substr(7, site_pos - 7);
+      _port = 80;
     } else {
-      _site = no_proto_url.substr(0, port_pos);
-      _port = no_proto_url.substr(port_pos + 1, site_pos - port_pos - 1);
+      _site = url.substr(7, port_pos - 7);
+      if (Utility::str2integer(
+            (url.substr(port_pos + 1, site_pos - port_pos - 1)).c_str(), 
+            _port) != S_OK) {
+        _site = "";
+        _port = 0;
+        _protocol = PRO_DUMMY;
+        return;
+      }
     }
 
-    _file = no_proto_url.substr(site_pos + 1);
+    _file = url.substr(site_pos + 1);
   }
 
-  _is_valid = true;
+  _status = INITIALIZED;
   _raw_url = url;
   return;
 }
 
-RES_CODE Url::is_valid(bool& valid) {
-  valid = _is_valid;
+RES_CODE Url::get_status(EnumStatus& status) {
+  status = _status;
+
   return S_OK;
 }
 
 RES_CODE Url::get_protocol(Protocol& protocol) {
+  if (_status != INITIALIZED) {
+    return S_FAIL;
+  }
+
   protocol = _protocol;
 
   return S_OK;
 }
 
-RES_CODE Url::get_site(String& site) {
-  site = _site;
+RES_CODE Url::get_ip(uint32_t& ip) {
+  if (_status != DNSED) {
+    return S_FAIL;
+  }
+
+  ip = _ip;
 
   return S_OK;
 }
 
-RES_CODE Url::get_port(String& port) {
+RES_CODE Url::get_port(uint16_t& port) {
+  if (_status != INITIALIZED) {
+    return S_FAIL;
+  }
+
   port = _port;
 
   return S_OK;
 }
 
+RES_CODE Url::get_site(String& site) {
+  if (_status != INITIALIZED) {
+    return S_FAIL;
+  }
+
+  site = _site;
+
+  return S_OK;
+}
+
 RES_CODE Url::get_file(String& file) {
+  if (_status != INITIALIZED) {
+    return S_FAIL;
+  }
+
   file = _file;
 
   return S_OK;
 }
 
 RES_CODE Url::get_md5(MD5& md5) {
+  if (_status != INITIALIZED) {
+    md5 = MD5();
+    return S_FAIL;
+  }
+
   if (has_get_md5) {
     md5 = _md5;
     return S_OK;
-  }
-
-  if (!_is_valid || _protocol == PRO_DUMMY) {
-    md5 = MD5();
-    return S_INVALID_URL;
   }
 
   String url = "";
@@ -118,18 +158,18 @@ RES_CODE Url::get_md5(MD5& md5) {
     url += "http://";
   } else {
     md5 = MD5();
-    return S_INVALID_URL;
+    return S_FAIL;
   }
 
   url += _site;
-  if (_port == "") {
-    md5 = MD5();
-    return S_INVALID_URL;
-  } else if (_port != "80") {
-    url += ":" + _port;
+
+  if (_port > 0 && _port != 80) {
+    String str_port;
+    Utility::integer2str(_port, str_port);
+    url += ":" + str_port;
   }
   
-  if (_file != "") {
+  if (_file.length() > 0) {
     url += "/" + _file;
   }
 

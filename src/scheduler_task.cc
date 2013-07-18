@@ -27,13 +27,15 @@ SchedulerTask::SchedulerTask(uint32_t id) :
   _id(id), 
   _downloader_num(0), 
   _url_queue(NULL) {
-  _downloader_queue.clear();
+  _downloader_queues.clear();
 }
 
 SchedulerTask::~SchedulerTask() {}
 
 RES_CODE SchedulerTask::operator()(void* arg) {
-  init();
+  if (init() != S_OK) {
+    return S_FAIL;
+  }
 
   for (;;) {
     // select one url
@@ -63,23 +65,27 @@ RES_CODE SchedulerTask::operator()(void* arg) {
 
     index %= _downloader_num;
 
-    //put the url into the downloader's url_queue
-    _downloader_queue[index]->push(url);
+    //put the url into the downloader's queue
+    _downloader_queues[index]->push(url);
   }
 
   return S_OK;
 }
 
 RES_CODE SchedulerTask::init() {
-  glob->get_downloader_num(_downloader_num);
+  if (glob->get_downloader_num(_downloader_num) != S_OK) {
+    return S_FAIL;
+  }
 
-  glob->get_url_queue(_url_queue);
+  if (glob->get_scheduler_queue(_id, _url_queue) != S_OK) {
+    return S_FAIL;
+  }
 
   uint32_t i;
   for (i = 0; i < _downloader_num; ++i) {
     SharedPointer<SQueue<SharedPointer<Url> > > tmp_q;
     glob->get_downloader_queue(i, tmp_q);
-    _downloader_queue.push_back(tmp_q);
+    _downloader_queues.push_back(tmp_q);
   }
 
   return S_OK;

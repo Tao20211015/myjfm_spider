@@ -105,9 +105,6 @@ enum RES_CODE {
   // LoggerTask and Global member functions also use these
   S_BAD_ARG = 0x00040000, 
 
-  // Url member functions use these
-  S_INVALID_URL = 0x4, 
-
   //Logger member functions use these
   S_INVALID_LOG = 0x4, 
   S_IS_LOGGING = 0x8, 

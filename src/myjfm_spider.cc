@@ -18,6 +18,7 @@
 #include "downloader_task.h"
 #include "extractor_task.h"
 #include "scheduler_task.h"
+#include "dnser_task.h"
 #include "thread_pool.h"
 #include "shared_pointer.h"
 
@@ -30,12 +31,18 @@ _MYJFM_NAMESPACE_::Global *glob = NULL;
 
 typedef _MYJFM_NAMESPACE_::ThreadPool ThreadPool;
 typedef _MYJFM_NAMESPACE_::SharedPointer<ThreadPool> ThreadPoolPtr;
+
 typedef _MYJFM_NAMESPACE_::DownloaderTask DownloaderTask;
 typedef _MYJFM_NAMESPACE_::SharedPointer<DownloaderTask> DownloaderTaskPtr;
+
 typedef _MYJFM_NAMESPACE_::ExtractorTask ExtractorTask;
 typedef _MYJFM_NAMESPACE_::SharedPointer<ExtractorTask> ExtractorTaskPtr;
+
 typedef _MYJFM_NAMESPACE_::SchedulerTask SchedulerTask;
 typedef _MYJFM_NAMESPACE_::SharedPointer<SchedulerTask> SchedulerTaskPtr;
+
+typedef _MYJFM_NAMESPACE_::DnserTask DnserTask;
+typedef _MYJFM_NAMESPACE_::SharedPointer<DnserTask> DnserTaskPtr;
 
 RES_CODE usage(char *argv0) {
   Cerr << "[Usage] " << argv0 << " [-f configure_file_name]" << Endl;
@@ -103,14 +110,17 @@ void init_modules() {
   uint32_t downloader_num = 0;
   uint32_t extractor_num = 0;
   uint32_t scheduler_num = 0;
+  uint32_t dnser_num = 0;
 
   glob->get_downloader_num(downloader_num);
   glob->get_extractor_num(extractor_num);
   glob->get_scheduler_num(scheduler_num);
+  glob->get_dnser_num(dnser_num);
 
   ThreadPoolPtr downloader_threadpool(new ThreadPool(downloader_num));
   ThreadPoolPtr extractor_threadpool(new ThreadPool(extractor_num));
   ThreadPoolPtr scheduler_threadpool(new ThreadPool(scheduler_num));
+  ThreadPoolPtr dnser_threadpool(new ThreadPool(dnser_num));
 
   String flag = "";
 
@@ -129,6 +139,11 @@ void init_modules() {
     goto failed;
   }
 
+  if (glob->set_dnser_threadpool(dnser_threadpool) != S_OK) {
+    flag = "dnser";
+    goto failed;
+  }
+
   RES_CODE t;
   if ((t = downloader_threadpool->init()) != S_OK) {
     flag = "downloader";
@@ -142,6 +157,11 @@ void init_modules() {
 
   if (scheduler_threadpool->init() != S_OK) {
     flag = "scheduler";
+    goto failed;
+  }
+
+  if (dnser_threadpool->init() != S_OK) {
+    flag = "dnser";
     goto failed;
   }
 
@@ -168,6 +188,15 @@ void init_modules() {
 
     if (scheduler_threadpool->add_task(task) != S_OK) {
       flag = "scheduler";
+      goto failed;
+    }
+  }
+
+  for (i = 0; i < dnser_num; ++i) {
+    DnserTaskPtr task(new DnserTask(i));
+
+    if (dnser_threadpool->add_task(task) != S_OK) {
+      flag = "dnser";
       goto failed;
     }
   }
@@ -248,6 +277,13 @@ void shutdown() {
 
   if (!scheduler_threadpool.is_null()) {
     scheduler_threadpool->stop();
+  }
+
+  ThreadPoolPtr dnser_threadpool;
+  glob->get_dnser_threadpool(dnser_threadpool);
+
+  if (!dnser_threadpool.is_null()) {
+    dnser_threadpool->stop();
   }
 
   delete_pid_file();

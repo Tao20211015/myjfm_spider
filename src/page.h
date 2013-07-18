@@ -20,6 +20,7 @@
 #include <stdlib.h>
 
 #include "config.h"
+#include "utility.h"
 #include "memory_pool.h"
 
 _START_MYJFM_NAMESPACE_

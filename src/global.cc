@@ -14,6 +14,8 @@
 #include "global.h"
 #include "utility.h"
 #include "logger.h"
+#include "url.h"
+#include "page.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -41,11 +43,12 @@ Global::Global() :
   _downloader_num(5), 
   _extractor_num(5), 
   _scheduler_num(1), 
+  _dnser_num(1), 
   _to_be_shutdown(false), 
-  _url_queue(NULL), 
   _downloader_threadpool(NULL), 
   _extractor_threadpool(NULL), 
   _scheduler_threadpool(NULL), 
+  _dnser_threadpool(NULL), 
   //_dns_timeout(10), 
   _create_connection_timeout(2), 
   _send_timeout(5), 
@@ -57,7 +60,10 @@ Global::Global() :
   //_name_server("") {
   _file_types.clear();
   _seed_urls.clear();
+  _extractor_queues.clear();
   _downloader_queues.clear();
+  _scheduler_queues.clear();
+  _dnser_queues.clear();
 }
 
 Global::~Global() {
@@ -86,6 +92,7 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   _downloader_num = 5;
   _extractor_num = 5;
   _scheduler_num = 1;
+  _dnser_num = 1;
 
   _seed_urls.clear();
 
@@ -102,22 +109,40 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
 
   assemble_request_header();
 
-  // initialize the url queue
-  _url_queue = 
-    SharedPointer<SQueue<SharedPointer<Url> > >
-    (new SQueue<SharedPointer<Url> >());
-
   uint32_t i = 0;
-  for (i = 0; i < _seed_urls.size(); ++i) {
-    SharedPointer<Url> url_p(new Url(_seed_urls[i]));
-    _url_queue->push(url_p);
+
+  // initialize all the extractors' queues
+  for (i = 0; i < _extractor_num; ++i) {
+    _extractor_queues.push_back(
+        SharedPointer<SQueue<SharedPointer<Page> > >
+        (new SQueue<SharedPointer<Page> >()));
   }
 
-  // initialize all the downloader queues
+  // initialize all the downloaders' queues
   for (i = 0; i < _downloader_num; ++i) {
     _downloader_queues.push_back(
         SharedPointer<SQueue<SharedPointer<Url> > >
         (new SQueue<SharedPointer<Url> >()));
+  }
+
+  // initialize all the schedulers' queues
+  for (i = 0; i < _scheduler_num; ++i) {
+    _scheduler_queues.push_back(
+        SharedPointer<SQueue<SharedPointer<Url> > >
+        (new SQueue<SharedPointer<Url> >()));
+  }
+
+  // initialize all the dnsers' queues
+  for (i = 0; i < _dnser_num; ++i) {
+    _dnser_queues.push_back(
+        SharedPointer<SQueue<SharedPointer<Url> > >
+        (new SQueue<SharedPointer<Url> >()));
+  }
+
+  // put all seed urls into the first scheduler temporarily
+  for (i = 0; i < _seed_urls.size(); ++i) {
+    SharedPointer<Url> url_p(new Url(_seed_urls[i]));
+    _scheduler_queues[0]->push(url_p);
   }
 
   // initialize the dns cache
@@ -198,27 +223,29 @@ RES_CODE Global::parse_config() {
         set_extractor_num(key_and_value[1]);
       } else if (key_and_value[0] == "SCHEDULERS") {
         set_scheduler_num(key_and_value[1]);
+      } else if (key_and_value[0] == "DNSERS") {
+        set_dnser_num(key_and_value[1]);
       } else if (key_and_value[0] == "FILETYPES") {
         set_file_types(key_and_value);
       } else if (key_and_value[0] == "SEEDURLS") {
         set_seed_urls(key_and_value);
         /*
-      } else if (key_and_value[0] == "DNS_TIMEOUT") {
-        set_dns_timeout(key_and_value[1]);
-        */
-      } else if (key_and_value[0] == "CREATE_CONNECTION_TIMEOUT") {
-        set_create_connection_timeout(key_and_value[1]);
-      } else if (key_and_value[0] == "SEND_TIMEOUT") {
-        set_send_timeout(key_and_value[1]);
-      } else if (key_and_value[0] == "RECV_TIMEOUT") {
-        set_recv_timeout(key_and_value[1]);
-        /*
-      } else if (key_and_value[0] == "NAME_SERVER") {
-        set_name_server(key_and_value[1]);
-        */
-      } else {
-        continue;
-      }
+           } else if (key_and_value[0] == "DNS_TIMEOUT") {
+           set_dns_timeout(key_and_value[1]);
+           */
+    } else if (key_and_value[0] == "CREATE_CONNECTION_TIMEOUT") {
+      set_create_connection_timeout(key_and_value[1]);
+    } else if (key_and_value[0] == "SEND_TIMEOUT") {
+      set_send_timeout(key_and_value[1]);
+    } else if (key_and_value[0] == "RECV_TIMEOUT") {
+      set_recv_timeout(key_and_value[1]);
+      /*
+         } else if (key_and_value[0] == "NAME_SERVER") {
+         set_name_server(key_and_value[1]);
+         */
+    } else {
+      continue;
+    }
     }
 
     if (_seed_urls.empty()) {
@@ -234,14 +261,14 @@ RES_CODE Global::parse_config() {
 }
 
 /*
-RES_CODE Global::check_name_server() {
-  if (_name_server.length() <= 0) {
-    return S_FAIL;
-  }
+   RES_CODE Global::check_name_server() {
+   if (_name_server.length() <= 0) {
+   return S_FAIL;
+   }
 
-  return S_OK;
-}
-*/
+   return S_OK;
+   }
+   */
 
 RES_CODE Global::set_seed_urls(Vector<String>& seed_urls) {
   _seed_urls.clear();
@@ -272,9 +299,9 @@ RES_CODE Global::set_downloader_num(String& downloader_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_downloader_num(uint32_t& num) {
+RES_CODE Global::get_downloader_num(uint32_t& downloader_num) {
   CHECK_HAS_INIT();
-  num = _downloader_num;
+  downloader_num = _downloader_num;
 
   return S_OK;
 }
@@ -286,9 +313,9 @@ RES_CODE Global::set_extractor_num(String& extractor_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_extractor_num(uint32_t& num) {
+RES_CODE Global::get_extractor_num(uint32_t& extractor_num) {
   CHECK_HAS_INIT();
-  num = _extractor_num;
+  extractor_num = _extractor_num;
 
   return S_OK;
 }
@@ -300,9 +327,23 @@ RES_CODE Global::set_scheduler_num(String& scheduler_num) {
   return S_OK;
 }
 
-RES_CODE Global::get_scheduler_num(uint32_t& num) {
+RES_CODE Global::get_scheduler_num(uint32_t& scheduler_num) {
   CHECK_HAS_INIT();
-  num = _scheduler_num;
+  scheduler_num = _scheduler_num;
+
+  return S_OK;
+}
+
+RES_CODE Global::set_dnser_num(String& dnser_num) {
+  CHECK_HAS_INIT();
+  _dnser_num = atoi(dnser_num.c_str());
+
+  return S_OK;
+}
+
+RES_CODE Global::get_dnser_num(uint32_t& dnser_num) {
+  CHECK_HAS_INIT();
+  dnser_num = _dnser_num;
 
   return S_OK;
 }
@@ -349,6 +390,21 @@ RES_CODE Global::set_scheduler_threadpool(SharedPointer<ThreadPool>& ptr) {
 
 RES_CODE Global::get_scheduler_threadpool(SharedPointer<ThreadPool>& ptr) {
   ptr = _scheduler_threadpool;
+  return S_OK;
+}
+
+RES_CODE Global::set_dnser_threadpool(SharedPointer<ThreadPool>& ptr) {
+  if (ptr.is_null()) {
+    return S_BAD_ARG;
+  }
+
+  _dnser_threadpool = ptr;
+
+  return S_OK;
+}
+
+RES_CODE Global::get_dnser_threadpool(SharedPointer<ThreadPool>& ptr) {
+  ptr = _dnser_threadpool;
   return S_OK;
 }
 
@@ -422,6 +478,23 @@ RES_CODE Global::set_depth(String& dep) {
   return S_OK;
 }
 
+RES_CODE Global::get_extractor_queue(uint32_t id, 
+    SharedPointer<SQueue<SharedPointer<Page> > >& queue) {
+  CHECK_HAS_INIT();
+
+  uint32_t extractor_num = 0;
+  get_extractor_num(extractor_num);
+
+  if (id >= extractor_num) {
+    queue = SharedPointer<SQueue<SharedPointer<Page> > >(NULL);
+    return S_OUT_RANGE;
+  }
+
+  queue = _extractor_queues[id];
+
+  return S_OK;
+}
+
 RES_CODE Global::get_downloader_queue(uint32_t id, 
     SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
   CHECK_HAS_INIT();
@@ -439,9 +512,36 @@ RES_CODE Global::get_downloader_queue(uint32_t id,
   return S_OK;
 }
 
-RES_CODE Global::get_url_queue(
+RES_CODE Global::get_scheduler_queue(uint32_t id, 
     SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
-  queue = _url_queue;
+  CHECK_HAS_INIT();
+
+  uint32_t scheduler_num = 0;
+  get_scheduler_num(scheduler_num);
+
+  if (id >= scheduler_num) {
+    queue = SharedPointer<SQueue<SharedPointer<Url> > >(NULL);
+    return S_OUT_RANGE;
+  }
+
+  queue = _scheduler_queues[id];
+
+  return S_OK;
+}
+
+RES_CODE Global::get_dnser_queue(uint32_t id, 
+    SharedPointer<SQueue<SharedPointer<Url> > >& queue) {
+  CHECK_HAS_INIT();
+
+  uint32_t dnser_num = 0;
+  get_dnser_num(dnser_num);
+
+  if (id >= dnser_num) {
+    queue = SharedPointer<SQueue<SharedPointer<Url> > >(NULL);
+    return S_OUT_RANGE;
+  }
+
+  queue = _dnser_queues[id];
 
   return S_OK;
 }
@@ -472,13 +572,13 @@ RES_CODE Global::get_request_header(String& request_header) {
 }
 
 /*
-RES_CODE Global::set_dns_timeout(String& timeout) {
-  CHECK_HAS_INIT();
-  _dns_timeout = atoi(timeout.c_str());
+   RES_CODE Global::set_dns_timeout(String& timeout) {
+   CHECK_HAS_INIT();
+   _dns_timeout = atoi(timeout.c_str());
 
-  return S_OK;
-}
-*/
+   return S_OK;
+   }
+   */
 
 RES_CODE Global::set_create_connection_timeout(String& timeout) {
   CHECK_HAS_INIT();
@@ -502,22 +602,22 @@ RES_CODE Global::set_recv_timeout(String& timeout) {
 }
 
 /*
-RES_CODE Global::set_name_server(String& name_server) {
-  CHECK_HAS_INIT();
-  _name_server = name_server;
+   RES_CODE Global::set_name_server(String& name_server) {
+   CHECK_HAS_INIT();
+   _name_server = name_server;
 
-  return S_OK;
-}
-*/
+   return S_OK;
+   }
+   */
 
 /*
-RES_CODE Global::get_dns_timeout(int& timeout) {
-  CHECK_HAS_INIT();
-  timeout = _dns_timeout;
+   RES_CODE Global::get_dns_timeout(int& timeout) {
+   CHECK_HAS_INIT();
+   timeout = _dns_timeout;
 
-  return S_OK;
-}
-*/
+   return S_OK;
+   }
+   */
 
 RES_CODE Global::get_create_connection_timeout(uint32_t& timeout) {
   CHECK_HAS_INIT();
@@ -548,13 +648,13 @@ RES_CODE Global::get_dns_cache(SharedPointer<DnsCache>& dns_cache) {
 }
 
 /*
-RES_CODE Global::get_name_server(String& name_server) {
-  CHECK_HAS_INIT();
-  name_server = _name_server;
+   RES_CODE Global::get_name_server(String& name_server) {
+   CHECK_HAS_INIT();
+   name_server = _name_server;
 
-  return S_OK;
-}
-*/
+   return S_OK;
+   }
+   */
 
 #undef CHECK_HAS_INIT
 

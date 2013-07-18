@@ -74,6 +74,7 @@ private:
   RES_CODE main_loop();
 
   RES_CODE init_url_queue();
+  RES_CODE init_extractor_queue();
   RES_CODE init_dns_cache();
   RES_CODE init_event_loop();
   //RES_CODE init_dns();
@@ -92,8 +93,10 @@ private:
   RES_CODE recvn(int, uint32_t, char*);
 
   uint32_t _id;
+  uint32_t _extractor_num;
   SharedPointer<DnsCache> _dns_cache;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
+  Vector<SharedPointer<SQueue<SharedPointer<Page> > > > _extractor_queues;
   SharedPointer<EventLoop> _event_loop;
   //SharedPointer<Dns> _dns;
   Map<String, int> _sock_fd_map;

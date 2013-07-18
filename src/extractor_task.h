@@ -14,6 +14,10 @@
 
 #include "config.h"
 #include "task.h"
+#include "shared_pointer.h"
+#include "squeue.h"
+#include "url.h"
+#include "page.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -25,6 +29,11 @@ public:
 
 private:
   uint32_t _id;
+  uint32_t _dnser_num;
+  SharedPointer<SQueue<SharedPointer<Page> > > _page_queue;
+  Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _dnser_queues;
+
+  RES_CODE init();
 };
 
 _END_MYJFM_NAMESPACE_

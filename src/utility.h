@@ -9,6 +9,7 @@
 #define _UTILITY_H_
 
 #include <stdint.h>
+#include <string.h>
 #include <assert.h>
 
 #include "config.h"
@@ -68,6 +69,43 @@ public:
     } else {
       return S_FAIL;
     }
+  }
+
+  template <class T>
+  static RES_CODE integer2str(T& number, String& str) {
+    Stringstream ss;
+    bool ret = false;
+    ss << number;
+    if (ss.str().length() > 0) {
+      try {
+        ss >> str;
+        if (ss.eof() && !ss.fail()) {
+          ret = true;
+        }
+      } catch (std::ios_base::failure&) {
+      }
+    }
+    
+    if (ret) {
+      return S_OK;
+    } else {
+      return S_FAIL;
+    }
+  }
+
+  template <class T>
+  static RES_CODE integer2str(T&number, char* str) {
+    if (!str) {
+      return S_FAIL;
+    }
+    
+    String tmp;
+    if (Utility::str2integer(number, tmp) != S_OK) {
+      return S_FAIL;
+    }
+
+    strcpy(str, tmp.c_str());
+    return S_OK;
   }
 
   template <class T>

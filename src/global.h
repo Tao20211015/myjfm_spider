@@ -14,6 +14,7 @@
 #include "url.h"
 #include "dns_cache.h"
 #include "squeue.h"
+#include "page.h"
 #include "shared_pointer.h"
 #include "thread_pool.h"
 
@@ -41,8 +42,18 @@ public:
   RES_CODE get_downloader_num(uint32_t&);
   RES_CODE get_extractor_num(uint32_t&);
   RES_CODE get_scheduler_num(uint32_t&);
+  RES_CODE get_dnser_num(uint32_t&);
+
+  RES_CODE get_extractor_queue(uint32_t, 
+      SharedPointer<SQueue<SharedPointer<Page> > >&);
 
   RES_CODE get_downloader_queue(uint32_t, 
+      SharedPointer<SQueue<SharedPointer<Url> > >&);
+
+  RES_CODE get_scheduler_queue(uint32_t, 
+      SharedPointer<SQueue<SharedPointer<Url> > >&);
+
+  RES_CODE get_dnser_queue(uint32_t, 
       SharedPointer<SQueue<SharedPointer<Url> > >&);
 
   RES_CODE get_dns_cache(SharedPointer<DnsCache>&);
@@ -50,12 +61,12 @@ public:
   RES_CODE set_downloader_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE set_extractor_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE set_scheduler_threadpool(SharedPointer<ThreadPool>&);
+  RES_CODE set_dnser_threadpool(SharedPointer<ThreadPool>&);
 
   RES_CODE get_downloader_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE get_extractor_threadpool(SharedPointer<ThreadPool>&);
   RES_CODE get_scheduler_threadpool(SharedPointer<ThreadPool>&);
-
-  RES_CODE get_url_queue(SharedPointer<SQueue<SharedPointer<Url> > >&);
+  RES_CODE get_dnser_threadpool(SharedPointer<ThreadPool>&);
 
   RES_CODE get_logger(Logger*&);
 
@@ -87,6 +98,7 @@ private:
   RES_CODE set_downloader_num(String&);
   RES_CODE set_extractor_num(String&);
   RES_CODE set_scheduler_num(String&);
+  RES_CODE set_dnser_num(String&);
 
   //RES_CODE set_dns_timeout(String&);
   RES_CODE set_create_connection_timeout(String&);
@@ -119,6 +131,7 @@ private:
   uint32_t _downloader_num;
   uint32_t _extractor_num;
   uint32_t _scheduler_num;
+  uint32_t _dnser_num;
 
   bool _to_be_shutdown;
 
@@ -128,18 +141,30 @@ private:
   // the seed urls read from configure file
   Vector<String> _seed_urls;
 
-  // url queue. This queue is used by all threads.
-  // All download threads will produce urls, and, 
-  // the scheduler threads consume the urls.
-  SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
+  // extractors' page queue. This queue is used by extractors and downloaders.
+  // The downloaders produce fresh pages downloaded from Internet, then pass
+  // them to extractors
+  Vector<SharedPointer<SQueue<SharedPointer<Page> > > > _extractor_queues;
 
-  // downloader queue. Each download thread has one queue.
-  // The queue is shared between this downloader and all scheduler threads.
+  // dnsers' url queue. This queue is used by dnsers and extractors.
+  // The extractors produce fresh urls extracted from web pages, then, pass
+  // them to dnsers
+  Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _dnser_queues;
+
+  // schedulers' url queue. This queue is used by schedulers and dnsers.
+  // The dnsers produce urls that have been dnsed, and, 
+  // the schedulers consume urls, they judge whether can pass them to 
+  // the downloaders immediately
+  Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _scheduler_queues;
+
+  // downloaders' url queue. Each downloader has one queue.
+  // The queue is shared between this downloader and all schedulers.
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queues;
 
   SharedPointer<ThreadPool> _downloader_threadpool;
   SharedPointer<ThreadPool> _extractor_threadpool;
   SharedPointer<ThreadPool> _scheduler_threadpool;
+  SharedPointer<ThreadPool> _dnser_threadpool;
 
   //uint32_t _dns_timeout;
   uint32_t _create_connection_timeout;

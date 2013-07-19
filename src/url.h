@@ -34,7 +34,9 @@ public:
 
   RES_CODE get_protocol(Protocol&);
 
-  RES_CODE get_ip(uint32_t&);
+  RES_CODE set_ip(Vector<uint32_t>&);
+
+  RES_CODE get_ip(Vector<uint32_t>&);
 
   RES_CODE get_port(uint16_t&);
 
@@ -52,7 +54,7 @@ private:
   String _raw_url;
   volatile EnumStatus _status;
   Protocol _protocol;
-  uint32_t _ip;
+  Vector<uint32_t> _ips;
   uint16_t _port;
   String _site;
   String _file;

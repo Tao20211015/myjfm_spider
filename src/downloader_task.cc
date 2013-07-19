@@ -53,7 +53,6 @@ RES_CODE ErrorCallback::operator()(void* arg) {
 
 DownloaderTask::DownloaderTask(uint32_t id) : 
   _id(id), 
-  _dns_cache(NULL), 
   _url_queue(NULL), 
   _event_loop(NULL), 
   //_dns(NULL), 
@@ -82,10 +81,6 @@ RES_CODE DownloaderTask::init() {
   }
 
   if (init_extractor_queue() != S_OK) {
-    return S_FAIL;
-  }
-
-  if (init_dns_cache() != S_OK) {
     return S_FAIL;
   }
 
@@ -122,15 +117,6 @@ RES_CODE DownloaderTask::init_extractor_queue() {
     SharedPointer<SQueue<SharedPointer<Page> > > tmp_q;
     glob->get_extractor_queue(i, tmp_q);
     _extractor_queues.push_back(tmp_q);
-  }
-
-  return S_OK;
-}
-
-RES_CODE DownloaderTask::init_dns_cache() {
-  glob->get_dns_cache(_dns_cache);
-  if (_dns_cache.is_null()) {
-    return S_FAIL;
   }
 
   return S_OK;
@@ -185,7 +171,7 @@ RES_CODE DownloaderTask::main_loop() {
 
     Protocol proto;
     String site;
-    uint32_t ip = 0;
+    Vector<uint32_t> ips;
     uint16_t port = 0;
     String file;
     uint32_t retries = 0;
@@ -193,13 +179,13 @@ RES_CODE DownloaderTask::main_loop() {
 
     // if the url has not been initialized, drop it
     url_p->get_status(status);
-    if (status != Url::INITIALIZED) {
+    if (status != Url::DNSED) {
       continue;
     }
 
     url_p->get_protocol(proto);
     url_p->get_site(site);
-    //url_p->get_ip(ip);
+    url_p->get_ip(ips);
     url_p->get_port(port);
     url_p->get_file(file);
     url_p->get_retries(retries);
@@ -221,61 +207,16 @@ RES_CODE DownloaderTask::main_loop() {
     // if the TCP connection with this site has been established, then reuse it
     Map<String, int>::iterator itr = _sock_fd_map.find(site);
     if (itr == _sock_fd_map.end()) { // not connected
-      Vector<String> ips;
-      res_code = _dns_cache->find(site, ips);
-      if (res_code == S_OK) { // dns cached
-        if (ips.size() == 0) { // can't find the site's ip
-          //we should not retry
-          continue;
-        }
-
-        res_code = create_connection(ips, port, fd);
-        if (res_code == S_OK) {
-          _sock_fd_map[site] = fd;
-        } else { // can not create the TCP connection
-          // retry
-          url_p->inc_retries();
-          _url_queue->push(url_p);
-          continue;
-        }
-      } else {
-        LOG(WARNING, "[%d] query dns for %s", _id, site.c_str());
-        IPTYPE iptype = IP_DUMMY;
-        res_code = DnsCache::dns_query(site, ips, iptype);
-        if (res_code != S_OK) { //dns query failed
-          LOG(WARNING, "[%d] query dns for %s failed", _id, site.c_str());
-          // retry
-          url_p->inc_retries();
-          _url_queue->push(url_p);
-          continue;
-        }
-        
-        LOG(WARNING, "[%d] query dns for %s successfully", _id, site.c_str());
-
-        if (iptype != IPv4) { // only support ipv4 for now
-          // should not retry
-          continue;
-        }
-
-        if (ips.size() == 0) { // can't find the site's ip
-          // should not retry
-          continue;
-        }
-
-        _dns_cache->insert(site, ips);
-
-        // pick up the first ip
-        res_code = create_connection(ips, port, fd);
-        if (res_code == S_OK) {
-          _sock_fd_map[site] = fd;
-        } else { // cannot create the TCP connection
-          // retry
-          url_p->inc_retries();
-          _url_queue->push(url_p);
-          continue;
-        }
+      res_code = create_connection(ips, port, fd);
+      if (res_code == S_OK) {
+        _sock_fd_map[site] = fd;
+      } else { // can not create the TCP connection
+        // retry
+        url_p->inc_retries();
+        _url_queue->push(url_p);
+        continue;
       }
-    } else { // connected
+    } else {
       fd = itr->second;
     }
 
@@ -376,9 +317,9 @@ RES_CODE DownloaderTask::main_loop() {
   return S_OK;
 }
 
-RES_CODE DownloaderTask::create_connection(Vector<String>& ips, 
+RES_CODE DownloaderTask::create_connection(Vector<uint32_t>& ips, 
     uint16_t& port, int& fd) {
-  String ip = "";
+  uint32_t ip = 0;
   uint32_t num_of_ips = ips.size();
 
   if (num_of_ips == 0) {
@@ -395,7 +336,7 @@ RES_CODE DownloaderTask::create_connection(Vector<String>& ips,
   bzero((char*)&stat_addr, sizeof(stat_addr));
   stat_addr.sin_family = AF_INET;
   stat_addr.sin_port = htons(port);
-  stat_addr.sin_addr.s_addr = inet_addr(ip.c_str());
+  stat_addr.sin_addr.s_addr = ip;
 
   if ((fd = socket(AF_INET, SOCK_STREAM, 0)) < 0) {
     fd = -1;

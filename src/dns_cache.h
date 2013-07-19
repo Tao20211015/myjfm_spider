@@ -8,6 +8,8 @@
 #ifndef _DNS_CACHE_H_
 #define _DNS_CACHE_H_
 
+#include <stdint.h>
+
 #include "config.h"
 #include "shared.h"
 #include "rwlock.h"
@@ -19,12 +21,12 @@ public:
   DnsCache();
   ~DnsCache();
 
-  RES_CODE find(String&, Vector<String>&);
-  RES_CODE insert(String&, Vector<String>&);
-  static RES_CODE dns_query(String&, Vector<String>&, IPTYPE&);
+  RES_CODE find(String&, Vector<uint32_t>&);
+  RES_CODE insert(String&, Vector<uint32_t>&);
+  static RES_CODE dns_query(String&, Vector<uint32_t>&, IPTYPE&);
 
 private:
-  Map<String, Vector<String> > _dns;
+  Map<String, Vector<uint32_t> > _dns;
   RWlock _rwlock;
 };
 

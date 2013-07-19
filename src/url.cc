@@ -20,12 +20,13 @@ Url::Url(const String& url) :
   _raw_url(""), 
   _status(UNINITIALIZED), 
   _protocol(PRO_DUMMY), 
-  _ip(0), 
   _port(0), 
   _site(""), 
   _file(""), 
   has_get_md5(false), 
   _retries(0) {
+  _ips.clear();
+
   if (url.length() == 0) {
     return;
   }
@@ -101,12 +102,23 @@ RES_CODE Url::get_protocol(Protocol& protocol) {
   return S_OK;
 }
 
-RES_CODE Url::get_ip(uint32_t& ip) {
+RES_CODE Url::set_ip(Vector<uint32_t>& ips) {
+  if (_status != INITIALIZED) {
+    return S_FAIL;
+  }
+
+  _ips = ips;
+  _status = DNSED;
+
+  return S_OK;
+}
+
+RES_CODE Url::get_ip(Vector<uint32_t>& ips) {
   if (_status != DNSED) {
     return S_FAIL;
   }
 
-  ip = _ip;
+  ips = _ips;
 
   return S_OK;
 }

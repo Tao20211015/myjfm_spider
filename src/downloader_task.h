@@ -14,7 +14,6 @@
 
 #include "config.h"
 #include "task.h"
-#include "dns_cache.h"
 //#include "dns.h"
 #include "shared_pointer.h"
 #include "event_loop.h"
@@ -75,11 +74,10 @@ private:
 
   RES_CODE init_url_queue();
   RES_CODE init_extractor_queue();
-  RES_CODE init_dns_cache();
   RES_CODE init_event_loop();
   //RES_CODE init_dns();
 
-  RES_CODE create_connection(Vector<String>&, uint16_t&, int&);
+  RES_CODE create_connection(Vector<uint32_t>&, uint16_t&, int&);
   RES_CODE generate_http_request(String&, String&, String&);
   RES_CODE set_timeout(int);
   RES_CODE send_http_request(int, String&);
@@ -94,7 +92,6 @@ private:
 
   uint32_t _id;
   uint32_t _extractor_num;
-  SharedPointer<DnsCache> _dns_cache;
   SharedPointer<SQueue<SharedPointer<Url> > > _url_queue;
   Vector<SharedPointer<SQueue<SharedPointer<Page> > > > _extractor_queues;
   SharedPointer<EventLoop> _event_loop;

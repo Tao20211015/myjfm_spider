@@ -2,7 +2,7 @@
 CC			= g++
 CFLAGS	= -Wall -c -g -I../deps/adns/include
 LD			= g++
-LDFLAGS	= -lpthread ../deps/adns/lib/libadns.a
+LDFLAGS	= -lpthread
 
 OBJS		= myjfm_spider.o utility.o log.o global.o shared.o thread_pool.o \
 					thread.o thread_task.o logger.o site.o url.o md5.o dns_cache.o \
@@ -79,26 +79,33 @@ realclean :
 	rm -rf $(SCHEDULER_TASK_SHUFFLE_TEST_OBJS) $(SCHEDULER_TASK_SHUFFLE_TEST_BIN)
 
 $(BIN) : $(OBJS)
-	$(LD) -o $(BIN) $(LDFLAGS) $(OBJS)
+	$(LD) $(LDFLAGS) -o $(BIN) $(OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)
-	$(LD) -o $(UTILITY_UT_BIN) $(LDFLAGS) $(UTILITY_UT_OBJS)
+	$(LD) $(LDFLAGS) -o $(UTILITY_UT_BIN) $(UTILITY_UT_OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(THREAD_TEST_BIN) : $(THREAD_TEST_OBJS)
-	$(LD) -o $(THREAD_TEST_BIN) $(LDFLAGS) $(THREAD_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(THREAD_TEST_BIN) $(THREAD_TEST_OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(HASH_TEST_BIN) : $(HASH_TEST_OBJS)
-	$(LD) -o $(HASH_TEST_BIN) $(LDFLAGS) $(HASH_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(HASH_TEST_BIN) $(HASH_TEST_OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(MD5_TEST_BIN) : $(MD5_TEST_OBJS)
-	$(LD) -o $(MD5_TEST_BIN) $(LDFLAGS) $(MD5_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(MD5_TEST_BIN) $(MD5_TEST_OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(URL_TEST_BIN) : $(URL_TEST_OBJS)
-	$(LD) -o $(URL_TEST_BIN) $(LDFLAGS) $(URL_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(URL_TEST_BIN) $(URL_TEST_OBJS) \
+		../deps/adns/lib/libadns.a
 
 $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) : $(SCHEDULER_TASK_SHUFFLE_TEST_OBJS)
-	$(LD) -o $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) $(LDFLAGS) \
-		$(SCHEDULER_TASK_SHUFFLE_TEST_OBJS)
+	$(LD) $(LDFLAGS) -o $(SCHEDULER_TASK_SHUFFLE_TEST_BIN) \
+		$(SCHEDULER_TASK_SHUFFLE_TEST_OBJS) \
+		../deps/adns/lib/libadns.a
 
 others : 
 	cp $(BIN) $(OUTPUT_PATH)/

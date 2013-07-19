@@ -49,6 +49,10 @@ public:
   RES_CODE get_retries(uint32_t&);
 
   RES_CODE inc_retries();
+  
+  bool get_has_dnsed_cname();
+
+  RES_CODE set_has_dnsed_cname(bool has_dnsed_cname);
 
 private:
   String _raw_url;
@@ -63,6 +67,7 @@ private:
   MD5 _md5;
 
   uint32_t _retries;
+  bool _has_dnsed_cname;
 };
 
 _END_MYJFM_NAMESPACE_

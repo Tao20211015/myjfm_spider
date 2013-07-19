@@ -23,7 +23,6 @@ public:
 
   RES_CODE find(String&, Vector<uint32_t>&);
   RES_CODE insert(String&, Vector<uint32_t>&);
-  static RES_CODE dns_query(String&, Vector<uint32_t>&, IPTYPE&);
 
 private:
   Map<String, Vector<uint32_t> > _dns;

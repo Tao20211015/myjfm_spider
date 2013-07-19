@@ -26,6 +26,32 @@ struct MD5 {
   bool operator==(MD5& md5) {
     return !memcmp(_value, md5._value, 16);
   }
+
+  RES_CODE shuffle(uint32_t x, uint32_t& index) {
+    if (x == 0) {
+      return S_FAIL;
+    }
+
+    // optimize for the extractors and dnsers
+    if (x == 1) {
+      index = 0;
+      return S_OK;
+    }
+
+    // ((_value[0-3] % x) + (_value[4-7] % x) + 
+    // (_value[8-11] % x) + (_value[12-15] % x)) % x
+    // ignore overflow
+    uint32_t i;
+    uint32_t* p = (uint32_t*)_value;
+
+    for (i = 0; i < 4; ++i) {
+      index += p[i] % x;
+    }
+
+    index %= x;
+
+    return S_OK;
+  }
 };
 
 /* MD5caculator declaration. */

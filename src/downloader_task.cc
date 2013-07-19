@@ -27,7 +27,6 @@
 #include "downloader_task.h"
 #include "memory_pool.h"
 #include "page.h"
-//#include "dns.h"
 
 extern _MYJFM_NAMESPACE_::Global* glob;
 
@@ -55,7 +54,6 @@ DownloaderTask::DownloaderTask(uint32_t id) :
   _id(id), 
   _url_queue(NULL), 
   _event_loop(NULL), 
-  //_dns(NULL), 
   _create_connection_timeout(0), 
   _send_timeout(0), 
   _recv_timeout(0) {
@@ -86,12 +84,6 @@ RES_CODE DownloaderTask::init() {
 
   /*
   if (init_event_loop() != S_OK) {
-    return S_FAIL;
-  }
-  */
-
-  /*
-  if (init_dns() != S_OK) {
     return S_FAIL;
   }
   */
@@ -133,31 +125,11 @@ RES_CODE DownloaderTask::init_event_loop() {
   return _event_loop->init();
 }
 
-/*
-RES_CODE DownloaderTask::init_dns() {
-  _dns = SharedPointer<Dns>(new Dns());
-  if (_dns.is_null()) {
-    return S_FAIL;
-  }
-
-  String name_server = "";
-  if (glob->get_name_server(name_server) != S_OK) {
-    return S_FAIL;
-  }
-
-  if (_dns->init(name_server) != S_OK) {
-    return S_FAIL;
-  }
-
-  return S_OK;
-}
-*/
-
 RES_CODE DownloaderTask::main_loop() {
   RES_CODE res_code = S_OK;
 
   for (;;) {
-    LOG(WARNING, "[%d] fetch one url", _id);
+    LOG(WARNING, "Downloader[%d] fetch one url", _id);
 
     // get the url from _url_queue
     SharedPointer<Url> url_p;

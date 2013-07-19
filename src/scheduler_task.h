@@ -33,6 +33,7 @@ private:
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _downloader_queues;
 
   RES_CODE init();
+  RES_CODE put_url_into_downloader(SharedPointer<Url>& url_p);
 };
 
 _END_MYJFM_NAMESPACE_

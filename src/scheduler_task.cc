@@ -39,34 +39,14 @@ RES_CODE SchedulerTask::operator()(void* arg) {
 
   for (;;) {
     // select one url
-    SharedPointer<Url> url;
-    _url_queue->pop(url);
-    if (url.is_null()) {
+    SharedPointer<Url> url_p;
+    _url_queue->pop(url_p);
+    if (url_p.is_null()) {
       continue;
     }
 
-    // calculate the md5 value of this url
-    MD5 md5;
-    url->get_md5(md5);
-
-    // select one downloader randomly
-    // use this algorithm:
-    // ((md5[0-31] % _downloader_num) + (md5[32-63] % _downloader_num) + 
-    // (md5[64-95] % _downloader_num) + (md5[96-127] % _downloader_num)) % 
-    // _downloader_num
-    uint32_t i;
-    uint32_t index = 0;
-
-    for (i = 0; i < 4; ++i) {
-      uint32_t tmp = (uint32_t)(md5._value[i << 2]);
-      tmp %= _downloader_num;
-      index += tmp;
-    }
-
-    index %= _downloader_num;
-
     //put the url into the downloader's queue
-    _downloader_queues[index]->push(url);
+    put_url_into_downloader(url_p);
   }
 
   return S_OK;
@@ -87,6 +67,22 @@ RES_CODE SchedulerTask::init() {
     glob->get_downloader_queue(i, tmp_q);
     _downloader_queues.push_back(tmp_q);
   }
+
+  return S_OK;
+}
+
+RES_CODE SchedulerTask::put_url_into_downloader(SharedPointer<Url>& url_p) {
+  MD5 md5;
+  if (url_p->get_md5(md5) != S_OK) {
+    return S_FAIL;
+  }
+
+  uint32_t index = 0;
+  if (md5.shuffle(_downloader_num, index) != S_OK) {
+    return S_FAIL;
+  }
+
+  _downloader_queues[index]->push(url_p);
 
   return S_OK;
 }

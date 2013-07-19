@@ -37,8 +37,12 @@ private:
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _scheduler_queues;
 
   RES_CODE init();
+  RES_CODE init_url_queue();
+  RES_CODE init_scheduler_queue();
   RES_CODE init_dns_cache();
   RES_CODE main_loop();
+  RES_CODE submit_once(const char*, void*);
+  RES_CODE check_once();
   RES_CODE put_url_into_scheduler(SharedPointer<Url>&);
 };
 

@@ -24,7 +24,8 @@ Url::Url(const String& url) :
   _site(""), 
   _file(""), 
   has_get_md5(false), 
-  _retries(0) {
+  _retries(0), 
+  _has_dnsed_cname(false) {
   _ips.clear();
 
   if (url.length() == 0) {
@@ -93,7 +94,7 @@ RES_CODE Url::get_status(EnumStatus& status) {
 }
 
 RES_CODE Url::get_protocol(Protocol& protocol) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     return S_FAIL;
   }
 
@@ -103,7 +104,7 @@ RES_CODE Url::get_protocol(Protocol& protocol) {
 }
 
 RES_CODE Url::set_ip(Vector<uint32_t>& ips) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     return S_FAIL;
   }
 
@@ -124,7 +125,7 @@ RES_CODE Url::get_ip(Vector<uint32_t>& ips) {
 }
 
 RES_CODE Url::get_port(uint16_t& port) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     return S_FAIL;
   }
 
@@ -134,7 +135,7 @@ RES_CODE Url::get_port(uint16_t& port) {
 }
 
 RES_CODE Url::get_site(String& site) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     return S_FAIL;
   }
 
@@ -144,7 +145,7 @@ RES_CODE Url::get_site(String& site) {
 }
 
 RES_CODE Url::get_file(String& file) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     return S_FAIL;
   }
 
@@ -154,7 +155,7 @@ RES_CODE Url::get_file(String& file) {
 }
 
 RES_CODE Url::get_md5(MD5& md5) {
-  if (_status != INITIALIZED) {
+  if (_status == UNINITIALIZED) {
     md5 = MD5();
     return S_FAIL;
   }
@@ -201,6 +202,16 @@ RES_CODE Url::get_retries(uint32_t& retries) {
 
 RES_CODE Url::inc_retries() {
   ++_retries;
+
+  return S_OK;
+}
+
+bool Url::get_has_dnsed_cname() {
+  return _has_dnsed_cname;
+}
+
+RES_CODE Url::set_has_dnsed_cname(bool has_dnsed_cname) {
+  _has_dnsed_cname = has_dnsed_cname;
 
   return S_OK;
 }

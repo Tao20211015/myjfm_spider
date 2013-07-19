@@ -30,7 +30,7 @@ ExtractorTask::~ExtractorTask() {}
 RES_CODE ExtractorTask::operator()(void* arg) {
   for (;;) {
     LOG(INFO, "#Extractor# %d", _id);
-    usleep(5000);
+    usleep(1000);
   }
 
   return S_OK;

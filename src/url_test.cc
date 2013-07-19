@@ -2,7 +2,6 @@
 #include <assert.h>
 
 #include "config.h"
-//#include "site.h"
 #include "md5.h"
 #include "url.h"
 

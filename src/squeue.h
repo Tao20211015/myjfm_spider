@@ -48,6 +48,18 @@ public:
     return S_OK;
   }
 
+  RES_CODE try_pop(T& t) {
+    Mutex::ScopeGuard guard(&_mutex);
+    if (_queue.empty()) {
+      return S_FAIL;
+    }
+
+    t = _queue.front();
+    _queue.pop();
+
+    return S_OK;
+  }
+
   RES_CODE size(uint32_t& s) {
     Mutex::ScopeGuard guard(&_mutex);
     s = _queue.size();

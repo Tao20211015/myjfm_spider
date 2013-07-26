@@ -253,20 +253,29 @@ RES_CODE DownloaderTask::main_loop() {
     }
 
     LOG(WARNING, "[%d] Analysis http response header successfully!", _id);
+
     int http_version = 0;
     int status_code = 0;
     int content_length = -1;
+    bool connection = true;
     String content_type = "";
+    String charset = "";
+    int32_t content_encoding = 0;
     http_response_header.get_http_version(http_version);
     http_response_header.get_status_code(status_code);
     http_response_header.get_content_length(content_length);
     http_response_header.get_content_type(content_type);
+    http_response_header.get_charset(charset);
+    http_response_header.get_connection(connection);
+    http_response_header.get_content_encoding(content_encoding);
+
     LOG(WARNING, "[%d] status code %d", _id, status_code);
     LOG(WARNING, "[%d] content length %d", _id, content_length);
+
     memory_pool->put_memory(header);
     
-    SharedPointer<Page> page(NULL);
-    res_code = recv_http_response_body(fd, status_code, content_length, page);
+    SharedPointer<Page> page_p(NULL);
+    res_code = recv_http_response_body(fd, status_code, content_length, page_p);
     if (res_code == S_SHOULD_CLOSE_CONNECTION) {
       LOG(WARNING, "[%d] ******read() error******", _id);
       close(fd);
@@ -276,13 +285,26 @@ RES_CODE DownloaderTask::main_loop() {
       continue;
     } else if (res_code == S_FAIL) {
       LOG(WARNING, "[%d] ******recv body error******", _id);
+
+      if (!connection) {
+        close(fd);
+        _sock_fd_map.erase(site);
+      }
+
       continue;
     } else if (res_code == S_OK) {
-      char* content = NULL;
-      page->get_page_content(content);
-      if (content) {
-        LOG(WARNING, "[%d] !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!", _id);
-      }
+      LOG(WARNING, "[%d] *******************SUCCESS!******************", _id);
+      page_p->set_site(site);
+      page_p->set_port(port);
+      page_p->set_file(file);
+      page_p->set_charset(charset);
+      page_p->set_encoding(content_encoding);
+      put_page_into_extractor(url_p, page_p);
+    }
+
+    if (!connection) {
+      close(fd);
+      _sock_fd_map.erase(site);
     }
   }
 
@@ -478,7 +500,7 @@ RES_CODE DownloaderTask::analysis_http_response_header(char* header,
 }
 
 RES_CODE DownloaderTask::recv_http_response_body(int fd, 
-    uint32_t status_code, int32_t content_length, SharedPointer<Page>& page) {
+    uint32_t status_code, int32_t content_length, SharedPointer<Page>& page_p) {
   if (fd < 0) {
     return S_FAIL;
   }
@@ -489,19 +511,19 @@ RES_CODE DownloaderTask::recv_http_response_body(int fd,
   }
 
   if (content_length == -1) {
-    return recv_by_chunk(fd, page);
+    return recv_by_chunk(fd, page_p);
   } else if (content_length > 0) {
-    page = SharedPointer<Page>(new Page(content_length));
-    return recv_by_content_length(fd, content_length, page);
+    page_p = SharedPointer<Page>(new Page(content_length));
+    return recv_by_content_length(fd, content_length, page_p);
   } else {
     return S_FAIL;
   }
 }
 
 RES_CODE DownloaderTask::recv_by_chunk(int fd, 
-    SharedPointer<Page>& page) {
-  SharedPointer<Page> buffer(new Page(0));
-  if (buffer.is_null()) {
+    SharedPointer<Page>& page_p) {
+  SharedPointer<Page> buffer_p(new Page(0));
+  if (buffer_p.is_null()) {
     return S_SHOULD_CLOSE_CONNECTION;
   }
 
@@ -519,48 +541,48 @@ RES_CODE DownloaderTask::recv_by_chunk(int fd,
       break;
     }
 
-    SharedPointer<Page> chunk(new Page(chunk_size + 2));
+    SharedPointer<Page> chunk_p(new Page(chunk_size + 2));
     char* chunk_content = NULL;
-    chunk->get_page_content(chunk_content);
+    chunk_p->get_page_content(chunk_content);
     if (recvn(fd, chunk_size + 2, chunk_content) != S_OK) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
     uint32_t buffer_size = 0;
-    buffer->get_page_size(buffer_size);
+    buffer_p->get_page_size(buffer_size);
 
     char* buffer_content = NULL;
-    buffer->get_page_content(buffer_content);
+    buffer_p->get_page_content(buffer_content);
 
-    SharedPointer<Page> tmp_buffer(new Page(buffer_size + chunk_size));
-    if (tmp_buffer.is_null()) {
+    SharedPointer<Page> tmp_buffer_p(new Page(buffer_size + chunk_size));
+    if (tmp_buffer_p.is_null()) {
       return S_SHOULD_CLOSE_CONNECTION;
     }
 
     char* tmp_buffer_content = NULL;
-    tmp_buffer->get_page_content(tmp_buffer_content);
+    tmp_buffer_p->get_page_content(tmp_buffer_content);
 
     if (buffer_content) {
       memcpy(tmp_buffer_content, buffer_content, buffer_size);
     }
 
     memcpy(tmp_buffer_content + buffer_size, chunk_content, chunk_size);
-    buffer = tmp_buffer;
+    buffer_p = tmp_buffer_p;
   }
 
-  page = buffer;
+  page_p = buffer_p;
 
   return S_OK;
 }
 
 RES_CODE DownloaderTask::recv_by_content_length(int fd, 
-    uint32_t content_length, SharedPointer<Page>& page) {
-  if (fd <= 0 || content_length < 0 || page.is_null()) {
+    uint32_t content_length, SharedPointer<Page>& page_p) {
+  if (fd <= 0 || content_length < 0 || page_p.is_null()) {
     return S_SHOULD_CLOSE_CONNECTION;
   }
 
   char* buffer = NULL;
-  page->get_page_content(buffer);
+  page_p->get_page_content(buffer);
   if (!buffer) {
     return S_SHOULD_CLOSE_CONNECTION;
   }
@@ -596,6 +618,8 @@ RES_CODE DownloaderTask::recv_chunk_size(int fd, uint32_t& size) {
       } else {
         size = size * 16 + buffer - 'A';
       }
+    } else if (buffer == ' ') {
+      continue;
     } else {
       break;
     }
@@ -663,6 +687,23 @@ RES_CODE DownloaderTask::recvn(int fd, uint32_t n, char* buffer) {
       buffer += read_len;
     }
   }
+}
+
+RES_CODE DownloaderTask::put_page_into_extractor(SharedPointer<Url>& url_p, 
+    SharedPointer<Page>& page_p) {
+  MD5 md5;
+  if (url_p->get_md5(md5) != S_OK) {
+    return S_FAIL;                                                              
+  }
+  
+  uint32_t index = 0;
+  if (md5.shuffle(_extractor_num, index) != S_OK) {                             
+    return S_FAIL;
+  }
+
+  _extractor_queues[index]->push(page_p);
+
+  return S_OK;
 }
 
 _END_MYJFM_NAMESPACE_

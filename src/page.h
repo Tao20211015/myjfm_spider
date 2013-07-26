@@ -35,7 +35,11 @@ public:
     _http_version(1), 
     _status_code(0), 
     _content_type(""), 
-    _content_length(-1) {
+    _charset(""), 
+    _content_length(-1), 
+    _content_encoding(0), 
+    _connection(true), 
+    _location("") {
   }
 
   inline bool is_valid() {
@@ -72,6 +76,16 @@ public:
     return S_FAIL;
   }
 
+  inline RES_CODE get_charset(String& charset) {
+    if (_is_valid) {
+      charset = _charset;
+      return S_OK;
+    }
+
+    charset = "";
+    return S_FAIL;
+  }
+
   inline RES_CODE get_content_length(int32_t& content_length) {
     if (_is_valid) {
       content_length = _content_length;
@@ -79,6 +93,36 @@ public:
     }
 
     content_length = -1;
+    return S_FAIL;
+  }
+
+  inline RES_CODE get_content_encoding(int32_t& content_encoding) {
+    if (_is_valid) {
+      content_encoding = _content_encoding;
+      return S_OK;
+    }
+
+    content_encoding = -1;
+    return S_FAIL;
+  }
+
+  inline RES_CODE get_connection(bool& connection) {
+    if (_is_valid) {
+      connection = _connection;
+      return S_OK;
+    }
+
+    connection = false;
+    return S_FAIL;
+  }
+
+  inline RES_CODE get_location(String& location) {
+    if (_is_valid) {
+      location = _location;
+      return S_OK;
+    }
+
+    location = "";
     return S_FAIL;
   }
 
@@ -149,15 +193,52 @@ public:
         header[j] = '\0';
         char* key = header;
         char* value = header + j + 2;
-        if (!strcmp(key, "Content-Length")) {
+        Utility::tolower(key);
+        Utility::tolower(value);
+        if (!strcmp(key, "content-length")) {
           uint32_t length = 0;
           if (Utility::str2integer(value, length) == S_OK) {
             _content_length = length;
           }
-        } else if (!strcmp(key, "Content-Type")) {
+        } else if (!strcmp(key, "content-type")) {
           _content_type = value;
-        } else if (!strcmp(key, "Transfer-Encoding")) {
+          Vector<String> items;
+          Utility::split(_content_type, CHARS2STR("; "), items);
+          if (items.size() == 0) {
+            _content_type = "";
+            _charset = "";
+          } else if (items.size() == 1) {
+            _content_type = items[0];
+            _charset = "";
+          } else if (items.size() == 2) {
+            _content_type = items[0];
+            _charset = items[1];
+            Utility::split(_charset, CHARS2STR("="), items);
+            if (items.size() != 2 || items[0] != CHARS2STR("charset")) {
+              _charset = "";
+            } else {
+              _charset = items[1];
+            }
+          } else {
+            _content_type = items[0];
+            _charset = "";
+          }
+        } else if (!strcmp(key, "content-encoding")) {
+          if (!strcmp(value, "gzip")) {
+            _content_encoding = 1;
+          } else if (!strcmp(value, "deflate")) {
+            _content_encoding = 2;
+          } else {
+            _content_encoding = -1;
+          }
+        } else if (!strcmp(key, "transfer-encoding")) {
           _content_length = -1;
+        } else if (!strcmp(key, "location")) {
+          _location = value;
+        } else if (!strcmp(key, "connection")) {
+          if (!strcmp(value, "close")) {
+            _connection = false;
+          }
         }
 
         header += i + 1;
@@ -174,7 +255,11 @@ private:
   int32_t _http_version;
   int32_t _status_code;
   String _content_type;
+  String _charset;
   int32_t _content_length;
+  int32_t _content_encoding;
+  bool _connection;
+  String _location;
 };
 
 // This is the page class
@@ -231,9 +316,74 @@ public:
     return S_OK;
   }
 
+  RES_CODE get_site(String& site) {
+    site = _site;
+
+    return S_OK;
+  }
+
+  RES_CODE set_site(String& site) {
+    _site = site;
+
+    return S_OK;
+  }
+
+  RES_CODE get_port(uint16_t& port) {
+    port = _port;
+
+    return S_OK;
+  }
+
+  RES_CODE set_port(uint16_t& port) {
+    _port = port;
+
+    return S_OK;
+  }
+
+  RES_CODE get_file(String& file) {
+    file = _file;
+
+    return S_OK;
+  }
+
+  RES_CODE set_file(String& file) {
+    _file = file;
+
+    return S_OK;
+  }
+
+  RES_CODE get_charset(String& charset) {
+    charset = _charset;
+
+    return S_OK;
+  }
+
+  RES_CODE set_charset(String& charset) {
+    _charset = charset;
+
+    return S_OK;
+  }
+
+  RES_CODE get_encoding(int32_t& encoding) {
+    encoding = _encoding;
+
+    return S_OK;
+  }
+
+  RES_CODE set_encoding(int32_t& encoding) {
+    _encoding = encoding;
+
+    return S_OK;
+  }
+
 private:
   char* _page_content;
   uint32_t _page_size;
+  String _site;
+  uint16_t _port;
+  String _file;
+  String _charset;
+  int32_t _encoding;
 };
 
 _END_MYJFM_NAMESPACE_

@@ -50,7 +50,7 @@ RES_CODE usage(char *argv0) {
 }
 
 static RES_CODE load_config(String cur_path, String config_file_name) {
-  int res = access(config_file_name.c_str(), F_OK);
+  int res = access(config_file_name.c_str(), R_OK);
 
   if (res != 0) {
     Cerr << "[FATAL] The configure file '" << config_file_name 

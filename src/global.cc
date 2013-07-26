@@ -84,6 +84,8 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
   _has_init = true;
 
   _cur_path = v_cur_path;
+  // the default save path is current path
+  _save_path = _cur_path;
   _config_file = config_file_name;
   _depth = 5;
   _downloader_num = 5;
@@ -125,6 +127,9 @@ RES_CODE Global::init(String& v_cur_path, String& config_file_name) {
         (new SQueue<SharedPointer<Url> >()));
   }
 
+  // init memory pool
+  MemoryPool::get_instance();
+
   // put all seed urls into url queue of one of the dnsers
   for (i = 0; i < _seed_urls.size(); ++i) {
     SharedPointer<Url> url_p(new Url(_seed_urls[i]));
@@ -164,8 +169,9 @@ RES_CODE Global::assemble_request_header() {
   _request_header = "User-Agent: ";
   _request_header += _user_agent + " " + _sender;
   _request_header += "\r\nAccept: */*\r\n";
-  _request_header += "Accept-Encoding: gzip,deflate,sdch\r\n";
-  _request_header += "Accept-Language: en-US,en;q=0.8\r\n";
+  _request_header += "Accept-Charset: utf-8\r\n";
+  _request_header += "Accept-Encoding: gzip,deflate\r\n";
+  _request_header += "Accept-Language: en,zh\r\n";
   _request_header += "Connection: keep-alive\r\n\r\n";
 
   return S_OK;
@@ -233,13 +239,17 @@ RES_CODE Global::parse_config() {
       }
     }
 
+    fclose(config_file_p);
+
     if (_seed_urls.empty()) {
-      fclose(config_file_p);
       Cerr << "[FATAL] The _seed_urls is empty. Stop crawling" << Endl;
       exit(1);
     }
 
-    fclose(config_file_p);
+    if (access(_save_path.c_str(), R_OK | W_OK | X_OK) != 0) {
+      Cerr << "[FATAL] The _save_path can't be written" << Endl;
+      exit(1);
+    }
   }
 
   return S_OK;

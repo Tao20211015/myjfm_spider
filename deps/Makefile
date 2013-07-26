@@ -5,6 +5,10 @@ all:
 		./configure --disable-dynamic --prefix=`pwd` --exec-prefix=`pwd` && \
 		make && \
 		make install && \
+		cd ../zlib && \
+		./configure --static --prefix=`pwd` && \
+		make && \
+		make install && \
 		cd ..
 
 realclean:
@@ -38,3 +42,17 @@ realclean:
 	rm -rf adns/regress/adnstest_playback
 	rm -rf adns/regress/adnstest_record
 	rm -rf adns/dynamic/Makefile
+	rm -rf zlib/Makefile
+	rm -rf zlib/configure.log
+	rm -rf zlib/*.o
+	rm -rf zlib/example
+	rm -rf zlib/example64
+	rm -rf zlib/include/
+	rm -rf zlib/lib/
+	rm -rf zlib/libz.a
+	rm -rf zlib/minigzip
+	rm -rf zlib/minigzip64
+	rm -rf zlib/share/
+	rm -rf zlib/treebuild.xml
+	rm -rf zlib/zconf.h
+	rm -rf zlib/zlib.pc

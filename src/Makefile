@@ -1,6 +1,6 @@
 #Program, flags, etc.
 CC			= g++
-CFLAGS	= -Wall -c -g -I../deps/adns/include
+CFLAGS	= -Wall -c -g -I../deps/adns/include -I../deps/zlib/include
 LD			= g++
 LDFLAGS	= -lpthread
 
@@ -69,27 +69,27 @@ realclean :
 
 $(BIN) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $(BIN) $(OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 $(UTILITY_UT_BIN) : $(UTILITY_UT_OBJS)
 	$(LD) $(LDFLAGS) -o $(UTILITY_UT_BIN) $(UTILITY_UT_OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 $(THREAD_TEST_BIN) : $(THREAD_TEST_OBJS)
 	$(LD) $(LDFLAGS) -o $(THREAD_TEST_BIN) $(THREAD_TEST_OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 $(HASH_TEST_BIN) : $(HASH_TEST_OBJS)
 	$(LD) $(LDFLAGS) -o $(HASH_TEST_BIN) $(HASH_TEST_OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 $(MD5_TEST_BIN) : $(MD5_TEST_OBJS)
 	$(LD) $(LDFLAGS) -o $(MD5_TEST_BIN) $(MD5_TEST_OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 $(URL_TEST_BIN) : $(URL_TEST_OBJS)
 	$(LD) $(LDFLAGS) -o $(URL_TEST_BIN) $(URL_TEST_OBJS) \
-		../deps/adns/lib/libadns.a
+		../deps/adns/lib/libadns.a ../deps/zlib/lib/libz.a
 
 others : 
 	cp $(BIN) $(OUTPUT_PATH)/

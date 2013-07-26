@@ -30,10 +30,14 @@ public:
 private:
   uint32_t _id;
   uint32_t _dnser_num;
+  String _save_path;
   SharedPointer<SQueue<SharedPointer<Page> > > _page_queue;
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _dnser_queues;
 
   RES_CODE init();
+  RES_CODE main_loop();
+  RES_CODE save_page(SharedPointer<Page>&);
+  RES_CODE extract_links(SharedPointer<Page>&, Vector<String>&);
 };
 
 _END_MYJFM_NAMESPACE_

@@ -92,8 +92,6 @@ RES_CODE DnserTask::init_dns_cache() {
 }
 
 RES_CODE DnserTask::main_loop() {
-  int a = 0;
-  int b = 0;
   for (;;) {
     String site;
     SharedPointer<Url> url_p;
@@ -101,12 +99,8 @@ RES_CODE DnserTask::main_loop() {
     Vector<uint32_t> ips;
     
     if (_is_dnsing_lutable.size() == 0) {
-      a++;
-      LOG(WARNING, "Dnser[%d] ----------------a: %d", _id, a);
       _url_queue->pop(url_p);
     } else { // need to adns_check(), non-blocking
-      b++;
-      LOG(WARNING, "Dnser[%d] ----------------b: %d", _id, b);
       if (_url_queue->try_pop(url_p) != S_OK) {
         goto check;
       }

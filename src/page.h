@@ -30,6 +30,13 @@ _START_MYJFM_NAMESPACE_
 // if and only if the status_code is 200, the response is valid
 class HttpResponseHeader {
 public:
+  enum http_encoding_type {
+    HTTP_ENCODING_UNKNOWN = -1, 
+    HTTP_ENCODING_TXT = 0, 
+    HTTP_ENCODING_GZIP = 1, 
+    HTTP_ENCODING_DEFLATE = 2 
+  };
+
   HttpResponseHeader() : 
     _is_valid(false), 
     _http_version(1), 
@@ -37,7 +44,7 @@ public:
     _content_type(""), 
     _charset(""), 
     _content_length(-1), 
-    _content_encoding(0), 
+    _content_encoding(HTTP_ENCODING_TXT), 
     _connection(true), 
     _location("") {
   }
@@ -96,13 +103,13 @@ public:
     return S_FAIL;
   }
 
-  inline RES_CODE get_content_encoding(int32_t& content_encoding) {
+  inline RES_CODE get_content_encoding(http_encoding_type& content_encoding) {
     if (_is_valid) {
       content_encoding = _content_encoding;
       return S_OK;
     }
 
-    content_encoding = -1;
+    content_encoding = HTTP_ENCODING_UNKNOWN;
     return S_FAIL;
   }
 
@@ -225,14 +232,19 @@ public:
           }
         } else if (!strcmp(key, "content-encoding")) {
           if (!strcmp(value, "gzip")) {
-            _content_encoding = 1;
+            _content_encoding = HTTP_ENCODING_GZIP;
           } else if (!strcmp(value, "deflate")) {
-            _content_encoding = 2;
+            _content_encoding = HTTP_ENCODING_DEFLATE;
           } else {
-            _content_encoding = -1;
+            _content_encoding = HTTP_ENCODING_UNKNOWN;
           }
         } else if (!strcmp(key, "transfer-encoding")) {
-          _content_length = -1;
+          if (!strcmp(value, "chunked")) {
+            _content_length = -1;
+          } else { // only support the chunked transfer-coding
+            _is_valid = false;
+            return S_FAIL;
+          }
         } else if (!strcmp(key, "location")) {
           _location = value;
         } else if (!strcmp(key, "connection")) {
@@ -257,7 +269,7 @@ private:
   String _content_type;
   String _charset;
   int32_t _content_length;
-  int32_t _content_encoding;
+  http_encoding_type _content_encoding;
   bool _connection;
   String _location;
 };
@@ -364,13 +376,13 @@ public:
     return S_OK;
   }
 
-  RES_CODE get_encoding(int32_t& encoding) {
+  RES_CODE get_encoding(HttpResponseHeader::http_encoding_type& encoding) {
     encoding = _encoding;
 
     return S_OK;
   }
 
-  RES_CODE set_encoding(int32_t& encoding) {
+  RES_CODE set_encoding(HttpResponseHeader::http_encoding_type& encoding) {
     _encoding = encoding;
 
     return S_OK;
@@ -383,7 +395,7 @@ private:
   uint16_t _port;
   String _file;
   String _charset;
-  int32_t _encoding;
+  HttpResponseHeader::http_encoding_type _encoding;
 };
 
 _END_MYJFM_NAMESPACE_

@@ -36,6 +36,7 @@ private:
 
   RES_CODE init();
   RES_CODE main_loop();
+  RES_CODE decompress_page(SharedPointer<Page>&, SharedPointer<Page>&);
   RES_CODE save_page(SharedPointer<Page>&);
   RES_CODE extract_links(SharedPointer<Page>&, Vector<String>&);
 };

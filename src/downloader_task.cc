@@ -260,7 +260,8 @@ RES_CODE DownloaderTask::main_loop() {
     bool connection = true;
     String content_type = "";
     String charset = "";
-    int32_t content_encoding = 0;
+    HttpResponseHeader::http_encoding_type content_encoding = 
+      HttpResponseHeader::HTTP_ENCODING_UNKNOWN;
     http_response_header.get_http_version(http_version);
     http_response_header.get_status_code(status_code);
     http_response_header.get_content_length(content_length);
@@ -499,8 +500,8 @@ RES_CODE DownloaderTask::analysis_http_response_header(char* header,
   return http_response_header.analysis(header);
 }
 
-RES_CODE DownloaderTask::recv_http_response_body(int fd, 
-    uint32_t status_code, int32_t content_length, SharedPointer<Page>& page_p) {
+RES_CODE DownloaderTask::recv_http_response_body(int fd, uint32_t status_code, 
+    int32_t content_length, SharedPointer<Page>& page_p) {
   if (fd < 0) {
     return S_FAIL;
   }
@@ -562,7 +563,7 @@ RES_CODE DownloaderTask::recv_by_chunk(int fd,
     char* tmp_buffer_content = NULL;
     tmp_buffer_p->get_page_content(tmp_buffer_content);
 
-    if (buffer_content) {
+    if (buffer_content && buffer_size > 0) {
       memcpy(tmp_buffer_content, buffer_content, buffer_size);
     }
 
@@ -613,10 +614,10 @@ RES_CODE DownloaderTask::recv_chunk_size(int fd, uint32_t& size) {
     if (Utility::is_hex_digit(buffer)) {
       if (buffer >= '0' && buffer <= '9') {
         size = size * 16 + buffer - '0';
-      } else if (buffer >= 'a' && buffer <= 'z') {
-        size = size * 16 + buffer - 'a';
-      } else {
-        size = size * 16 + buffer - 'A';
+      } else if (buffer >= 'a' && buffer <= 'f') {
+        size = size * 16 + buffer - 'a' + 10;
+      } else if (buffer >= 'A' && buffer <= 'F') {
+        size = size * 16 + buffer - 'A' + 10;
       }
     } else if (buffer == ' ') {
       continue;
@@ -637,7 +638,7 @@ RES_CODE DownloaderTask::recv_chunk_size(int fd, uint32_t& size) {
 
     if (buffer == '\r') {
       flag = true;
-    } else if (buffer == '\n' && flag == 1) {
+    } else if (buffer == '\n' && flag) {
       return S_OK;
     } else {
       flag = false;
@@ -661,7 +662,7 @@ RES_CODE DownloaderTask::recv_and_discard(int fd) {
 
     if (buffer == '\r') {
       flag = true;
-    } else if (buffer == '\n' && flag == 1) {
+    } else if (buffer == '\n' && flag) {
       return S_OK;
     } else {
       flag = false;

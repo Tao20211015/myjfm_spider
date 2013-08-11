@@ -30,16 +30,17 @@
 #define String_size_t String::size_type
 #define String_tail String::npos
 
+#define Istream std::istream
 #define Stringstream std::stringstream
+#define Istringstream std::istringstream
 #define Ifstream std::ifstream
+#define Ofstream std::ofstream
 #define Stream_size std::streamsize
 
 #define Vector std::vector
 #define Queue std::queue
 #define Map std::map
 #define Pair std::pair
-
-#define Ofstream std::ofstream
 
 #define MAX_LOG_LEN (1024 * 16)
 

@@ -1,13 +1,15 @@
 #Program, flags, etc.
 CC			= g++
-CFLAGS	= -Wall -c -g -I../deps/adns/include -I../deps/zlib/include
+CFLAGS	= -O2 -Wall -c -g -I../deps/adns/include -I../deps/zlib/include
+LEX			= flex
 LD			= g++
-LDFLAGS	= -lpthread
+LDFLAGS	= -lpthread -D_REENTRANT
 
+LINK_LEXER	= link_lexer.cc
 OBJS		= myjfm_spider.o utility.o log.o global.o shared.o thread_pool.o \
 					thread.o thread_task.o logger.o url.o md5.o dns_cache.o \
 					downloader_task.o extractor_task.o scheduler_task.o dnser_task.o\
-					logger_task.o event_loop.o memory_pool.o
+					logger_task.o event_loop.o memory_pool.o link_lexer.o
 BIN			= myjfm_spider
 
 UTILITY_UT_OBJS	= utility.o utility_ut.o
@@ -17,28 +19,28 @@ THREAD_TEST_OBJS	= thread_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
 										scheduler_task.o dnser_task.o logger_task.o event_loop.o \
-										memory_pool.o
+										memory_pool.o link_lexer.o
 THREAD_TEST_BIN	= thread_test
 
 HASH_TEST_OBJS	= hash_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
 										scheduler_task.o dnser_task.o logger_task.o event_loop.o \
-										memory_pool.o
+										memory_pool.o link_lexer.o
 HASH_TEST_BIN	= hash_test
 
 MD5_TEST_OBJS	= md5_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
 										scheduler_task.o dnser_task.o logger_task.o event_loop.o \
-										memory_pool.o
+										memory_pool.o link_lexer.o
 MD5_TEST_BIN	= md5_test
 
 URL_TEST_OBJS	= url_test.o utility.o log.o global.o shared.o url.o \
 										thread_pool.o thread.o thread_task.o logger.o \
 										md5.o dns_cache.o downloader_task.o extractor_task.o \
 										scheduler_task.o dnser_task.o logger_task.o event_loop.o \
-										memory_pool.o
+										memory_pool.o link_lexer.o
 URL_TEST_BIN	= url_test
 
 export OUTPUT_PATH=../output
@@ -57,6 +59,7 @@ clean :
 	rm -rf $(HASH_TEST_OBJS)
 	rm -rf $(MD5_TEST_OBJS)
 	rm -rf $(URL_TEST_OBJS)
+	rm -rf $(LINK_LEXER)
 
 realclean : 
 	rm -rf $(OBJS) $(BIN)
@@ -66,6 +69,7 @@ realclean :
 	rm -rf $(HASH_TEST_OBJS) $(HASH_TEST_BIN)
 	rm -rf $(MD5_TEST_OBJS) $(MD5_TEST_BIN)
 	rm -rf $(URL_TEST_OBJS) $(URL_TEST_BIN)
+	rm -rf $(LINK_LEXER)
 
 $(BIN) : $(OBJS)
 	$(LD) $(LDFLAGS) -o $(BIN) $(OBJS) \
@@ -170,4 +174,8 @@ event_loop.o : event_loop.cc
 
 memory_pool.o : memory_pool.cc
 	$(CC) $(CFLAGS) -o $@ $<
+
+link_lexer.o : link_lexer.l
+	$(LEX) -o $(LINK_LEXER) $<
+	$(CC) $(CFLAGS) -o $@ $(LINK_LEXER)
 

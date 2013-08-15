@@ -116,6 +116,12 @@ public:
   static bool is_hex_digit(char p);
   static RES_CODE str2hex(const char* str, uint32_t& number);
   static RES_CODE str2hex(String& str, uint32_t number);
+  static char* strdupn(const char* src, int n);
+  static char* strdup(const char* src);
+  static int strcmp(const char* str1, const char* str2);
+  static int strcasecmp(const char* str1, const char* str2);
+  static int strncasecmp(const char* str1, const char* str2, uint32_t n);
+  static RES_CODE escape(String& str, String& escstr);
 };
 
 _END_MYJFM_NAMESPACE_

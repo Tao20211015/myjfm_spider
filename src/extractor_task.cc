@@ -30,7 +30,8 @@ _START_MYJFM_NAMESPACE_
 
 ExtractorTask::ExtractorTask(uint32_t id) : 
   _id(id), 
-  _page_queue(NULL) {
+  _page_queue(NULL), 
+  _link_lexer(NULL) {
 }
 
 ExtractorTask::~ExtractorTask() {}
@@ -61,6 +62,11 @@ RES_CODE ExtractorTask::init() {
     SharedPointer<SQueue<SharedPointer<Url> > > tmp_q;
     glob->get_dnser_queue(i, tmp_q);
     _dnser_queues.push_back(tmp_q);
+  }
+
+  _link_lexer = SharedPointer<LinkLexer>(new LinkLexer());
+  if (_link_lexer.is_null()) {
+    return S_FAIL;
   }
 
   return S_OK;
@@ -262,8 +268,8 @@ RES_CODE ExtractorTask::save_page(SharedPointer<Page>& page_p) {
   page_p->get_port(port);
   page_p->get_file(file);
 
-  if (file.length() == 0) {
-    file = "index.html";
+  if (file.length() == 0 || file == "/") {
+    file = "/index.html";
   }
 
   Vector<String> dirs;
@@ -318,13 +324,15 @@ RES_CODE ExtractorTask::save_page(SharedPointer<Page>& page_p) {
 
 RES_CODE ExtractorTask::extract_links(SharedPointer<Page>& page_p, 
     Vector<String>& links) {
-  LinkLexer linklexer(page_p, &links);
-  linklexer.lex();
+  _link_lexer->init(page_p, &links);
+  _link_lexer->lex();
 
+  /*
   int i;
   for (i = 0; i < links.size(); ++i) {
-    LOG(WARNING, "[%d] %s\n", _id, links[i].c_str());
+    LOG(INFO, "%s\n", links[i].c_str());
   }
+  */
 
   return S_OK;
 }

@@ -48,6 +48,7 @@ Url::Url(const String& url) :
 
   site_pos = url.find("/", 7);
   if (site_pos == String_tail) { // no requested file
+    _file = "/";
     port_pos = url.find(":", 7);
     if (port_pos == String_tail) { // not specify port
       _site = url.substr(7);
@@ -79,7 +80,7 @@ Url::Url(const String& url) :
       }
     }
 
-    _file = url.substr(site_pos + 1);
+    _file = url.substr(site_pos);
   }
 
   _status = INITIALIZED;
@@ -182,9 +183,7 @@ RES_CODE Url::get_md5(MD5& md5) {
     url += ":" + str_port;
   }
   
-  if (_file.length() > 0) {
-    url += "/" + _file;
-  }
+  url += _file;
 
   MD5Caculator md5caculator(url);
   md5caculator.digest(_md5);

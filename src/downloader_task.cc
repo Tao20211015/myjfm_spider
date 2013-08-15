@@ -387,7 +387,7 @@ RES_CODE DownloaderTask::generate_http_request(String& site,
     return S_FAIL;
   }
 
-  request = "GET /";
+  request = "GET ";
   request += file + " HTTP/1.1\r\nHost: " + site + "\r\n";
 
   return glob->get_request_header(request);

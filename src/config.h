@@ -11,6 +11,7 @@
 #include <string>
 #include <vector>
 #include <queue>
+#include <stack>
 #include <fstream>
 #include <iostream>
 #include <sstream>
@@ -39,10 +40,28 @@
 
 #define Vector std::vector
 #define Queue std::queue
+#define Stack std::stack
 #define Map std::map
 #define Pair std::pair
 
 #define MAX_LOG_LEN (1024 * 16)
+
+
+#define IS_URI_CHR(c) ({ \
+  unsigned char tmp = (c); \
+  char uri_chr[16] = { \
+    0x00, 0x00, 0x00, 0x00, \
+    0x5b, 0xff, 0xff, 0xf5, \
+    0xff, 0xff, 0xff, 0xe1, \
+    0x7f, 0xff, 0xff, 0xe2 \
+  }; \
+  tmp < 128 && uri_chr[tmp >> 3] & 0x80 >> (tmp & 0x07); \
+})
+
+#define IS_BLANK(c) ({ \
+  char tmp = (c); \
+  tmp == ' ' || tmp == '\t' || tmp == '\r' || tmp == '\n'; \
+})
 
 enum LOG_LEVEL {
   LOG_DUMMY = 0x0, 

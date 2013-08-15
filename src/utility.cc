@@ -282,5 +282,123 @@ RES_CODE Utility::str2hex(String& str, uint32_t number) {
   return Utility::str2hex(str.c_str(), number);
 }
 
+char* Utility::strdupn(const char* src, int n) {
+  if (src == NULL || n < 0) {
+    return NULL;
+  }
+
+  char* res = new char[n + 1];
+  if (res) {
+    memcpy(res, src, n);
+    res[n] = '\0';
+  }
+
+  return res;
+}
+
+char* Utility::strdup(const char* src) {
+  if (src == NULL) {
+    return NULL;
+  }
+
+  int n = strlen(src);
+  char* res = new char[n + 1];
+  if (res) {
+    memcpy(res, src, n);
+    res[n] = '\0';
+  }
+
+  return res;
+}
+
+int Utility::strcmp(const char* str1, const char* str2) {
+  if (str1 == NULL || str2 == NULL) {
+    return -2;
+  }
+  while (*str1 && *str2) {
+    uint8_t a = *str1++;
+    uint8_t b = *str2++;
+    if (a > b) {
+      return 1;
+    } else if (a < b) {
+      return -1;
+    }
+  }
+  if (*str1) {
+    return 1;
+  }
+  if (*str2) {
+    return -1;
+  }
+  return 0;
+}
+
+int Utility::strcasecmp(const char* str1, const char* str2) {
+  if (str1 == NULL || str2 == NULL) {
+    return -2;
+  }
+  while (*str1 && *str2) {
+    uint8_t a = *str1++;
+    uint8_t b = *str2++;
+    a = (a >= 'A' && a <= 'Z') ? (a - 'A' + 'a') : a;
+    b = (b >= 'A' && b <= 'Z') ? (b - 'A' + 'a') : b;
+    if (a > b) {
+      return 1;
+    } else if (a < b) {
+      return -1;
+    }
+  }
+  if (*str1) {
+    return 1;
+  }
+  if (*str2) {
+    return -1;
+  }
+  return 0;
+}
+
+int Utility::strncasecmp(const char* str1, const char* str2, uint32_t n) {
+  if (str1 == NULL || str2 == NULL) {
+    return -2;
+  }
+  while (*str1 && *str2 && n) {
+    uint8_t a = *str1++;
+    uint8_t b = *str2++;
+    n--;
+    a = (a >= 'A' && a <= 'Z') ? (a - 'A' + 'a') : a;
+    b = (b >= 'A' && b <= 'Z') ? (b - 'A' + 'a') : b;
+    if (a > b) {
+      return 1;
+    } else if (a < b) {
+      return -1;
+    }
+  }
+  if (n == 0) {
+    return 0;
+  }
+  if (*str1) {
+    return 1;
+  }
+  if (*str2) {
+    return -1;
+  }
+}
+
+RES_CODE Utility::escape(String& str, String& escstr) {
+  escstr = "";
+  int i;
+  for (i = 0; i < str.length(); ++i) {
+    if (IS_URI_CHR(str[i])) {
+      escstr.append(1, str[i]);
+    } else {
+      char buffer[4];
+      sprintf(buffer, "%%%X%X", (unsigned char)str[i] >> 4, str[i] & 0x0f);
+      escstr += buffer;
+    }
+  }
+
+  return S_OK;
+}
+
 _END_MYJFM_NAMESPACE_
 

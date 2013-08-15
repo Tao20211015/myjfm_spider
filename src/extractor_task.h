@@ -18,6 +18,7 @@
 #include "squeue.h"
 #include "url.h"
 #include "page.h"
+#include "link_lexer.h"
 
 _START_MYJFM_NAMESPACE_
 
@@ -33,6 +34,7 @@ private:
   String _save_path;
   SharedPointer<SQueue<SharedPointer<Page> > > _page_queue;
   Vector<SharedPointer<SQueue<SharedPointer<Url> > > > _dnser_queues;
+  SharedPointer<LinkLexer> _link_lexer;
 
   RES_CODE init();
   RES_CODE main_loop();

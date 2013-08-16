@@ -32,7 +32,7 @@ class RWlock {
 public:
   class ReadScopeGuard {
   public:
-    ReadScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
+    explicit ReadScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
       if (_rwlock != NULL) {
         _rwlock->rdlock();
       }
@@ -50,7 +50,7 @@ public:
 
   class WriteScopeGuard {
   public:
-    WriteScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
+    explicit WriteScopeGuard(RWlock* rwlock) : _rwlock(rwlock) {
       if (_rwlock != NULL) {
         _rwlock->wrlock();
       }

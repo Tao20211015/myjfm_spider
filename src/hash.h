@@ -147,7 +147,7 @@ class UlongHashFunction : HashFunction<unsigned long> {
 template <class T>
 class HashListNode {
 public:
-  HashListNode(const T& value) {
+  explicit HashListNode(const T& value) {
     _next = NULL;
     // copy constructor
     _value = new T(value);
@@ -173,7 +173,7 @@ class Hash : public Shared {
   typedef Vector<HashNode*> Buckets;
 
 public:
-  Hash(hash_size_type n) {
+  explicit Hash(hash_size_type n) {
     uint32_t i = 0;
     for (i = 0; i < _num_primes; ++i) {
       if (_prime_list[i] > n) {

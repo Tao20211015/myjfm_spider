@@ -57,10 +57,10 @@ struct MD5 {
 /* MD5caculator declaration. */
 class MD5Caculator {
 public:
-  MD5Caculator();
-  MD5Caculator(const void*, uint32_t);
-	MD5Caculator(const String&);
-	MD5Caculator(Ifstream&);
+  explicit MD5Caculator();
+  explicit MD5Caculator(const void*, uint32_t);
+	explicit MD5Caculator(const String&);
+	explicit MD5Caculator(Ifstream&);
 
 	RES_CODE update(const void*, uint32_t);
 	RES_CODE update(const String&);

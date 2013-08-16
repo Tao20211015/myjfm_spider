@@ -282,7 +282,7 @@ private:
 // disk, then transfer the urls to schedulers
 class Page : public Shared {
 public:
-  Page(uint32_t length = 0) {
+  explicit Page(uint32_t length = 0) {
     if (length == 0) {
       _page_content = NULL;
       _page_size = 0;

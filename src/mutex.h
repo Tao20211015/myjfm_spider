@@ -35,7 +35,7 @@ public:
 
   class ScopeGuard {
   public:
-    ScopeGuard(Mutex* mutex) : _mutex(mutex) {
+    explicit ScopeGuard(Mutex* mutex) : _mutex(mutex) {
       if (_mutex != NULL) {
         _mutex->lock();
       }

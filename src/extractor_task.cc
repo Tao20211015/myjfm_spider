@@ -158,7 +158,7 @@ RES_CODE ExtractorTask::decompress_page(SharedPointer<Page>& page_compressed_p,
   uint32_t bytes_written = 0;
   int code = 0;
 
-#define DECOMPRESS_ERROR() {\
+#define DECOMPRESS_ERROR() { \
   memory_pool->put_memory(cache); \
   page_decompressed_p = SharedPointer<Page>(NULL); \
   inflateEnd(&stream); \

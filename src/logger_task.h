@@ -19,7 +19,7 @@ _START_MYJFM_NAMESPACE_
 
 class LoggerTask : public Task {
 public:
-  LoggerTask(Logger* const);
+  explicit LoggerTask(Logger* const);
   ~LoggerTask();
   virtual RES_CODE operator()(void* arg = NULL);
 

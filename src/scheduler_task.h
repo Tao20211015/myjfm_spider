@@ -22,7 +22,7 @@ _START_MYJFM_NAMESPACE_
 
 class SchedulerTask : public Task {
 public:
-  SchedulerTask(uint32_t);
+  explicit SchedulerTask(uint32_t id);
   ~SchedulerTask();
   virtual RES_CODE operator()(void* arg = NULL);
 

@@ -317,17 +317,19 @@ RES_CODE LinkLexer::lex() {
 
   _base_uri.copy_from(uri);
 
-  LOG(INFO, "***************************\n");
-  LOG(INFO, "scheme:   %s\n", _base_uri._scheme);
-  LOG(INFO, "path:     %s\n", _base_uri._path);
+  LOG(INFO, "");
+  LOG(INFO, "***************************");
+  LOG(INFO, "scheme:   %s", _base_uri._scheme);
+  LOG(INFO, "path:     %s", _base_uri._path);
   if (_base_uri._authority && _base_uri._authority->_type == AT_SERVER) {
-    LOG(INFO, "userinfo: %s\n", _base_uri._authority->_userinfo);
-    LOG(INFO, "host:     %s\n", _base_uri._authority->_host);
-    LOG(INFO, "port:     %s\n", _base_uri._authority->_port);
+    LOG(INFO, "userinfo: %s", _base_uri._authority->_userinfo);
+    LOG(INFO, "host:     %s", _base_uri._authority->_host);
+    LOG(INFO, "port:     %s", _base_uri._authority->_port);
   }
-  LOG(INFO, "query:    %s\n", _base_uri._query);
-  LOG(INFO, "fragment: %s\n", _base_uri._fragment);
-  LOG(INFO, "!!!!!!!!!!!!!!!!!!!!!!!!!!!\n");
+  LOG(INFO, "query:    %s", _base_uri._query);
+  LOG(INFO, "fragment: %s", _base_uri._fragment);
+  LOG(INFO, "***************************");
+  LOG(INFO, "");
 
   char* page_content = NULL;
   _page_p->get_page_content(page_content);
@@ -385,7 +387,6 @@ RES_CODE LinkLexer::save_link(String& link) {
 
   Uri merged_uri;
   if (_uri_lexer->uri_merge(&merged_uri) != S_OK) {
-    LOG(INFO, "[new] &&&&&&&&&&&&&&&&&&&&&&");
     return S_FAIL;
   }
 

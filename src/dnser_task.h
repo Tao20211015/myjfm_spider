@@ -23,7 +23,7 @@ _START_MYJFM_NAMESPACE_
 
 class DnserTask : public Task {
 public:
-  DnserTask(uint32_t);
+  explicit DnserTask(uint32_t);
   ~DnserTask();
   virtual RES_CODE operator()(void* arg = NULL);
 

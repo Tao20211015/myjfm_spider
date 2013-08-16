@@ -24,7 +24,7 @@ _START_MYJFM_NAMESPACE_
 
 class ExtractorTask : public Task {
 public:
-  ExtractorTask(uint32_t id);
+  explicit ExtractorTask(uint32_t id);
   ~ExtractorTask();
   virtual RES_CODE operator()(void* arg = NULL);
 

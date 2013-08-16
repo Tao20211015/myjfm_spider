@@ -32,7 +32,7 @@ class Semaphore {
 
 public:
   // initv: the init value of the semaphore
-  Semaphore(int initv = 0) {
+  explicit Semaphore(int initv = 0) {
     _has_init = true;
     initv = initv < 0 ? 0 : initv;
     // the value of the second argument is 0 which means that this is an

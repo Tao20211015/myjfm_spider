@@ -28,7 +28,7 @@ _START_MYJFM_NAMESPACE_
 // when some socket can be read, then executes the read callback functor
 class ReadCallback : public Callback {
 public:
-  ReadCallback(int);
+  explicit ReadCallback(int fd);
   ~ReadCallback() {}
 
   virtual RES_CODE operator()(void* arg = NULL);
@@ -40,7 +40,7 @@ private:
 // when some socket can be written, then executes the write callback functor
 class WriteCallback : public Callback {
 public:
-  WriteCallback(int fd);
+  explicit WriteCallback(int fd);
   ~WriteCallback() {}
 
   virtual RES_CODE operator()(void* arg = NULL);
@@ -52,7 +52,7 @@ private:
 // when some socket occurred an error, then executes the error callback functor
 class ErrorCallback : public Callback {
 public:
-  ErrorCallback(int fd);
+  explicit ErrorCallback(int fd);
   ~ErrorCallback() {}
 
   virtual RES_CODE operator()(void* arg = NULL);
@@ -63,7 +63,7 @@ private:
 
 class DownloaderTask : public Task {
 public:
-  DownloaderTask(uint32_t id);
+  explicit DownloaderTask(uint32_t id);
   ~DownloaderTask();
   virtual RES_CODE operator()(void* arg = NULL);
 
